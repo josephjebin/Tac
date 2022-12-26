@@ -7,7 +7,7 @@ Backlog
 - Connect to Calendar and Tasks APIs
 - Bottom App Bar
 - Task screen 
--- isDraggable depends on if task has duration set
+-   isDraggable depends on if task has duration set
 - Make TaskRows draggables that turn into events
 - FAB to make tasks / events
 - Sign in w/ One-Tap
