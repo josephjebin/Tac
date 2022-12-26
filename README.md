@@ -4,10 +4,12 @@ Tac is a unified way to edit tasks and calendars. You can Tac(k) tasks onto the 
 
 Backlog
 
-Connect to Calendar and Tasks APIs
-Bottom App Bar
-Change Task model to dao. -- isDraggable depends on if task has duration set
-Make TaskRows draggables that turn into events
-FAB to make tasks / events
-Sign in w/ One-Tap
-Animations and candy!
+- Connect to Calendar and Tasks APIs
+- Bottom App Bar
+- Task screen 
+-- isDraggable depends on if task has duration set
+- Make TaskRows draggables that turn into events
+- FAB to make tasks / events
+- Sign in w/ One-Tap
+- Animations and candy!
+-- Theme
