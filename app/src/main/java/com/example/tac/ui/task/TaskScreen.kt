@@ -15,16 +15,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.tac.data.Task
 import com.example.tac.data.Datasource
+import com.google.api.services.tasks.model.TaskList
 
 @Composable
-fun TaskSheet() {
+fun TaskSheet(projects: MutableList<TaskList>) {
     val datasource = Datasource()
     Column() {
         val tasksViewModel = TaskViewModel()
         LazyRow() {
-            items(tasksViewModel.getLists().size) {index ->
+            items(projects.size) {index ->
                 Card() {
-                    Text(text = tasksViewModel.getLists()[index].title)
+                    Text(text = projects[index].title)
                 }
             }
         }

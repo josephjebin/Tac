@@ -14,15 +14,15 @@ class TaskService {
     val googleClient = GoogleClient()
 
     // Build a new authorized API client service.
-    val HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport()
-    val service =
-        Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, googleClient.getCredentials(HTTP_TRANSPORT))
-            .setApplicationName(APPLICATION_NAME).build()
-
-    @GET
-    fun getTaskLists(): MutableList<TaskList> {
-        return service.tasklists().list().execute().items
-    }
+//    val HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport()
+//    val service =
+//        Tasks.Builder(HTTP_TRANSPORT, JSON_FACTORY, googleClient.getCredentials(HTTP_TRANSPORT))
+//            .setApplicationName(APPLICATION_NAME).build()
+//
+//    @GET
+//    fun getTaskLists(): MutableList<TaskList> {
+//        return service.tasklists().list().execute().items
+//    }
 
     @GET
     suspend fun getTasks() {

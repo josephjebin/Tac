@@ -11,13 +11,13 @@ class TaskViewModel: ViewModel() {
     var _state: TasksState by mutableStateOf(TasksState(mutableListOf(), mutableListOf()))
         private set
 
-    init {
-        updateListsAndTasks()
-    }
-
-    fun updateListsAndTasks() {
-        _state.taskLists = TaskService().getTaskLists()
-    }
+//    init {
+//        updateListsAndTasks()
+//    }
+//
+//    fun updateListsAndTasks() {
+//        _state.taskLists = TaskService().getTaskLists()
+//    }
 
     fun getLists(): MutableList<TaskList> {
         return _state.taskLists
