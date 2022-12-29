@@ -18,7 +18,7 @@ import com.example.tac.data.Datasource
 import com.google.api.services.tasks.model.TaskList
 
 @Composable
-fun TaskSheet(projects: MutableList<TaskList>) {
+fun TaskSheet(projects: List<TaskList>) {
     val datasource = Datasource()
     Column() {
         val tasksViewModel = TaskViewModel()

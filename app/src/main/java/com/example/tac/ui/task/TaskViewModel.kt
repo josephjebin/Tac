@@ -1,25 +1,23 @@
 package com.example.tac.ui.task
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.tac.data.TaskService
 import com.google.api.services.tasks.model.TaskList
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 class TaskViewModel: ViewModel() {
-    var _state: TasksState by mutableStateOf(TasksState(mutableListOf(), mutableListOf()))
-        private set
+    var _uiState = MutableStateFlow(TasksState(listOf(), listOf()))
+    val uiState: StateFlow<TasksState> = _uiState.asStateFlow()
 
 //    init {
 //        updateListsAndTasks()
 //    }
 //
-//    fun updateListsAndTasks() {
-//        _state.taskLists = TaskService().getTaskLists()
-//    }
-
-    fun getLists(): MutableList<TaskList> {
-        return _state.taskLists
+    fun updateTaskLists(newLists: List<TaskList>) {
+        _uiState.update { currentState ->
+            currentState.copy(taskLists = newLists)
+        }
     }
 }
