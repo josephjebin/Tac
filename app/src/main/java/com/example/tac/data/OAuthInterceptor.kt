@@ -5,7 +5,6 @@ import android.text.TextUtils
 import android.util.Log
 import com.example.tac.MainActivity
 import com.example.tac.data.OAuthToken.Factory.create
-import com.renaultnissan.acms.platform.oauth.githubsample.MyApplication
 import okhttp3.Interceptor
 import okhttp3.Response
 import java.io.IOException

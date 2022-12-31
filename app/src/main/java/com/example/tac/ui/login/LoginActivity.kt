@@ -10,7 +10,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.data.EmptyGroup.data
 import androidx.core.content.ContextCompat
 import retrofit2.Call
 import retrofit2.Response
@@ -117,14 +116,14 @@ class LoginActivity : ComponentActivity() {
             .addQueryParameter("response_type", CODE)
             .build()
 
-        Intent intent = Intent(Intent.ACTION_VIEW).apply {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
             Log.e(TAG, "the url is : $authorizeUrl")
             data = Uri.parse(authorizeUrl.toString())
             addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-//        TO-DO: applicationContext.startActivity(intent)
 
+        applicationContext.startActivity(intent)
 
         finish()
     }
@@ -199,7 +198,7 @@ class LoginActivity : ComponentActivity() {
         if (newtask) {
             i.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        ContextCompat.startActivity(i)
+        applicationContext.startActivity(i)
         //you can die so
         finish()
     }

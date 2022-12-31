@@ -2,7 +2,6 @@ package com.example.tac.data
 
 import com.google.android.gms.common.internal.safeparcel.SafeParcelable
 
-import com.renaultnissan.acms.platform.oauth.githubsample.transverse.model.OAuthToken;
 
 import retrofit2.Call;
 import retrofit2.http.Field;

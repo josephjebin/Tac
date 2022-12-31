@@ -1,8 +1,6 @@
 package com.example.tac.data
 
 import android.content.Context
-import com.renaultnissan.acms.platform.oauth.githubsample.retrofit.converters.StringConverterFactory
-import com.renaultnissan.acms.platform.oauth.githubsample.retrofit.interceptors.OAuthInterceptor
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -39,7 +37,7 @@ object RetrofitBuilder {
             .addConverterFactory(MoshiConverterFactory.create())
             .baseUrl(BASE_URL)
             .build()
-        return retrofit.create(OAuthServerIntf::class.java)
+        return retrofit.create(OAuthServerInterface::class.java)
     }
 
     /**
@@ -57,7 +55,7 @@ object RetrofitBuilder {
             .addConverterFactory(StringConverterFactory())
             .addConverterFactory(MoshiConverterFactory.create())
             .build()
-        return raCustom.create(OAuthServerIntf::class.java)
+        return raCustom.create(OAuthServerInterface::class.java)
     }
     /***********************************************************
      * OkHttp Clients
