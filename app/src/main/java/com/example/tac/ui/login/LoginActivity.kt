@@ -7,8 +7,10 @@ import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.data.EmptyGroup.data
 import androidx.core.content.ContextCompat
 import retrofit2.Call
 import retrofit2.Response
@@ -45,57 +47,59 @@ class LoginActivity : ComponentActivity() {
         //            <data android:scheme="com.renaultnissan.acms.platform.oauth.githubsample" />
         //        </intent-filter>
 
-        val data = Intent.getIntentOld(null).data
+        val data = intent.data
+
+        val oauthToken: OAuthToken? = OAuthToken.Factory.create()
+        //If the app does not have a token or if the token is expired:
+        if (oauthToken == null || oauthToken.accessToken == null) {
+            //If the app does not have a refresh token, go through entire authorization flow
+            if (oauthToken == null || oauthToken.refreshToken == null) {
+                Log.e(TAG, "onCreate: Launching authorization (first step)")
+                setContent {
+                    MakeAuthorizationRequest()
+                }
+            }
+//            else {
+//                Log.e(
+//                    TAG,
+//                    "onCreate: refreshing the token :$oauthToken"
+//                )
+//                //refresh token case
+//                refreshTokenFormUrl(oauthToken)
+//            }
+        } else {
+            Log.e(TAG, "onCreate: Token available, just launch MainActivity")
+            startMainActivity(false)
+        }
+
+
 
         //Manage the callback case:
-        if (data != null && !TextUtils.isEmpty(data.scheme)) {
-            if (REDIRECT_URI_ROOT == data.scheme) {
-                authorizationCode = data.getQueryParameter(CODE)
-                authorizationError = data.getQueryParameter(ERROR_CODE)
-                Log.e(
-                    TAG,
-                    "onCreate: handle result of authorization with code :$authorizationCode"
-                )
-                if (!TextUtils.isEmpty(authorizationCode)) {
-                    tokenFormUrl
-                }
-                if (!TextUtils.isEmpty(authorizationError)) {
-                    //a problem occurs, the user reject our granting request or something like that
-                    Toast.makeText(this, "WHY DID YOU CANCEL AUTHORIZING", Toast.LENGTH_LONG)
-                        .show()
-                    Log.e(
-                        TAG,
-                        "onCreate: handle result of authorization with error :$authorizationError"
-                    )
-                    //then die
-                    finish()
-                }
-            }
-        }
+//        if (data != null && !TextUtils.isEmpty(data.scheme)) {
+//            if (REDIRECT_URI_ROOT == data.scheme) {
+//                authorizationCode = data.getQueryParameter(CODE)
+//                authorizationError = data.getQueryParameter(ERROR_CODE)
+//                Log.e(
+//                    TAG,
+//                    "onCreate: handle result of authorization with code :$authorizationCode"
+//                )
+//                if (!TextUtils.isEmpty(authorizationCode)) {
+//                    tokenFormUrl
+//                }
+//                if (!TextUtils.isEmpty(authorizationError)) {
+//                    //a problem occurs, the user reject our granting request or something like that
+//                    Toast.makeText(this, "WHY DID YOU CANCEL AUTHORIZING", Toast.LENGTH_LONG)
+//                        .show()
+//                    Log.e(
+//                        TAG,
+//                        "onCreate: handle result of authorization with error :$authorizationError"
+//                    )
+//                    //then die
+//                    finish()
+//                }
+//            }
+//        }
 
-        //Manage the start application case:
-        else {
-            //If you don't have a token yet or if your token has expired, ask for it
-            val oauthToken: OAuthToken? = OAuthToken.Factory.create()
-            if (oauthToken == null || oauthToken.accessToken == null) {
-                //first case==first token request
-                if (oauthToken == null || oauthToken.refreshToken == null) {
-                    Log.e(TAG, "onCreate: Launching authorization (first step)")
-                    //first step of OAUth: the authorization step
-                    MakeAuthorizationRequest()
-                } else {
-                    Log.e(
-                        TAG,
-                        "onCreate: refreshing the token :$oauthToken"
-                    )
-                    //refresh token case
-                    refreshTokenFormUrl(oauthToken)
-                }
-            } else {
-                Log.e(TAG, "onCreate: Token available, just launch MainActivity")
-                startMainActivity(false)
-            }
-        }
     }
     /***********************************************************
      * Managing Authotization and Token process
@@ -103,7 +107,6 @@ class LoginActivity : ComponentActivity() {
     /**
      * Make the Authorization request
      */
-    @Composable
     fun MakeAuthorizationRequest() {
         val authorizeUrl = HttpUrl
             .Builder()
@@ -114,76 +117,77 @@ class LoginActivity : ComponentActivity() {
             .addQueryParameter("response_type", CODE)
             .build()
 
-        Intent(Intent.ACTION_VIEW).apply {
-            Log.e(TAG, "the url is : ${authorizeUrl.toString()}")
+        Intent intent = Intent(Intent.ACTION_VIEW).apply {
+            Log.e(TAG, "the url is : $authorizeUrl")
             data = Uri.parse(authorizeUrl.toString())
             addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            LocalContext.current.startActivity(this)
         }
+//        TO-DO: applicationContext.startActivity(intent)
+
 
         finish()
     }
 
-    /**
-     * Refresh the OAuth token
-     */
-    private fun refreshTokenFormUrl(oauthToken: OAuthToken) {
-        val oAuthServer: OAuthServerInterface = RetrofitBuilder.getSimpleClient(this)
-        val refreshTokenFormCall: Call<OAuthToken> = oAuthServer.refreshTokenForm(
-            oauthToken.getRefreshToken(),
-            CLIENT_ID,
-            GRANT_TYPE_REFRESH_TOKEN
-        )
-        refreshTokenFormCall.enqueue(object : Callback<OAuthToken?>() {
-            fun onResponse(call: Call<OAuthToken?>?, response: Response<OAuthToken?>) {
-                Log.e(TAG, "===============New Call==========================")
-                Log.e(TAG,
-                    "The call refreshTokenFormUrl succeed with code=" + response.code()
-                        .toString() + " and has body = " + response.body()
-                )
-                //ok we have the token
-                response.body().save()
-                startMainActivity(true)
-            }
+//    /**
+//     * Refresh the OAuth token
+//     */
+//    private fun refreshTokenFormUrl(oauthToken: OAuthToken) {
+//        val oAuthServer: OAuthServerInterface = RetrofitBuilder.getSimpleClient(this)
+//        val refreshTokenFormCall: Call<OAuthToken> = oAuthServer.refreshTokenForm(
+//            oauthToken.getRefreshToken(),
+//            CLIENT_ID,
+//            GRANT_TYPE_REFRESH_TOKEN
+//        )
+//        refreshTokenFormCall.enqueue(object : Callback<OAuthToken?>() {
+//            fun onResponse(call: Call<OAuthToken?>?, response: Response<OAuthToken?>) {
+//                Log.e(TAG, "===============New Call==========================")
+//                Log.e(TAG,
+//                    "The call refreshTokenFormUrl succeed with code=" + response.code()
+//                        .toString() + " and has body = " + response.body()
+//                )
+//                //ok we have the token
+//                response.body().save()
+//                startMainActivity(true)
+//            }
+//
+//            fun onFailure(call: Call<OAuthToken?>?, t: Throwable?) {
+//                Log.e(TAG, "===============New Call==========================")
+//                Log.e(TAG, "The call refreshTokenFormCall failed", t)
+//            }
+//        })
+//    }//ok we have the token
 
-            fun onFailure(call: Call<OAuthToken?>?, t: Throwable?) {
-                Log.e(TAG, "===============New Call==========================")
-                Log.e(TAG, "The call refreshTokenFormCall failed", t)
-            }
-        })
-    }//ok we have the token
-
-    /**
-     * Retrieve the OAuth token
-     */
-    private val tokenFormUrl: Unit
-        private get() {
-            val oAuthServer: OAuthServerInterface = RetrofitBuilder.getSimpleClient(this)
-            val getRequestTokenFormCall: Call<OAuthToken> = oAuthServer.requestTokenForm(
-                authorizationCode,
-                CLIENT_ID,
-                REDIRECT_URI,
-                GRANT_TYPE_AUTHORIZATION_CODE
-            )
-            getRequestTokenFormCall.enqueue(object : Callback<OAuthToken?>() {
-                fun onResponse(call: Call<OAuthToken?>?, response: Response<OAuthToken?>) {
-                    Log.e(TAG, "===============New Call==========================")
-                    Log.e(TAG,
-                        "The call getRequestTokenFormCall succeed with code=" + response.code()
-                            .toString() + " and has body = " + response.body()
-                    )
-                    //ok we have the token
-                    response.body().save()
-                    startMainActivity(true)
-                }
-
-                fun onFailure(call: Call<OAuthToken?>?, t: Throwable?) {
-                    Log.e(TAG, "===============New Call==========================")
-                    Log.e(TAG, "The call getRequestTokenFormCall failed", t)
-                }
-            })
-        }
+//    /**
+//     * Retrieve the OAuth token
+//     */
+//    private val tokenFormUrl: Unit
+//        private get() {
+//            val oAuthServer: OAuthServerInterface = RetrofitBuilder.getSimpleClient(this)
+//            val getRequestTokenFormCall: Call<OAuthToken> = oAuthServer.requestTokenForm(
+//                authorizationCode,
+//                CLIENT_ID,
+//                REDIRECT_URI,
+//                GRANT_TYPE_AUTHORIZATION_CODE
+//            )
+//            getRequestTokenFormCall.enqueue(object : Callback<OAuthToken?>() {
+//                fun onResponse(call: Call<OAuthToken?>?, response: Response<OAuthToken?>) {
+//                    Log.e(TAG, "===============New Call==========================")
+//                    Log.e(TAG,
+//                        "The call getRequestTokenFormCall succeed with code=" + response.code()
+//                            .toString() + " and has body = " + response.body()
+//                    )
+//                    //ok we have the token
+//                    response.body().save()
+//                    startMainActivity(true)
+//                }
+//
+//                fun onFailure(call: Call<OAuthToken?>?, t: Throwable?) {
+//                    Log.e(TAG, "===============New Call==========================")
+//                    Log.e(TAG, "The call getRequestTokenFormCall failed", t)
+//                }
+//            })
+//        }
     /***********************************************************
      * Others business methods
      */
