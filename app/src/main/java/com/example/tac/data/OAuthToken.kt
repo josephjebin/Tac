@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.google.api.client.json.Json
-import com.renaultnissan.acms.platform.oauth.githubsample.MyApplication
-
 
 /**
  * Created by Mathias Seguy - Android2EE on 06/01/2017.

@@ -43,7 +43,7 @@ class LoginActivity : ComponentActivity() {
         //            <action android:name="android.intent.action.VIEW" />
         //            <category android:name="android.intent.category.BROWSABLE" />
         //            <category android:name="android.intent.category.DEFAULT" />
-        //            <data android:scheme="com.renaultnissan.acms.platform.oauth.githubsample" />
+        //            <data android:scheme="com.example.tac" />
         //        </intent-filter>
 
         val data = intent.data
