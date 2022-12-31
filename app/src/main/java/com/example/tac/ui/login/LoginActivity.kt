@@ -5,9 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import com.example.tac.MainActivity
-import com.example.tac.data.login.OAuthToken
 import okhttp3.HttpUrl
 
 class LoginActivity : ComponentActivity() {
@@ -89,7 +86,7 @@ class LoginActivity : ComponentActivity() {
          * The redirect root uri you have define in your google console for your project
          * It is also the scheme your Main Activity will react
          */
-        private const val REDIRECT_URI_ROOT = "com.example.tac.platform.oauth.redirect_auth_code"
+        private const val REDIRECT_URI_ROOT = "com.example.tac"
 
         /**
          * You are asking to use a code when autorizing
