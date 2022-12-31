@@ -26,6 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             TacTheme() {
+                Tac()
             }
         }
     }
