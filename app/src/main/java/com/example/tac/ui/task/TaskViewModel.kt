@@ -11,10 +11,14 @@ class TaskViewModel: ViewModel() {
     var _uiState = MutableStateFlow(TasksState(listOf(), listOf()))
     val uiState: StateFlow<TasksState> = _uiState.asStateFlow()
 
-//    init {
-//        updateListsAndTasks()
-//    }
-//
+    init {
+        _uiState.update { currentState ->
+            currentState.copy(taskLists = listOf(
+
+            ))
+        }
+    }
+
     fun updateTaskLists(newLists: List<TaskList>) {
         _uiState.update { currentState ->
             currentState.copy(taskLists = newLists)

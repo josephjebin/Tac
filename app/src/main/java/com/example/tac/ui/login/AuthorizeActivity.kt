@@ -10,14 +10,16 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.tac.MainActivity
-import com.example.tac.R
+import com.example.tac.data.Constants.CODE
+import com.example.tac.data.Constants.ERROR_CODE
+import com.example.tac.data.Constants.REDIRECT_URI_ROOT
+import com.example.tac.data.login.GoogleTokenService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class AuthorizeActivity : ComponentActivity() {
     private val TAG = "Authorize Activity"
-
-    private val CODE = "code"
-    private val ERROR_CODE = "error"
-
 
     /**
      * The code returned by the server at the authorization's first step
@@ -29,11 +31,7 @@ class AuthorizeActivity : ComponentActivity() {
      */
     private var error: String? = null
 
-    /**
-     * The redirect root uri you have define in your google console for your project
-     * It is also the scheme your Main Activity will react
-     */
-    private val REDIRECT_URI_ROOT = "com.example.tac"
+    private val googleTokenService = GoogleTokenService(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,19 +39,22 @@ class AuthorizeActivity : ComponentActivity() {
 
         val data: Uri? = intent.data
 
-        if (data != null && !TextUtils.isEmpty(data.getScheme())) {
-            if (REDIRECT_URI_ROOT.equals(data.getScheme())) {
+        if (data != null && !TextUtils.isEmpty(data.scheme)) {
+            if (REDIRECT_URI_ROOT == data.scheme) {
                 code = data.getQueryParameter(CODE);
                 error=data.getQueryParameter(ERROR_CODE);
-                Log.e(TAG, "onCreate: handle result of authorization with code :" + code);
+                Log.e(TAG, "onCreate: handle result of authorization with code :$code");
                 if (!TextUtils.isEmpty(code)) {
-                    //LAUNCH CALL TO OAUTH2
-
+                    CoroutineScope(Dispatchers.IO).launch {
+                        code?.let { googleTokenService.callGoogleOAuth2Server(it) }
+                    }
+//                    val intent = Intent(this, MainActivity::class.java)
+//                    startActivity(intent)
                 }
                 if(!TextUtils.isEmpty(error)) {
                     //a problem occurs, the user reject our granting request or something like that
                     Toast.makeText(this, "ERROR AUTHORIZING",Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "onCreate: handle result of authorization with error :" + error);
+                    Log.e(TAG, "onCreate: handle result of authorization with error :$error");
                     //then die
                     finish();
                 }

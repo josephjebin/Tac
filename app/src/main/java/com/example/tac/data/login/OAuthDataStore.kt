@@ -31,7 +31,7 @@ class OAuthDataStore(context: Context) {
     }
 
 
-    suspend fun saveTokenToTokenDataStore(token: String, context: Context) {
+    suspend fun saveTokenToTokenDataStore(context: Context, token: String) {
         context.dataStore.edit { preferences ->
             preferences[access_token] = token
         }
