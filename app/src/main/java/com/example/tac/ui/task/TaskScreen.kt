@@ -17,9 +17,8 @@ import com.google.api.services.tasks.model.TaskList
 
 @Composable
 fun TaskSheet(projects: List<TaskList>) {
-//    val datasource = Datasource()
     Column() {
-        val tasksViewModel = TaskViewModel()
+        //projects
         LazyRow() {
             items(projects.size) {index ->
                 Card() {
@@ -28,6 +27,7 @@ fun TaskSheet(projects: List<TaskList>) {
             }
         }
 
+        //tasks
 //        LazyVerticalGrid(
 //            columns = GridCells.Fixed(1),
 //            contentPadding = PaddingValues(4.dp)

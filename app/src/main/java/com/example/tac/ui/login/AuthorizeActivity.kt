@@ -31,7 +31,7 @@ class AuthorizeActivity : ComponentActivity() {
      */
     private var error: String? = null
 
-    private val googleTokenService = GoogleTokenService(this)
+    private lateinit var googleTokenService: GoogleTokenService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +45,7 @@ class AuthorizeActivity : ComponentActivity() {
                 error=data.getQueryParameter(ERROR_CODE);
                 Log.e(TAG, "onCreate: handle result of authorization with code :$code");
                 if (!TextUtils.isEmpty(code)) {
+                    googleTokenService = GoogleTokenService(this)
                     CoroutineScope(Dispatchers.IO).launch {
                         code?.let { googleTokenService.callGoogleOAuth2Server(it) }
                     }
@@ -56,7 +57,7 @@ class AuthorizeActivity : ComponentActivity() {
                     Toast.makeText(this, "ERROR AUTHORIZING",Toast.LENGTH_LONG).show();
                     Log.e(TAG, "onCreate: handle result of authorization with error :$error");
                     //then die
-                    finish();
+                    finish()
                 }
             }
         }

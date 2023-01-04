@@ -1,6 +1,7 @@
 package com.example.tac.ui.task
 
 import androidx.lifecycle.ViewModel
+import com.example.tac.data.tasks.TasksService
 import com.google.api.services.tasks.model.TaskList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.update
 class TaskViewModel: ViewModel() {
     var _uiState = MutableStateFlow(TasksState(listOf(), listOf()))
     val uiState: StateFlow<TasksState> = _uiState.asStateFlow()
+    private lateinit var tasksService: TasksService
 
     init {
         _uiState.update { currentState ->
