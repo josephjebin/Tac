@@ -12,13 +12,15 @@ import com.example.tac.data.tasks.TaskDao
 import com.google.api.services.tasks.model.TaskList
 
 @Composable
-fun TaskSheet(projects: List<TaskList>) {
+fun TaskSheet(projects: List<TaskList?>?) {
     Column() {
         //projects
         LazyRow() {
-            items(projects.size) {index ->
-                Card() {
-                    Text(text = projects[index].title)
+            projects?.let { it ->
+                items(it.size) { index ->
+                    Card() {
+                        projects[index]?.let { Text(text = it.title) }
+                    }
                 }
             }
         }

@@ -16,7 +16,6 @@ data class TaskDao(
     var deleted: Boolean,
     var hidden: Boolean,
     var links: List<Link>
-
 )
 
 data class Link(var type: String, var description: String, var link: String)

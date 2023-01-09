@@ -16,15 +16,17 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import com.example.tac.data.Constants
+import com.google.api.services.tasks.model.TaskList
 import com.example.tac.ui.calendar.Calendar
 import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.ui.theme.TacTheme
-import com.google.api.services.tasks.model.TaskList
 import kotlinx.coroutines.*
 import net.openid.appauth.*
 import net.openid.appauth.browser.BrowserAllowList
@@ -150,14 +152,15 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Tac(authState: AuthState, authorizationService : AuthorizationService, tasksViewModel: TasksViewModel = TasksViewModel(authState, authorizationService)) {
     val uiState by tasksViewModel.uiState.collectAsState()
-    TasksAndCalendarScreen(uiState.taskLists)
+    val coroutineScope = rememberCoroutineScope()
+    TasksAndCalendarScreen(tasksViewModel, uiState.taskLists)
 
 }
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TasksAndCalendarScreen(projects: List<TaskList>) {
+fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskList?>?) {
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
     BottomSheetScaffold(
         sheetContent = {
@@ -167,7 +170,7 @@ fun TasksAndCalendarScreen(projects: List<TaskList>) {
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
     ) { padding ->  // We need to pass scaffold's inner padding to content. That's why we use Box.
         Box(modifier = Modifier.padding(padding)) {
-            Calendar()
+            Calendar(tasksViewModel)
         }
     }
 }

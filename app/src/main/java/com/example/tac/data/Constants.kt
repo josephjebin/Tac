@@ -12,7 +12,7 @@ class Constants {
         val URL_LOGOUT = "https://accounts.google.com/o/oauth2/revoke?token="
 
         val SCOPE_TASKS = "https://www.googleapis.com/auth/tasks"
-        val URL_TASKS = "https://tasks.googleapis.com"
+        val URL_TASKS = "https://tasks.googleapis.com/tasks/v1/"
 
 
         val URL_LOGOUT_REDIRECT = "com.example.tac:/logout"
