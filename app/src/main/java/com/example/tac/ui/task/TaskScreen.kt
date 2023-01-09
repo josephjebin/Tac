@@ -2,17 +2,13 @@ package com.example.tac.ui.task
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.tac.data.tasks.Task
-import com.example.tac.data.Datasource
+import com.example.tac.data.tasks.TaskDao
 import com.google.api.services.tasks.model.TaskList
 
 @Composable
@@ -42,7 +38,7 @@ fun TaskSheet(projects: List<TaskList>) {
 }
 
 @Composable
-fun TaskRow(task: Task) {
+fun TaskRow(taskDao: TaskDao) {
     Row() {
         Button(onClick = { /*TODO*/ }) {
 
@@ -50,7 +46,7 @@ fun TaskRow(task: Task) {
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Text(text = task.title)
+        Text(text = taskDao.title)
 
 
     }

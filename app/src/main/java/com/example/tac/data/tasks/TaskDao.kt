@@ -1,6 +1,6 @@
 package com.example.tac.data.tasks
 
-data class Task(
+data class TaskDao(
     var kind: String,
     var id: String,
     var etag: String,

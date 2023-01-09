@@ -2,7 +2,6 @@ package com.example.tac.data.login
 
 import android.content.Context
 import android.util.Log
-import com.example.tac.data.Constants.CLIENT_ID
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import retrofit2.Retrofit
@@ -34,7 +33,7 @@ class GoogleTokenService(private val context: Context) {
     suspend fun callGoogleOAuth2Server(code: String) {
         try {
             Log.e(TAG, "boutta call and exchange code for token")
-            val response = googleTokenClient.callGoogleOAuth2Server(code = code, CLIENT_ID)
+            val response = googleTokenClient.callGoogleOAuth2Server(code = code, "")
             Log.e(TAG, "GOT A CODE: ${response.access_token}")
             oAuthDataStore.saveTokenToTokenDataStore(context, response.access_token)
         } catch (e: Exception) {

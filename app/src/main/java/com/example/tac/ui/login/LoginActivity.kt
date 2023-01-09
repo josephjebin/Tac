@@ -5,10 +5,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
-import com.example.tac.data.Constants.API_SCOPE
-import com.example.tac.data.Constants.CLIENT_ID
-import com.example.tac.data.Constants.CODE
-import com.example.tac.data.Constants.REDIRECT_URI
+import com.example.tac.data.Constants.Companion.CLIENT_ID
+import net.openid.appauth.ResponseTypeValues.CODE
+
 import okhttp3.HttpUrl
 
 class LoginActivity : ComponentActivity() {
@@ -41,9 +40,9 @@ class LoginActivity : ComponentActivity() {
             .scheme("https")
             .host("accounts.google.com")
             .addPathSegments("o/oauth2/v2/auth")
-            .addQueryParameter("client_id", CLIENT_ID)
-            .addQueryParameter("scope", API_SCOPE)
-            .addQueryParameter("redirect_uri", REDIRECT_URI)
+            .addQueryParameter("client_id", "CLIENT_ID")
+            .addQueryParameter("scope", "API_SCOPE")
+            .addQueryParameter("redirect_uri", "REDIRECT_URI")
             .addQueryParameter("response_type", CODE)
             .build()
 

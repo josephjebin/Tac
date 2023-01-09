@@ -10,9 +10,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.tac.MainActivity
-import com.example.tac.data.Constants.CODE
-import com.example.tac.data.Constants.ERROR_CODE
-import com.example.tac.data.Constants.REDIRECT_URI_ROOT
 import com.example.tac.data.login.GoogleTokenService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,28 +36,28 @@ class AuthorizeActivity : ComponentActivity() {
 
         val data: Uri? = intent.data
 
-        if (data != null && !TextUtils.isEmpty(data.scheme)) {
-            if (REDIRECT_URI_ROOT == data.scheme) {
-                code = data.getQueryParameter(CODE);
-                error=data.getQueryParameter(ERROR_CODE);
-                Log.e(TAG, "onCreate: handle result of authorization with code :$code");
-                if (!TextUtils.isEmpty(code)) {
-                    googleTokenService = GoogleTokenService(this)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        code?.let { googleTokenService.callGoogleOAuth2Server(it) }
-                    }
-//                    val intent = Intent(this, MainActivity::class.java)
-//                    startActivity(intent)
-                }
-                if(!TextUtils.isEmpty(error)) {
-                    //a problem occurs, the user reject our granting request or something like that
-                    Toast.makeText(this, "ERROR AUTHORIZING",Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "onCreate: handle result of authorization with error :$error");
-                    //then die
-                    finish()
-                }
-            }
-        }
+//        if (data != null && !TextUtils.isEmpty(data.scheme)) {
+//            if (REDIRECT_URI_ROOT == data.scheme) {
+//                code = data.getQueryParameter(CODE);
+//                error=data.getQueryParameter(ERROR_CODE);
+//                Log.e(TAG, "onCreate: handle result of authorization with code :$code");
+//                if (!TextUtils.isEmpty(code)) {
+//                    googleTokenService = GoogleTokenService(this)
+//                    CoroutineScope(Dispatchers.IO).launch {
+//                        code?.let { googleTokenService.callGoogleOAuth2Server(it) }
+//                    }
+////                    val intent = Intent(this, MainActivity::class.java)
+////                    startActivity(intent)
+//                }
+//                if(!TextUtils.isEmpty(error)) {
+//                    //a problem occurs, the user reject our granting request or something like that
+//                    Toast.makeText(this, "ERROR AUTHORIZING",Toast.LENGTH_LONG).show();
+//                    Log.e(TAG, "onCreate: handle result of authorization with error :$error");
+//                    //then die
+//                    finish()
+//                }
+//            }
+//        }
 
 
         setContent {

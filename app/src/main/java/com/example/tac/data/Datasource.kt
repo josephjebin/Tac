@@ -1,6 +1,6 @@
 package com.example.tac.data
 
-import com.example.tac.data.tasks.Task
+import com.example.tac.data.tasks.TaskDao
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -9,7 +9,7 @@ class Datasource {
     val calendar = Calendar.getInstance()
     val testDate = formatter.format(calendar.time)
 
-    val listOfTasks = listOf<Task>(
+    val listOfTaskDaos = listOf<TaskDao>(
 
     )
 }
