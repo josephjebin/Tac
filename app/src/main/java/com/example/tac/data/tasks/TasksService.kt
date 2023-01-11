@@ -5,8 +5,6 @@ import android.util.Log
 import com.example.tac.data.Constants
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.api.services.tasks.model.Task
-import com.google.api.services.tasks.model.TaskList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.openid.appauth.AuthState
@@ -14,6 +12,7 @@ import net.openid.appauth.AuthorizationService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import com.example.tac.data.tasks.TaskList
 
 
 class TasksService(val authState: AuthState, val authorizationService: AuthorizationService) {
@@ -35,10 +34,13 @@ class TasksService(val authState: AuthState, val authorizationService: Authoriza
                 try {
                     val response = client.newCall(request).execute()
                     var jsonBody = response.body?.string() ?: ""
+                    Log.e(TAG, "jsonbody: $jsonBody")
                     jsonBody = JSONObject(jsonBody).getString("items").toString()
                     result = mapper.readValue(jsonBody, object : TypeReference<List<TaskList>>() {})
                     Log.e(TAG, result.toString())
-                } catch (e: Exception) { }
+                } catch (e: Exception) {
+                    Log.e(TAG, e.toString() + e.cause + e.message + e.localizedMessage + e.stackTraceToString())
+                }
             }
         }
         return result

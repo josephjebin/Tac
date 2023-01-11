@@ -20,9 +20,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tac.data.Constants
-import com.google.api.services.tasks.model.TaskList
+import com.example.tac.data.tasks.TaskList
 import com.example.tac.ui.calendar.Calendar
 import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksViewModel
@@ -43,9 +43,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         initAuthServiceConfig()
         initAuthService()
-        if(!restoreState()) {
+//        if(!restoreState()) {
             attemptAuthorization()
-        }
+//        }
 
         setContent {
             TacTheme {
@@ -150,7 +150,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Tac(authState: AuthState, authorizationService : AuthorizationService, tasksViewModel: TasksViewModel = TasksViewModel(authState, authorizationService)) {
+fun Tac(authState: AuthState, authorizationService : AuthorizationService, tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory)) {
     val uiState by tasksViewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     TasksAndCalendarScreen(tasksViewModel, uiState.taskLists)
