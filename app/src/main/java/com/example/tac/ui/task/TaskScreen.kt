@@ -21,7 +21,7 @@ fun TaskSheet(projects: List<TaskList?>?) {
         LazyRow() {
             projects?.let { it ->
                 items(it.size) { index ->
-                    Card() {
+                    Card(modifier = Modifier.padding(16.dp)) {
                         projects[index]?.let { Text(text = it.title) }
                     }
                 }

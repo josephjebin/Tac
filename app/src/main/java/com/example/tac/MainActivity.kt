@@ -43,9 +43,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         initAuthServiceConfig()
         initAuthService()
-//        if(!restoreState()) {
+        if(!restoreState()) {
             attemptAuthorization()
-//        }
+        }
 
         setContent {
             TacTheme {

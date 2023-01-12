@@ -25,7 +25,7 @@ import net.openid.appauth.browser.VersionedBrowserMatcher
 import org.json.JSONException
 
 
-class TasksViewModel(val authState: AuthState, val authorizationService : AuthorizationService): ViewModel() {
+class TasksViewModel(authState: AuthState, authorizationService : AuthorizationService): ViewModel() {
     val TAG = "TasksViewModel"
     private val _uiState = MutableStateFlow(TasksState(listOf(), listOf()))
     val uiState: StateFlow<TasksState> = _uiState.asStateFlow()
