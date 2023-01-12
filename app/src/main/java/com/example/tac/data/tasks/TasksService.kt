@@ -32,7 +32,7 @@ class TasksService(val authState: AuthState, val authorizationService: Authoriza
                 try {
                     val response = client.newCall(request).execute()
                     var jsonBody = response.body?.string() ?: ""
-                    Log.e(TAG, "Response from tasks api: $jsonBody")
+                    Log.i(TAG, "Response from tasks api: $jsonBody")
                     jsonBody = JSONObject(jsonBody).getString("items").toString()
                     result = mapper.readValue(jsonBody, object : TypeReference<List<TaskList>>() {})
                 } catch (e: Exception) {
