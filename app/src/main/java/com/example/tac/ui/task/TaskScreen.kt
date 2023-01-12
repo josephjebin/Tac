@@ -1,6 +1,5 @@
 package com.example.tac.ui.task
 
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.Button
@@ -13,17 +12,13 @@ import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 
 @Composable
-fun TaskSheet(projects: List<TaskList?>?) {
-    val TAG = "TaskSheet"
-    Log.e(TAG, "$projects")
+fun TaskSheet(projects: List<TaskList?>) {
     Column() {
         //projects
         LazyRow() {
-            projects?.let { it ->
-                items(it.size) { index ->
-                    Card(modifier = Modifier.padding(16.dp)) {
-                        projects[index]?.let { Text(text = it.title) }
-                    }
+            items(projects.size) { index ->
+                Card(modifier = Modifier.padding(16.dp)) {
+                    projects[index]?.let { Text(text = it.title) }
                 }
             }
         }

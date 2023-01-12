@@ -76,13 +76,6 @@ dependencies {
     //jackson
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.1'
 
-    //tasks api
-    implementation 'com.google.apis:google-api-services-tasks:v1-rev20210709-2.0.0'
-
-    //datastore
-    implementation "androidx.datastore:datastore-preferences:1.0.0"
-
     //AppAuth
     implementation 'net.openid:appauth:0.11.1'
-    implementation 'com.auth0.android:jwtdecode:2.0.0'
 }

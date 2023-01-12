@@ -16,7 +16,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,13 +42,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         initAuthServiceConfig()
         initAuthService()
-        if(!restoreState()) {
+//        if(!restoreState()) {
             attemptAuthorization()
-        }
+//        }
 
         setContent {
             TacTheme {
-                Tac(authState, authorizationService)
+                Tac()
             }
         }
     }
@@ -108,14 +107,14 @@ class MainActivity : ComponentActivity() {
 
         val authIntent = authorizationService.getAuthorizationRequestIntent(request)
 
-        Log.e(TAG, "trying to get auth code")
+        Log.i(TAG, "Trying to get auth code")
 
         val authorizationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                 result ->
             run {
-                Log.e(TAG, "result code from activity result: ${result.resultCode}")
+                Log.i(TAG, "Result code from activity result: ${result.resultCode}")
                 if (result.resultCode == Activity.RESULT_OK) {
-                    Log.e(TAG, "trying to handle auth response: ${result.data}")
+                    Log.i(TAG, "Trying to handle auth response: ${result.data}")
                     handleAuthorizationResponse(result.data!!)
                 }
             }
@@ -129,7 +128,6 @@ class MainActivity : ComponentActivity() {
         val error = AuthorizationException.fromIntent(intent)
 
         authState = AuthState(authorizationResponse, error)
-        Log.e(TAG, "Auth code: ${authorizationResponse?.accessToken}")
 
         val tokenExchangeRequest = authorizationResponse?.createTokenExchangeRequest()
         if (tokenExchangeRequest != null) {
@@ -150,17 +148,15 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Tac(authState: AuthState, authorizationService : AuthorizationService, tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory)) {
+fun Tac(tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory)) {
     val uiState by tasksViewModel.uiState.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
     TasksAndCalendarScreen(tasksViewModel, uiState.taskLists)
-
 }
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskList?>?) {
+fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskList?>) {
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
     BottomSheetScaffold(
         sheetContent = {

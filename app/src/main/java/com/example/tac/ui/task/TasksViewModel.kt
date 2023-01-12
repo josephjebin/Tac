@@ -32,7 +32,6 @@ class TasksViewModel(authState: AuthState, authorizationService : AuthorizationS
     var tasksService: TasksService
 
     init {
-        Log.e(TAG, "IN THE INIT")
         tasksService = TasksService(authState, authorizationService)
     }
 
@@ -40,11 +39,10 @@ class TasksViewModel(authState: AuthState, authorizationService : AuthorizationS
         viewModelScope.launch {
             val newLists = tasksService.getTaskLists()
             updateTaskLists(newLists)
-            Log.e(TAG, _uiState.value.taskLists.toString())
         }
     }
 
-    private fun updateTaskLists(newLists: List<TaskList?>?) {
+    private fun updateTaskLists(newLists: List<TaskList?>) {
         _uiState.value = TasksState(newLists, listOf())
     }
 
