@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.net.http.SslCertificate.restoreState
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -42,9 +43,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         initAuthServiceConfig()
         initAuthService()
-//        if(!restoreState()) {
+        if(!restoreState()) {
             attemptAuthorization()
-//        }
+        }
 
         setContent {
             TacTheme {

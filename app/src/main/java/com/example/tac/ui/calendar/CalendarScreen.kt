@@ -7,23 +7,36 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.tac.ui.task.TasksViewModel
+import com.example.tac.R
 
 @Composable
 fun Calendar(tasksViewModel: TasksViewModel) {
-    LazyVerticalGrid(columns = GridCells.Fixed(1)) {
-        items(items = get24Hours(), key = { hour -> hour }) { hour ->
-            CalendarRow(hour)
+    Box {
+        LazyVerticalGrid(columns = GridCells.Fixed(1)) {
+            items(items = get24Hours(), key = { hour -> hour }) { hour ->
+                CalendarRow(hour)
+            }
         }
-    }
-    FloatingActionButton(onClick = { tasksViewModel.getTaskLists() }) {
-
+        FloatingActionButton(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp),
+            onClick = { tasksViewModel.getTaskLists() },
+            content = {
+                Icon(painter = painterResource(id = R.drawable.round_refresh_24),
+                    contentDescription = "Refresh")
+            }
+        )
     }
 }
 
