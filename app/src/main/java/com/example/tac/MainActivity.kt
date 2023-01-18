@@ -30,7 +30,6 @@ import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.ui.theme.TacTheme
 import com.example.tac.ui.theme.accent_gray
-import com.example.tac.ui.theme.highlight_gray
 import com.example.tac.ui.theme.primaryGray
 import kotlinx.coroutines.*
 import net.openid.appauth.*
@@ -185,14 +184,12 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskLi
         BottomAppBar(modifier = Modifier
             .align(Alignment.BottomCenter)
             .background(accent_gray)) {
-//            var calendarButtonState by remember { mutableStateOf(true) }
             var tasksButtonState by remember { mutableStateOf(0) }
 
             //calendar button
             IconButton(
                 modifier = Modifier.weight(1f),
                 onClick = {
-//                    if(!calendarButtonState) calendarButtonState = true
                     tasksButtonState = 0
                 }
             ) {
