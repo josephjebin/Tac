@@ -4,20 +4,21 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.net.http.SslCertificate.restoreState
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -27,6 +28,9 @@ import com.example.tac.ui.calendar.Calendar
 import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.ui.theme.TacTheme
+import com.example.tac.ui.theme.accent_gray
+import com.example.tac.ui.theme.highlight_gray
+import com.example.tac.ui.theme.primaryGray
 import kotlinx.coroutines.*
 import net.openid.appauth.*
 import net.openid.appauth.browser.BrowserAllowList
@@ -144,10 +148,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-
 }
-
 @Composable
 fun Tac(tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory)) {
     val uiState by tasksViewModel.uiState.collectAsState()
@@ -158,17 +159,68 @@ fun Tac(tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Fact
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskList?>) {
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-    BottomSheetScaffold(
-        sheetContent = {
-            TaskSheet(projects)
-        },
-        scaffoldState = bottomSheetScaffoldState,
-        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-    ) { padding ->  // We need to pass scaffold's inner padding to content. That's why we use Box.
-        Box(modifier = Modifier.padding(padding)) {
-            Calendar(tasksViewModel)
+    Box {
+        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+        BottomSheetScaffold(
+            sheetContent = {
+                TaskSheet(projects)
+            },
+            scaffoldState = bottomSheetScaffoldState,
+            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+        ) {
+            Box(modifier = Modifier.padding()) {
+                Calendar(tasksViewModel)
+            }
         }
+
+        BottomAppBar(modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .background(accent_gray)) {
+            var calendarButtonState by remember { mutableStateOf(true) }
+            var tasksButtonState by remember { mutableStateOf(0) }
+            IconButton(
+                modifier = Modifier,
+                onClick = {
+                    if(!calendarButtonState) calendarButtonState = true
+                    if(tasksButtonState > 0) tasksButtonState--
+                }
+            ) {
+                Icon(painter = painterResource(id = R.drawable.round_refresh_24), contentDescription = "Refresh")
+            }
+
+            //TODO: replace with enum
+            //0 -> minimized
+            //1 -> slightly expanded
+            //2 -> fully expanded
+            val tasksButtonModifier: Modifier
+            when(tasksButtonState) {
+                0 -> {
+                    tasksButtonModifier = Modifier.background(primaryGray)
+                }
+                1 -> {
+                    tasksButtonModifier = Modifier.background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                primaryGray,
+                                accent_gray
+                            )
+                        )
+                    )
+                }
+                else -> {
+                    tasksButtonModifier = Modifier.background(accent_gray)
+                }
+            }
+
+            IconButton(modifier = tasksButtonModifier,
+                onClick = {
+                    if(tasksButtonState < 2) tasksButtonState++
+                }
+            ) {
+                Icon(painter = painterResource(id = R.drawable.round_refresh_24), contentDescription = "Refresh")
+            }
+        }
+
     }
 }
 

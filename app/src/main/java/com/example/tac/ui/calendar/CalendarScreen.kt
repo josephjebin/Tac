@@ -1,6 +1,7 @@
 package com.example.tac.ui.calendar
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -18,10 +19,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.R
+import com.example.tac.ui.theme.surfaceGray
 
 @Composable
 fun Calendar(tasksViewModel: TasksViewModel) {
-    Box {
+    Box(modifier = Modifier.background(surfaceGray)) {
         LazyVerticalGrid(columns = GridCells.Fixed(1)) {
             items(items = get24Hours(), key = { hour -> hour }) { hour ->
                 CalendarRow(hour)
