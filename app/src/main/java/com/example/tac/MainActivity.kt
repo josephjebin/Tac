@@ -203,10 +203,10 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskLi
             //0 -> minimized
             //1 -> slightly expanded
             //2 -> fully expanded
-            val tasksButtonModifier: Modifier = Modifier.weight(1f)
+            val tasksButtonModifier: Modifier
             when(tasksButtonState) {
                 0 -> {
-                    tasksButtonModifier.background(primaryGray)
+                    tasksButtonModifier = Modifier.weight(1f).background(primaryGray)
                     LaunchedEffect(tasksButtonState) {
                         sheetPeekHeight = 0.dp
                     }
@@ -215,7 +215,7 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskLi
                     LaunchedEffect(tasksButtonState) {
                         sheetPeekHeight = 360.dp
                     }
-                    tasksButtonModifier.background(
+                    tasksButtonModifier = Modifier.weight(1f).background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
                                 primaryGray,
@@ -225,7 +225,7 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskLi
                     )
                 }
                 else -> {
-                    tasksButtonModifier.background(accent_gray)
+                    tasksButtonModifier = Modifier.weight(1f).background(accent_gray)
                     LaunchedEffect(tasksButtonState) {
                         sheetPeekHeight = screenHeight - 40.dp
                     }
