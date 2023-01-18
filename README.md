@@ -21,7 +21,8 @@ Backlog
 
 
 Not essential for MVP: 
-- clean up composables and files (if possible)
 - Theme
+- clean up composables and files (if possible)
+- Adaptive layouts
 - Animations and eye candy!
 - Sign in w/ One-Tap
