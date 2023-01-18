@@ -5,7 +5,7 @@ Tac is a unified way to edit tasks and calendars. You can Tac(k) tasks onto the 
 Backlog
 
 - (DONE) Connect to Tasks API
-- Bottom App Bar
+- (DONE) Bottom App Bar
 - Display tasks according to tasklist
 - Make tasks draggable: https://blog.canopas.com/android-drag-and-drop-ui-element-in-jetpack-compose-14922073b3f1 
 - connect to Calendars API 
@@ -16,5 +16,5 @@ Backlog
 
 Not essential for MVP: 
 - Sign in w/ One-Tap
-- Animations and candy!
+- Animations and eye candy!
   - Theme
