@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -160,13 +161,21 @@ fun Tac(tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Fact
 @Composable
 fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskList?>) {
     Box {
-        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+            bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed))
+        val configuration = LocalConfiguration.current
+        val screenHeight = configuration.screenHeightDp.dp
+        var sheetPeekHeight by remember { mutableStateOf(0.dp) }
+
         BottomSheetScaffold(
             sheetContent = {
                 TaskSheet(projects)
             },
             scaffoldState = bottomSheetScaffoldState,
-            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            sheetPeekHeight = sheetPeekHeight
+
+
         ) {
             Box(modifier = Modifier.padding()) {
                 Calendar(tasksViewModel)
@@ -176,13 +185,15 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskLi
         BottomAppBar(modifier = Modifier
             .align(Alignment.BottomCenter)
             .background(accent_gray)) {
-            var calendarButtonState by remember { mutableStateOf(true) }
+//            var calendarButtonState by remember { mutableStateOf(true) }
             var tasksButtonState by remember { mutableStateOf(0) }
+
+            //calendar button
             IconButton(
-                modifier = Modifier,
+                modifier = Modifier.weight(1f),
                 onClick = {
-                    if(!calendarButtonState) calendarButtonState = true
-                    if(tasksButtonState > 0) tasksButtonState--
+//                    if(!calendarButtonState) calendarButtonState = true
+                    tasksButtonState = 0
                 }
             ) {
                 Icon(painter = painterResource(id = R.drawable.round_refresh_24), contentDescription = "Refresh")
@@ -192,13 +203,19 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskLi
             //0 -> minimized
             //1 -> slightly expanded
             //2 -> fully expanded
-            val tasksButtonModifier: Modifier
+            val tasksButtonModifier: Modifier = Modifier.weight(1f)
             when(tasksButtonState) {
                 0 -> {
-                    tasksButtonModifier = Modifier.background(primaryGray)
+                    tasksButtonModifier.background(primaryGray)
+                    LaunchedEffect(tasksButtonState) {
+                        sheetPeekHeight = 0.dp
+                    }
                 }
                 1 -> {
-                    tasksButtonModifier = Modifier.background(
+                    LaunchedEffect(tasksButtonState) {
+                        sheetPeekHeight = 360.dp
+                    }
+                    tasksButtonModifier.background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
                                 primaryGray,
@@ -208,13 +225,17 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskLi
                     )
                 }
                 else -> {
-                    tasksButtonModifier = Modifier.background(accent_gray)
+                    tasksButtonModifier.background(accent_gray)
+                    LaunchedEffect(tasksButtonState) {
+                        sheetPeekHeight = screenHeight - 40.dp
+                    }
                 }
             }
 
             IconButton(modifier = tasksButtonModifier,
                 onClick = {
                     if(tasksButtonState < 2) tasksButtonState++
+                    else tasksButtonState--
                 }
             ) {
                 Icon(painter = painterResource(id = R.drawable.round_refresh_24), contentDescription = "Refresh")
