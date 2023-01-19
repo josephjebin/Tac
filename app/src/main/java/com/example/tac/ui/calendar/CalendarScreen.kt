@@ -33,7 +33,7 @@ fun Calendar(tasksViewModel: TasksViewModel) {
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(16.dp),
-            onClick = { tasksViewModel.getTaskLists() },
+            onClick = { tasksViewModel.getTaskListsAndTasks() },
             content = {
                 Icon(painter = painterResource(id = R.drawable.round_refresh_24),
                     contentDescription = "Refresh")

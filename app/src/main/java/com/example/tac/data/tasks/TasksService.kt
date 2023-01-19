@@ -43,7 +43,29 @@ class TasksService(val authState: AuthState, val authorizationService: Authoriza
         return result
     }
 
-//    suspend fun getTasks(): List<TaskDao> {
-//
-//    }
+    suspend fun getTasks(taskList: String): List<Task> {
+        var result: List<Task> = mutableListOf()
+        withContext(Dispatchers.IO) {
+            authState.performActionWithFreshTokens(authorizationService) { accessToken, idToken, ex ->
+                Log.i(TAG, "Trying to get task for id: $taskList")
+                val client = OkHttpClient()
+                val request = Request.Builder()
+                    .get()
+                    .url(Constants.URL_TASKS + "lists/$taskList/tasks")
+                    .addHeader("Authorization", "Bearer $accessToken")
+                    .build()
+
+                try {
+                    val response = client.newCall(request).execute()
+                    var jsonBody = response.body?.string() ?: ""
+                    Log.i(TAG, "Response from tasks api: $jsonBody")
+                    jsonBody = JSONObject(jsonBody).getString("items").toString()
+                    result = mapper.readValue(jsonBody, object : TypeReference<List<Task>>() {})
+                } catch (e: Exception) {
+                    Log.e(TAG, e.toString() + e.cause + e.message + e.localizedMessage + e.stackTraceToString())
+                }
+            }
+        }
+        return result
+    }
 }

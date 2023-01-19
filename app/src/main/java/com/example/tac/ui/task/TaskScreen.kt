@@ -1,6 +1,9 @@
 package com.example.tac.ui.task
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.Button
 import androidx.compose.material.Card
@@ -12,42 +15,50 @@ import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 
 @Composable
-fun TaskSheet(projects: List<TaskList?>) {
+fun TaskSheet(
+    taskLists: List<TaskList>,
+    tasks: List<TaskDao>,
+    currentSelectedTaskList: TaskList,
+    onTaskListSelected: (TaskList) -> Unit,
+    onTaskSelected: (TaskDao) -> Unit
+) {
     Column() {
         //projects
         LazyRow() {
-            items(projects.size) { index ->
-                Card(modifier = Modifier.padding(16.dp)) {
-                    projects[index]?.let { Text(text = it.title) }
+            items(taskLists, key = { taskList -> taskList.id }) { taskList ->
+                Card(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .clickable { onTaskListSelected(taskList) }) {
+                    Text(text = taskList.title)
                 }
             }
         }
 
+        val filteredTasks =
+            tasks.filter { taskDao -> taskDao.taskList.equals(currentSelectedTaskList) }
         //tasks
-//        LazyVerticalGrid(
-//            columns = GridCells.Fixed(1),
-//            contentPadding = PaddingValues(4.dp)
-//        ) {
-//            items(items = datasource.listOfTasks, key = { task ->
-//                task.id
-//            }) { task ->
-//                TaskRow(task)
-//            }
-//        }
+        LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
+            items(filteredTasks, key = { task -> task.id }) { task ->
+                TaskRow(
+                    taskDao = task,
+                    onTaskSelected = { onTaskSelected(task) },
+                    onTaskCompleted = { }
+                )
+            }
+        }
     }
 }
 
 @Composable
-fun TaskRow(taskDao: TaskDao) {
-    Row() {
-        Button(onClick = { /*TODO*/ }) {
+fun TaskRow(taskDao: TaskDao, onTaskSelected: , onTaskCompleted:) {
+    Row(modifier = Modifier.clickable { onTaskSelected() }) {
+        Button(onClick = { onTaskCompleted() }) {
 
         }
 
         Spacer(modifier = Modifier.width(16.dp))
 
         Text(text = taskDao.title)
-
-
     }
 }

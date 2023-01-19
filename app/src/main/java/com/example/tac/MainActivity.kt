@@ -24,13 +24,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tac.data.Constants
+import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import com.example.tac.ui.calendar.Calendar
 import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.ui.theme.TacTheme
 import com.example.tac.ui.theme.accent_gray
-import com.example.tac.ui.theme.highlight_gray
 import com.example.tac.ui.theme.primaryGray
 import kotlinx.coroutines.*
 import net.openid.appauth.*
@@ -150,16 +150,17 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-@Composable
-fun Tac(tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory)) {
-    val uiState by tasksViewModel.uiState.collectAsState()
-    TasksAndCalendarScreen(tasksViewModel, uiState.taskLists)
-}
 
+@Composable
+fun Tac() {
+    TasksAndCalendarScreen()
+}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskList?>) {
+fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory)) {
+    val uiState by tasksViewModel.uiState.collectAsState()
+
     Box {
         val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
             bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed))
@@ -169,7 +170,17 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskLi
 
         BottomSheetScaffold(
             sheetContent = {
-                TaskSheet(projects)
+                TaskSheet(
+                    uiState.taskLists,
+                    uiState.tasks,
+                    uiState.currentSelectedTaskList,
+                    onTaskListSelected = {taskList: TaskList ->
+                        tasksViewModel.updateCurrentSelectedTaskList(taskList)
+                    },
+                    onTaskSelected = {taskDao: TaskDao ->
+                        tasksViewModel.updateCurrentSelectedTask(taskDao)
+                    }
+                )
             },
             scaffoldState = bottomSheetScaffoldState,
             sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
@@ -185,14 +196,12 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel, projects: List<TaskLi
         BottomAppBar(modifier = Modifier
             .align(Alignment.BottomCenter)
             .background(accent_gray)) {
-//            var calendarButtonState by remember { mutableStateOf(true) }
             var tasksButtonState by remember { mutableStateOf(0) }
 
             //calendar button
             IconButton(
                 modifier = Modifier.weight(1f),
                 onClick = {
-//                    if(!calendarButtonState) calendarButtonState = true
                     tasksButtonState = 0
                 }
             ) {
