@@ -33,4 +33,4 @@ google-services.json
 *.hprof
 
 # creds?
-app/src/main/java/com/example/tac/data/
+../app/src/main/java/com/example/tac/data/
