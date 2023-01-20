@@ -31,3 +31,6 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+# creds?
+app/src/main/java/com/example/tac/data/
