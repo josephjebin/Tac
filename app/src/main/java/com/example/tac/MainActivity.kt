@@ -174,11 +174,14 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
                     uiState.taskLists,
                     uiState.tasks,
                     uiState.currentSelectedTaskList,
-                    onTaskListSelected = {taskList: TaskList ->
+                    onTaskListSelected = { taskList: TaskList ->
                         tasksViewModel.updateCurrentSelectedTaskList(taskList)
                     },
-                    onTaskSelected = {taskDao: TaskDao ->
+                    onTaskSelected = { taskDao: TaskDao ->
                         tasksViewModel.updateCurrentSelectedTask(taskDao)
+                    },
+                    onTaskCompleted = { taskDao: TaskDao ->
+//                        tas
                     }
                 )
             },

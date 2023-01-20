@@ -75,6 +75,10 @@ class TasksViewModel(authState: AuthState, authorizationService : AuthorizationS
         }
     }
 
+    fun modifyCurrentSelectedTask(currentSelectedTask: TaskDao) {
+
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {

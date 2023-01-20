@@ -20,7 +20,8 @@ fun TaskSheet(
     tasks: List<TaskDao>,
     currentSelectedTaskList: TaskList,
     onTaskListSelected: (TaskList) -> Unit,
-    onTaskSelected: (TaskDao) -> Unit
+    onTaskSelected: (TaskDao) -> Unit,
+    onTaskCompleted: (TaskDao) -> Unit
 ) {
     Column() {
         //projects
@@ -39,11 +40,11 @@ fun TaskSheet(
             tasks.filter { taskDao -> taskDao.taskList.equals(currentSelectedTaskList) }
         //tasks
         LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
-            items(filteredTasks, key = { task -> task.id }) { task ->
+            items(filteredTasks, key = { task -> task.id }) { taskDao ->
                 TaskRow(
-                    taskDao = task,
-                    onTaskSelected = { onTaskSelected(task) },
-                    onTaskCompleted = { }
+                    taskDao = taskDao,
+                    onTaskSelected = onTaskSelected,
+                    onTaskCompleted = onTaskCompleted
                 )
             }
         }
@@ -51,9 +52,9 @@ fun TaskSheet(
 }
 
 @Composable
-fun TaskRow(taskDao: TaskDao, onTaskSelected: , onTaskCompleted:) {
-    Row(modifier = Modifier.clickable { onTaskSelected() }) {
-        Button(onClick = { onTaskCompleted() }) {
+fun TaskRow(taskDao: TaskDao, onTaskSelected: (TaskDao) -> Unit, onTaskCompleted: (TaskDao) -> Unit) {
+    Row(modifier = Modifier.clickable { onTaskSelected(taskDao) }) {
+        Button(onClick = { onTaskCompleted(taskDao) }) {
 
         }
 
