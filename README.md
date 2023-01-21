@@ -16,6 +16,7 @@ Backlog
 - Make tasks draggable: https://blog.canopas.com/android-drag-and-drop-ui-element-in-jetpack-compose-14922073b3f1 
 - connect to Calendars API 
 - calendar screen
+- Editing a single task screen
 - FAB to make tasks / events
 - Testing
 
