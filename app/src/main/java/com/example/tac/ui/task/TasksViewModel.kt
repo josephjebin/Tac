@@ -44,7 +44,7 @@ class TasksViewModel(authState: AuthState, authorizationService : AuthorizationS
             for (taskList in taskLists) {
                 val tasksInProject = tasksService.getTasks(taskList.id)
                 for(taskInProject in tasksInProject) {
-                    tasks.add(TaskDao(taskInProject, taskList.id))
+                    tasks.add(TaskDao(taskInProject, taskList.title))
                 }
             }
             updateTasks(tasks)

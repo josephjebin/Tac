@@ -167,10 +167,16 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
         val configuration = LocalConfiguration.current
         val screenHeight = configuration.screenHeightDp.dp
         var sheetPeekHeight by remember { mutableStateOf(0.dp) }
+        var tasksButtonState by remember { mutableStateOf(0) }
 
+        val taskSheetModifier = when(tasksButtonState) {
+            0 -> Modifier.height(0.dp)
+            else -> Modifier.wrapContentHeight()
+        }
         BottomSheetScaffold(
             sheetContent = {
                 TaskSheet(
+                    taskSheetModifier = taskSheetModifier,
                     uiState.taskLists,
                     uiState.tasks,
                     uiState.currentSelectedTaskList,
@@ -188,8 +194,6 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
             scaffoldState = bottomSheetScaffoldState,
             sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             sheetPeekHeight = sheetPeekHeight
-
-
         ) {
             Box(modifier = Modifier.padding()) {
                 Calendar(tasksViewModel)
@@ -199,8 +203,6 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
         BottomAppBar(modifier = Modifier
             .align(Alignment.BottomCenter)
             .background(accent_gray)) {
-            var tasksButtonState by remember { mutableStateOf(0) }
-
             //calendar button
             IconButton(
                 modifier = Modifier.weight(1f),
@@ -208,7 +210,7 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
                     tasksButtonState = 0
                 }
             ) {
-                Icon(painter = painterResource(id = R.drawable.round_refresh_24), contentDescription = "Refresh")
+                Icon(painter = painterResource(id = R.drawable.round_calendar_today_24), contentDescription = "Refresh")
             }
 
             //TODO: replace with enum
@@ -250,7 +252,7 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
                     else tasksButtonState--
                 }
             ) {
-                Icon(painter = painterResource(id = R.drawable.round_refresh_24), contentDescription = "Refresh")
+                Icon(painter = painterResource(id = R.drawable.round_task_24), contentDescription = "Refresh")
             }
         }
 
