@@ -49,8 +49,10 @@ fun CalendarRow(hour: String) {
             modifier = Modifier
                 .padding(start = 8.dp)
                 .width(60.dp)
+                .align(Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = hour)
+            Text(text = "$hour:")
         }
 
         Column() {
@@ -60,7 +62,7 @@ fun CalendarRow(hour: String) {
                     .border(BorderStroke(2.dp, Color.LightGray))
                     .padding(start = 8.dp)
             Row(modifier = rowModifier) {
-                Text(text = "0")
+                Text(text = "00")
             }
             Row(modifier = rowModifier) {
                 Text(text = "15")
