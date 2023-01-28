@@ -33,7 +33,7 @@ fun Calendar(tasksViewModel: TasksViewModel) {
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(16.dp),
-            onClick = { tasksViewModel.getTaskLists() },
+            onClick = { tasksViewModel.getTaskListsAndTasks() },
             content = {
                 Icon(painter = painterResource(id = R.drawable.round_refresh_24),
                     contentDescription = "Refresh")
@@ -49,8 +49,10 @@ fun CalendarRow(hour: String) {
             modifier = Modifier
                 .padding(start = 8.dp)
                 .width(60.dp)
+                .align(Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = hour)
+            Text(text = "$hour:")
         }
 
         Column() {
@@ -60,7 +62,7 @@ fun CalendarRow(hour: String) {
                     .border(BorderStroke(2.dp, Color.LightGray))
                     .padding(start = 8.dp)
             Row(modifier = rowModifier) {
-                Text(text = "0")
+                Text(text = "00")
             }
             Row(modifier = rowModifier) {
                 Text(text = "15")
