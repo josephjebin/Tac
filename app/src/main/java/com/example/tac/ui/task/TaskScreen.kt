@@ -74,7 +74,6 @@ fun TaskRow(
     Row(modifier = Modifier
         .fillMaxWidth()
         .height(54.dp)
-//        .border(BorderStroke(1.dp, SolidColor(Color.LightGray)))
         .clickable { onTaskSelected(taskDao) }) {
         IconButton(
             modifier = Modifier.align(Alignment.CenterVertically),

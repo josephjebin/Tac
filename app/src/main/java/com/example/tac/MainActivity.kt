@@ -187,7 +187,6 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
                         tasksViewModel.updateCurrentSelectedTask(taskDao)
                     },
                     onTaskCompleted = { taskDao: TaskDao ->
-//                        tas
                     }
                 )
             },
@@ -210,7 +209,7 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
                     tasksButtonState = 0
                 }
             ) {
-                Icon(painter = painterResource(id = R.drawable.round_calendar_today_24), contentDescription = "Refresh")
+                Icon(painter = painterResource(id = R.drawable.round_calendar_today_24), contentDescription = "Calendar button")
             }
 
             //TODO: replace with enum
@@ -252,7 +251,7 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
                     else tasksButtonState--
                 }
             ) {
-                Icon(painter = painterResource(id = R.drawable.round_task_24), contentDescription = "Refresh")
+                Icon(painter = painterResource(id = R.drawable.round_task_24), contentDescription = "Tasks button")
             }
         }
 
