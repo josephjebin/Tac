@@ -23,6 +23,7 @@ Backlog
 
 
 Not essential for MVP: 
+- event with recurrence
 - Theme
 - clean up composables and files (if possible)
 - Adaptive layouts
