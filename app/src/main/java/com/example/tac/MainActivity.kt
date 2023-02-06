@@ -27,6 +27,7 @@ import com.example.tac.data.Constants
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import com.example.tac.ui.calendar.Calendar
+import com.example.tac.ui.calendar.CalendarViewModel
 import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.ui.theme.TacTheme
@@ -109,7 +110,7 @@ class MainActivity : ComponentActivity() {
             Constants.CLIENT_ID,
             ResponseTypeValues.CODE,
             Uri.parse(Constants.URL_AUTH_REDIRECT)
-        ).setScopes(Constants.SCOPE_TASKS).build()
+        ).setScopes(Constants.SCOPE_CALENDAR, Constants.SCOPE_TASKS).build()
 
         val authIntent = authorizationService.getAuthorizationRequestIntent(request)
 
@@ -158,8 +159,12 @@ fun Tac() {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory)) {
-    val uiState by tasksViewModel.uiState.collectAsState()
+fun TasksAndCalendarScreen(
+    tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory),
+    calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
+) {
+    val uiTasksState by tasksViewModel.uiState.collectAsState()
+    val uiCalendarState by calendarViewModel.uiState.collectAsState()
 
     Box {
         val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
@@ -177,9 +182,9 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
             sheetContent = {
                 TaskSheet(
                     taskSheetModifier = taskSheetModifier,
-                    uiState.taskLists,
-                    uiState.tasks,
-                    uiState.currentSelectedTaskList,
+                    uiTasksState.taskLists,
+                    uiTasksState.tasks,
+                    uiTasksState.currentSelectedTaskList,
                     onTaskListSelected = { taskList: TaskList ->
                         tasksViewModel.updateCurrentSelectedTaskList(taskList)
                     },
@@ -195,7 +200,7 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
             sheetPeekHeight = sheetPeekHeight
         ) {
             Box(modifier = Modifier.padding()) {
-                Calendar(tasksViewModel)
+                Calendar(tasksViewModel, calendarViewModel)
             }
         }
 
@@ -219,7 +224,9 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
             val tasksButtonModifier: Modifier
             when(tasksButtonState) {
                 0 -> {
-                    tasksButtonModifier = Modifier.weight(1f).background(primaryGray)
+                    tasksButtonModifier = Modifier
+                        .weight(1f)
+                        .background(primaryGray)
                     LaunchedEffect(tasksButtonState) {
                         sheetPeekHeight = 0.dp
                     }
@@ -228,17 +235,21 @@ fun TasksAndCalendarScreen(tasksViewModel: TasksViewModel = viewModel(factory = 
                     LaunchedEffect(tasksButtonState) {
                         sheetPeekHeight = 360.dp
                     }
-                    tasksButtonModifier = Modifier.weight(1f).background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                primaryGray,
-                                accent_gray
+                    tasksButtonModifier = Modifier
+                        .weight(1f)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    primaryGray,
+                                    accent_gray
+                                )
                             )
                         )
-                    )
                 }
                 else -> {
-                    tasksButtonModifier = Modifier.weight(1f).background(accent_gray)
+                    tasksButtonModifier = Modifier
+                        .weight(1f)
+                        .background(accent_gray)
                     LaunchedEffect(tasksButtonState) {
                         sheetPeekHeight = screenHeight - 40.dp
                     }
