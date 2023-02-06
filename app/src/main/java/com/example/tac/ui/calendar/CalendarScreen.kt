@@ -34,7 +34,7 @@ fun Calendar(tasksViewModel: TasksViewModel, calendarViewModel: CalendarViewMode
                 .align(Alignment.TopEnd)
                 .padding(16.dp),
             onClick = {
-//                tasksViewModel.getTaskListsAndTasks()
+                tasksViewModel.getTaskListsAndTasks()
                 calendarViewModel.getCalendarsAndEvents()
             },
             content = {

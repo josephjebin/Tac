@@ -10,8 +10,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.tac.TacApplication
 import com.example.tac.data.Constants
-import com.example.tac.data.calendar.CalendarService
-import com.example.tac.data.calendar.GoogleEvent
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import com.example.tac.data.tasks.TasksService
