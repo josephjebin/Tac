@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.tac.TacApplication
 import com.example.tac.data.Constants
+import com.example.tac.data.calendar.CalendarService
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import com.example.tac.data.tasks.TasksService
@@ -31,13 +32,16 @@ class TasksViewModel(authState: AuthState, authorizationService : AuthorizationS
     private val _uiState = MutableStateFlow(TasksState(listOf(), listOf(), TaskList(), TaskDao()))
     val uiState: StateFlow<TasksState> = _uiState.asStateFlow()
     var tasksService: TasksService
+    var calendarService: CalendarService
 
     init {
         tasksService = TasksService(authState, authorizationService)
+        calendarService = CalendarService(authState, authorizationService)
     }
 
     fun getTaskListsAndTasks() {
         viewModelScope.launch {
+            calendarService.getCalendarList()
             val taskLists = tasksService.getTaskLists()
             updateTaskLists(taskLists)
             val tasks = mutableListOf<TaskDao>()

@@ -109,7 +109,7 @@ class MainActivity : ComponentActivity() {
             Constants.CLIENT_ID,
             ResponseTypeValues.CODE,
             Uri.parse(Constants.URL_AUTH_REDIRECT)
-        ).setScopes(Constants.SCOPE_TASKS).build()
+        ).setScopes(listOf(Constants.SCOPE_TASKS, Constants.SCOPE_CALENDAR)).build()
 
         val authIntent = authorizationService.getAuthorizationRequestIntent(request)
 
