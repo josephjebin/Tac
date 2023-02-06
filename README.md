@@ -13,8 +13,8 @@ Backlog
 - (DONE) Connect to Tasks API
 - (DONE) Bottom App Bar
 - (DONE) Display tasks according to tasklist in an aesthetic way 
+- (DONE) Connect to Calendars API 
 - calendar screen
-- connect to Calendars API 
 - Make tasks draggable: https://blog.canopas.com/android-drag-and-drop-ui-element-in-jetpack-compose-14922073b3f1 
 - saving duration in google tasks
 - Editing a single task screen + updating Google tasks 
