@@ -1,20 +1,18 @@
-package com.example.tac.ui.task
+package com.example.tac.ui.calendar
 
 import android.content.Context
 import android.text.TextUtils
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.tac.TacApplication
 import com.example.tac.data.Constants
 import com.example.tac.data.calendar.CalendarService
+import com.example.tac.data.calendar.GoogleCalendar
 import com.example.tac.data.calendar.GoogleEvent
-import com.example.tac.data.tasks.TaskDao
-import com.example.tac.data.tasks.TaskList
-import com.example.tac.data.tasks.TasksService
+import com.example.tac.ui.task.TasksViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,64 +25,46 @@ import net.openid.appauth.browser.BrowserAllowList
 import net.openid.appauth.browser.VersionedBrowserMatcher
 import org.json.JSONException
 
-
-class TasksViewModel(authState: AuthState, authorizationService : AuthorizationService): ViewModel() {
-    val TAG = "TasksViewModel"
-    private val _uiState = MutableStateFlow(TasksState(listOf(), listOf(), TaskList(), TaskDao()))
-    val uiState: StateFlow<TasksState> = _uiState.asStateFlow()
-    var tasksService: TasksService
+class CalendarViewModel(authState: AuthState, authorizationService : AuthorizationService):
+    ViewModel() {
+    val TAG = "CalendarViewModel"
+    private val _uiState = MutableStateFlow(CalendarState(listOf(), listOf()))
+    val uiState: StateFlow<CalendarState> = _uiState.asStateFlow()
+    var calendarService: CalendarService
 
     init {
-        tasksService = TasksService(authState, authorizationService)
+        calendarService = CalendarService(authState, authorizationService)
     }
 
-    fun getTaskListsAndTasks() {
+    fun getCalendarsAndEvents() {
         viewModelScope.launch {
-            val taskLists = tasksService.getTaskLists()
-            updateTaskLists(taskLists)
-            val tasks = mutableListOf<TaskDao>()
-            for (taskList in taskLists) {
-                val tasksInProject = tasksService.getTasks(taskList.id)
-                for(taskInProject in tasksInProject) {
-                    tasks.add(TaskDao(taskInProject, taskList.title))
-                }
+            val calendars = calendarService.getCalendarList()
+            updateCalendarsState(calendars)
+            val events = mutableListOf<GoogleEvent>()
+            for(calendar in calendars) {
+                events.addAll(calendarService.getEvents(calendar.id))
             }
-            updateTasks(tasks)
+            println(events)
+            updateEventsState(events)
         }
     }
 
-    private fun updateTaskLists(newLists: List<TaskList>) {
-        _uiState.update {currentState ->
-            currentState.copy(taskLists = newLists)
+    fun updateCalendarsState(newCalendars: List<GoogleCalendar>) {
+        _uiState.update {calendarState ->
+            calendarState.copy(calendars = newCalendars)
         }
     }
 
-    private fun updateTasks(newTasks: List<TaskDao>) {
-        _uiState.update {currentState ->
-            currentState.copy(tasks = newTasks)
+    fun updateEventsState(newEvents: List<GoogleEvent>) {
+        _uiState.update {calendarState ->
+            calendarState.copy(events = newEvents)
         }
-    }
-
-    fun updateCurrentSelectedTaskList(currentSelectedTaskList: TaskList) {
-        _uiState.update { currentState ->
-            currentState.copy(currentSelectedTaskList = currentSelectedTaskList)
-        }
-    }
-
-    fun updateCurrentSelectedTask(currentSelectedTask: TaskDao) {
-        _uiState.update { currentState ->
-            currentState.copy(currentSelectedTask = currentSelectedTask)
-        }
-    }
-
-    fun modifyCurrentSelectedTask(currentSelectedTask: TaskDao) {
-
     }
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val application = (this[APPLICATION_KEY] as TacApplication)
+                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as TacApplication)
 
                 var authState = AuthState()
                 val jsonString = application
@@ -108,7 +88,7 @@ class TasksViewModel(authState: AuthState, authorizationService : AuthorizationS
                     application,
                     appAuthConfiguration)
 
-                TasksViewModel(authState, authorizationService)
+                CalendarViewModel(authState, authorizationService)
             }
         }
     }

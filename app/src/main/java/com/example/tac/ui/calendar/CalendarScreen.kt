@@ -22,7 +22,7 @@ import com.example.tac.R
 import com.example.tac.ui.theme.surfaceGray
 
 @Composable
-fun Calendar(tasksViewModel: TasksViewModel) {
+fun Calendar(tasksViewModel: TasksViewModel, calendarViewModel: CalendarViewModel) {
     Box(modifier = Modifier.background(surfaceGray)) {
         LazyVerticalGrid(columns = GridCells.Fixed(1)) {
             items(items = get24Hours(), key = { hour -> hour }) { hour ->
@@ -33,7 +33,10 @@ fun Calendar(tasksViewModel: TasksViewModel) {
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(16.dp),
-            onClick = { tasksViewModel.getTaskListsAndTasks() },
+            onClick = {
+//                tasksViewModel.getTaskListsAndTasks()
+                calendarViewModel.getCalendarsAndEvents()
+            },
             content = {
                 Icon(painter = painterResource(id = R.drawable.round_refresh_24),
                     contentDescription = "Refresh")
