@@ -19,16 +19,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.R
+import com.example.tac.data.calendar.EventDao
 import com.example.tac.ui.theme.surfaceGray
+import java.time.LocalDateTime
 
 @Composable
 fun Calendar(tasksViewModel: TasksViewModel, calendarViewModel: CalendarViewModel) {
     Box(modifier = Modifier.background(surfaceGray)) {
-        LazyVerticalGrid(columns = GridCells.Fixed(1)) {
-            items(items = get24Hours(), key = { hour -> hour }) { hour ->
-                CalendarRow(hour)
-            }
-        }
+//        LazyVerticalGrid(columns = GridCells.Fixed(1)) {
+//            items(items = get24Hours(), key = { hour -> hour }) { hour ->
+//                CalendarRow(hour)
+//            }
+//        }
+        Schedule(events = sampleEvents)
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -85,3 +88,27 @@ private fun get24Hours(): List<String> {
     for (i in 0..23) hours.add("$i")
     return hours
 }
+
+private val sampleEvents = listOf(
+    EventDao(
+        name = "Google I/O Keynote",
+        color = Color(0xFFAFBBF2),
+        start = LocalDateTime.parse("2021-05-18T13:00:00"),
+        end = LocalDateTime.parse("2021-05-18T15:00:00"),
+        description = "Tune in to find out about how we're furthering our mission to organize the world’s information and make it universally accessible and useful.",
+    ),
+    EventDao(
+        name = "Developer Keynote",
+        color = Color(0xFFAFBBF2),
+        start = LocalDateTime.parse("2021-05-18T15:15:00"),
+        end = LocalDateTime.parse("2021-05-18T16:00:00"),
+        description = "Learn about the latest updates to our developer products and platforms from Google Developers.",
+    ),
+    EventDao(
+        name = "What's new in Android",
+        color = Color(0xFF1B998B),
+        start = LocalDateTime.parse("2021-05-18T16:50:00"),
+        end = LocalDateTime.parse("2021-05-18T17:00:00"),
+        description = "In this Keynote, Chet Haase, Dan Sandler, and Romain Guy discuss the latest Android features and enhancements for developers.",
+    ),
+)
