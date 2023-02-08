@@ -319,8 +319,8 @@ fun MyBottomSheet(
 
         val columnModifier = when(swipeableState.currentValue) {
             TasksSheetState.EXPANDED ->
-                Modifier.fillMaxHeight().padding(PaddingValues(bottom = 66.dp))
-            TasksSheetState.PARTIALLY_EXPANDED -> Modifier.height(280.dp).padding(PaddingValues(bottom = 66.dp))
+                Modifier.fillMaxHeight().padding(PaddingValues(bottom = 56.dp))
+            TasksSheetState.PARTIALLY_EXPANDED -> Modifier.height(320.dp).padding(PaddingValues(bottom = 70.dp))
             else -> Modifier.height(0.dp)
         }
         Column(columnModifier) {
@@ -337,7 +337,7 @@ fun MyBottomSheet(
                         orientation = Orientation.Vertical,
                         anchors = mapOf(
                             0f to TasksSheetState.EXPANDED,
-                            1400f to TasksSheetState.PARTIALLY_EXPANDED,
+                            1300f to TasksSheetState.PARTIALLY_EXPANDED,
                             maxHeight to TasksSheetState.COLLAPSED,
                         )
                     )

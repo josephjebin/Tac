@@ -20,7 +20,6 @@ import com.example.tac.data.tasks.TaskList
 
 @Composable
 fun TaskSheet(
-//    taskSheetModifier: Modifier = Modifier,
     taskLists: List<TaskList>,
     tasks: List<TaskDao>,
     currentSelectedTaskList: TaskList,
@@ -35,17 +34,16 @@ fun TaskSheet(
             .fillMaxHeight()
             .fillMaxWidth()
     ) {
-
         //projects
         LazyRow() {
             itemsIndexed(taskLists) { index, taskList ->
                 Card(
                     modifier = Modifier
-                        .padding(16.dp, 24.dp)
+                        .padding(16.dp, 16.dp)
                         .border(BorderStroke(1.dp, SolidColor(Color.Black)))
                         .clickable { onTaskListSelected(taskList) }
-                        .padding(horizontal = 8.dp, vertical = 4.dp)) {
-                    Text(text = taskList.title)
+                ) {
+                    Text(modifier = Modifier.padding(8.dp), text = taskList.title)
                 }
             }
         }
