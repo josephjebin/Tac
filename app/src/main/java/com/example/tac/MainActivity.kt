@@ -10,7 +10,8 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -18,9 +19,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tac.data.Constants
@@ -38,18 +43,19 @@ import net.openid.appauth.*
 import net.openid.appauth.browser.BrowserAllowList
 import net.openid.appauth.browser.VersionedBrowserMatcher
 import org.json.JSONException
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     val TAG = "Tac"
     private var authState: AuthState = AuthState()
-    private lateinit var authorizationService : AuthorizationService
-    lateinit var authServiceConfig : AuthorizationServiceConfiguration
+    private lateinit var authorizationService: AuthorizationService
+    lateinit var authServiceConfig: AuthorizationServiceConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initAuthServiceConfig()
         initAuthService()
-        if(!restoreState()) {
+        if (!restoreState()) {
             attemptAuthorization()
         }
 
@@ -72,11 +78,12 @@ class MainActivity : ComponentActivity() {
             .getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
             .getString(Constants.AUTH_STATE, null)
 
-        if( jsonString != null && !TextUtils.isEmpty(jsonString) ) {
+        if (jsonString != null && !TextUtils.isEmpty(jsonString)) {
             try {
                 authState = AuthState.jsonDeserialize(jsonString)
                 return true
-            } catch(jsonException: JSONException) { }
+            } catch (jsonException: JSONException) {
+            }
         }
 
         return false
@@ -87,7 +94,8 @@ class MainActivity : ComponentActivity() {
             Uri.parse(Constants.URL_AUTHORIZATION),
             Uri.parse(Constants.URL_TOKEN_EXCHANGE),
             null,
-            Uri.parse(Constants.URL_LOGOUT))
+            Uri.parse(Constants.URL_LOGOUT)
+        )
     }
 
     private fun initAuthService() {
@@ -101,7 +109,8 @@ class MainActivity : ComponentActivity() {
 
         authorizationService = AuthorizationService(
             application,
-            appAuthConfiguration)
+            appAuthConfiguration
+        )
     }
 
     fun attemptAuthorization() {
@@ -116,16 +125,16 @@ class MainActivity : ComponentActivity() {
 
         Log.i(TAG, "Trying to get auth code")
 
-        val authorizationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                result ->
-            run {
-                Log.i(TAG, "Result code from activity result: ${result.resultCode}")
-                if (result.resultCode == Activity.RESULT_OK) {
-                    Log.i(TAG, "Trying to handle auth response: ${result.data}")
-                    handleAuthorizationResponse(result.data!!)
+        val authorizationLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                run {
+                    Log.i(TAG, "Result code from activity result: ${result.resultCode}")
+                    if (result.resultCode == Activity.RESULT_OK) {
+                        Log.i(TAG, "Trying to handle auth response: ${result.data}")
+                        handleAuthorizationResponse(result.data!!)
+                    }
                 }
             }
-        }
 
         authorizationLauncher.launch(authIntent)
     }
@@ -154,67 +163,65 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Tac() {
-    TasksAndCalendarScreen()
+    TasksAndCalendarScreen2()
+}
+
+
+enum class States {
+    EXPANDED,
+    PARTIALLY_EXPANDED,
+    COLLAPSED
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TasksAndCalendarScreen(
+fun TasksAndCalendarScreen2(
     tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory),
     calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
 ) {
-    val uiTasksState by tasksViewModel.uiState.collectAsState()
-    val uiCalendarState by calendarViewModel.uiState.collectAsState()
+    val swipeableState = rememberSwipeableState(initialValue = States.COLLAPSED)
+    var tasksButtonState by remember { mutableStateOf(0) }
 
-    Box {
-        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-            bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed))
-        val configuration = LocalConfiguration.current
-        val screenHeight = configuration.screenHeightDp.dp
-        var sheetPeekHeight by remember { mutableStateOf(0.dp) }
-        var tasksButtonState by remember { mutableStateOf(0) }
+    Text(text = "calendar")
 
-        val taskSheetModifier = when(tasksButtonState) {
-            0 -> Modifier.height(0.dp)
-            else -> Modifier.wrapContentHeight()
-        }
-        BottomSheetScaffold(
-            sheetContent = {
-                TaskSheet(
-                    taskSheetModifier = taskSheetModifier,
-                    uiTasksState.taskLists,
-                    uiTasksState.tasks,
-                    uiTasksState.currentSelectedTaskList,
-                    onTaskListSelected = { taskList: TaskList ->
-                        tasksViewModel.updateCurrentSelectedTaskList(taskList)
-                    },
-                    onTaskSelected = { taskDao: TaskDao ->
-                        tasksViewModel.updateCurrentSelectedTask(taskDao)
-                    },
-                    onTaskCompleted = { taskDao: TaskDao ->
-                    }
+    MyBottomSheet(swipeableState = swipeableState, body = {
+        Text(
+            modifier = Modifier.border(
+                BorderStroke(
+                    1.dp,
+                    SolidColor(Color.Black)
                 )
-            },
-            scaffoldState = bottomSheetScaffoldState,
-            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            sheetPeekHeight = sheetPeekHeight
-        ) {
-            Box(modifier = Modifier.padding()) {
-                Calendar(tasksViewModel, calendarViewModel)
-            }
-        }
+            ), text = "BODY"
+        )
+    })
 
-        BottomAppBar(modifier = Modifier
-            .align(Alignment.BottomCenter)
-            .background(accent_gray)) {
+    MyBottomBar(
+        tasksButtonState = tasksButtonState,
+        updateTasksButtonState = { newTasksButtonState: Int ->
+            tasksButtonState = newTasksButtonState
+        }
+    )
+}
+
+@Composable
+fun MyBottomBar(tasksButtonState: Int, updateTasksButtonState: (Int) -> Unit) {
+    Box() {
+        BottomAppBar(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .background(accent_gray)
+        ) {
             //calendar button
             IconButton(
                 modifier = Modifier.weight(1f),
                 onClick = {
-                    tasksButtonState = 0
+                    updateTasksButtonState(0)
                 }
             ) {
-                Icon(painter = painterResource(id = R.drawable.round_calendar_today_24), contentDescription = "Calendar button")
+                Icon(
+                    painter = painterResource(id = R.drawable.round_calendar_today_24),
+                    contentDescription = "Calendar button"
+                )
             }
 
             //TODO: replace with enum
@@ -222,7 +229,7 @@ fun TasksAndCalendarScreen(
             //1 -> slightly expanded
             //2 -> fully expanded
             val tasksButtonModifier: Modifier
-            when(tasksButtonState) {
+            when (tasksButtonState) {
                 0 -> {
                     tasksButtonModifier = Modifier
                         .weight(1f)
@@ -258,14 +265,110 @@ fun TasksAndCalendarScreen(
 
             IconButton(modifier = tasksButtonModifier,
                 onClick = {
-                    if(tasksButtonState < 2) tasksButtonState++
+                    if (tasksButtonState < 2) tasksButtonState++
                     else tasksButtonState--
                 }
             ) {
-                Icon(painter = painterResource(id = R.drawable.round_task_24), contentDescription = "Tasks button")
+                Icon(
+                    painter = painterResource(id = R.drawable.round_task_24),
+                    contentDescription = "Tasks button"
+                )
             }
         }
+    }
+}
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun MyBottomSheet(
+    body: @Composable () -> Unit,
+    swipeableState: SwipeableState<States>
+) {
+    BoxWithConstraints {
+        val constraintsScope = this
+        val maxHeight = with(LocalDensity.current) {
+            constraintsScope.maxHeight.toPx()
+        }
+        Column(Modifier.fillMaxHeight()) {
+            Box(
+                Modifier
+                    .offset {
+                        IntOffset(
+                            x = 0,
+                            y = swipeableState.offset.value.roundToInt()
+                        )
+                    }
+                    .swipeable(
+                        state = swipeableState,
+                        orientation = Orientation.Vertical,
+                        anchors = mapOf(
+                            0f to States.EXPANDED,
+                            1400f to States.PARTIALLY_EXPANDED,
+                            maxHeight to States.COLLAPSED,
+                        )
+                    )
+            ) {
+                body()
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun TasksAndCalendarScreen(
+    tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory),
+    calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
+) {
+    val uiTasksState by tasksViewModel.uiState.collectAsState()
+    val uiCalendarState by calendarViewModel.uiState.collectAsState()
+
+    Box {
+        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+            bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
+        )
+        val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+        var sheetPeekHeight by remember { mutableStateOf(0.dp) }
+
+
+        val taskSheetModifier = when (tasksButtonState) {
+            0 -> Modifier.height(0.dp)
+            else -> Modifier.wrapContentHeight()
+        }
+        BottomSheetScaffold(
+            modifier = Modifier.requiredHeightIn(max = screenHeight),
+            sheetContent = {
+                TaskSheet(
+                    taskSheetModifier = taskSheetModifier,
+                    uiTasksState.taskLists,
+                    uiTasksState.tasks,
+                    uiTasksState.currentSelectedTaskList,
+                    onTaskListSelected = { taskList: TaskList ->
+                        tasksViewModel.updateCurrentSelectedTaskList(taskList)
+                    },
+                    onTaskSelected = { taskDao: TaskDao ->
+                        tasksViewModel.updateCurrentSelectedTask(taskDao)
+                    },
+                    onTaskCompleted = { taskDao: TaskDao ->
+                    }
+                )
+            },
+            scaffoldState = bottomSheetScaffoldState,
+            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            sheetPeekHeight = sheetPeekHeight
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding()
+                    .requiredHeightIn(max = LocalConfiguration.current.screenHeightDp.dp)
+            ) {
+                Calendar(
+                    tasksViewModel,
+                    calendarViewModel
+                )
+            }
+        }
     }
 }
 

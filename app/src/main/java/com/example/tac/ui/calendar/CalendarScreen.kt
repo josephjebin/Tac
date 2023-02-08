@@ -1,8 +1,6 @@
 package com.example.tac.ui.calendar
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -15,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.tac.ui.task.TasksViewModel
@@ -25,13 +24,26 @@ import java.time.LocalDateTime
 
 @Composable
 fun Calendar(tasksViewModel: TasksViewModel, calendarViewModel: CalendarViewModel) {
-    Box(modifier = Modifier.background(surfaceGray)) {
+    val hourHeight = 64.dp
+    Box(modifier = Modifier.background(surfaceGray).requiredHeightIn(max = LocalConfiguration.current.screenHeightDp.dp)) {
 //        LazyVerticalGrid(columns = GridCells.Fixed(1)) {
 //            items(items = get24Hours(), key = { hour -> hour }) { hour ->
 //                CalendarRow(hour)
 //            }
 //        }
-        Schedule(events = sampleEvents)
+        Row(Modifier.requiredHeightIn(max = LocalConfiguration.current.screenHeightDp.dp)) {
+//        val verticalScrollState = rememberScrollState()
+
+//            HoursSidebar(
+//                hourHeight = hourHeight,
+////                modifier = Modifier.verticalScroll(verticalScrollState)
+//            )
+            Schedule(
+//                modifier = Modifier.verticalScroll(verticalScrollState),
+                events = sampleEvents,
+                hourHeight = hourHeight
+            )
+        }
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -107,8 +119,8 @@ private val sampleEvents = listOf(
     EventDao(
         name = "What's new in Android",
         color = Color(0xFF1B998B),
-        start = LocalDateTime.parse("2021-05-18T16:50:00"),
-        end = LocalDateTime.parse("2021-05-18T17:00:00"),
+        start = LocalDateTime.parse("2021-05-18T16:45:00"),
+        end = LocalDateTime.parse("2021-05-18T18:00:00"),
         description = "In this Keynote, Chet Haase, Dan Sandler, and Romain Guy discuss the latest Android features and enhancements for developers.",
     ),
 )
