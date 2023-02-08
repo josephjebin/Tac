@@ -13,7 +13,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,11 +27,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tac.data.Constants
-import com.example.tac.data.tasks.TaskDao
-import com.example.tac.data.tasks.TaskList
-import com.example.tac.ui.calendar.Calendar
 import com.example.tac.ui.calendar.CalendarViewModel
-import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.ui.theme.TacTheme
 import com.example.tac.ui.theme.accent_gray
@@ -167,7 +161,7 @@ fun Tac() {
 }
 
 
-enum class States {
+enum class TasksSheetState {
     EXPANDED,
     PARTIALLY_EXPANDED,
     COLLAPSED
@@ -179,8 +173,8 @@ fun TasksAndCalendarScreen2(
     tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory),
     calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
 ) {
-    val swipeableState = rememberSwipeableState(initialValue = States.COLLAPSED)
-    var tasksButtonState by remember { mutableStateOf(0) }
+    val swipeableState = rememberSwipeableState(initialValue = TasksSheetState.EXPANDED)
+    val coroutineScope = rememberCoroutineScope()
 
     Text(text = "calendar")
 
@@ -191,21 +185,26 @@ fun TasksAndCalendarScreen2(
                     1.dp,
                     SolidColor(Color.Black)
                 )
-            ), text = "BODY"
+            ), text = "BODY BODY BODY BODY"
         )
     })
 
     MyBottomBar(
-        tasksButtonState = tasksButtonState,
-        updateTasksButtonState = { newTasksButtonState: Int ->
-            tasksButtonState = newTasksButtonState
+        tasksSheetState = swipeableState.currentValue,
+        updateTasksSheetState = { newTasksSheetState: TasksSheetState ->
+            coroutineScope.launch {
+                swipeableState.animateTo(newTasksSheetState)
+            }
         }
     )
 }
 
 @Composable
-fun MyBottomBar(tasksButtonState: Int, updateTasksButtonState: (Int) -> Unit) {
-    Box() {
+fun MyBottomBar(
+    tasksSheetState: TasksSheetState,
+    updateTasksSheetState: (TasksSheetState) -> Unit
+) {
+    Box(Modifier.fillMaxHeight()) {
         BottomAppBar(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -215,7 +214,7 @@ fun MyBottomBar(tasksButtonState: Int, updateTasksButtonState: (Int) -> Unit) {
             IconButton(
                 modifier = Modifier.weight(1f),
                 onClick = {
-                    updateTasksButtonState(0)
+                    updateTasksSheetState(TasksSheetState.COLLAPSED)
                 }
             ) {
                 Icon(
@@ -229,20 +228,14 @@ fun MyBottomBar(tasksButtonState: Int, updateTasksButtonState: (Int) -> Unit) {
             //1 -> slightly expanded
             //2 -> fully expanded
             val tasksButtonModifier: Modifier
-            when (tasksButtonState) {
-                0 -> {
-                    tasksButtonModifier = Modifier
+            tasksButtonModifier = when (tasksSheetState) {
+                TasksSheetState.COLLAPSED -> {
+                    Modifier
                         .weight(1f)
                         .background(primaryGray)
-                    LaunchedEffect(tasksButtonState) {
-                        sheetPeekHeight = 0.dp
-                    }
                 }
-                1 -> {
-                    LaunchedEffect(tasksButtonState) {
-                        sheetPeekHeight = 360.dp
-                    }
-                    tasksButtonModifier = Modifier
+                TasksSheetState.PARTIALLY_EXPANDED -> {
+                    Modifier
                         .weight(1f)
                         .background(
                             brush = Brush.verticalGradient(
@@ -254,19 +247,20 @@ fun MyBottomBar(tasksButtonState: Int, updateTasksButtonState: (Int) -> Unit) {
                         )
                 }
                 else -> {
-                    tasksButtonModifier = Modifier
+                    Modifier
                         .weight(1f)
                         .background(accent_gray)
-                    LaunchedEffect(tasksButtonState) {
-                        sheetPeekHeight = screenHeight - 40.dp
-                    }
                 }
             }
 
+            //tasks button
             IconButton(modifier = tasksButtonModifier,
                 onClick = {
-                    if (tasksButtonState < 2) tasksButtonState++
-                    else tasksButtonState--
+                    when (tasksSheetState) {
+                        TasksSheetState.COLLAPSED -> updateTasksSheetState(TasksSheetState.PARTIALLY_EXPANDED)
+                        TasksSheetState.PARTIALLY_EXPANDED -> updateTasksSheetState(TasksSheetState.EXPANDED)
+                        else -> updateTasksSheetState(TasksSheetState.PARTIALLY_EXPANDED)
+                    }
                 }
             ) {
                 Icon(
@@ -282,7 +276,7 @@ fun MyBottomBar(tasksButtonState: Int, updateTasksButtonState: (Int) -> Unit) {
 @Composable
 fun MyBottomSheet(
     body: @Composable () -> Unit,
-    swipeableState: SwipeableState<States>
+    swipeableState: SwipeableState<TasksSheetState>
 ) {
     BoxWithConstraints {
         val constraintsScope = this
@@ -302,9 +296,9 @@ fun MyBottomSheet(
                         state = swipeableState,
                         orientation = Orientation.Vertical,
                         anchors = mapOf(
-                            0f to States.EXPANDED,
-                            1400f to States.PARTIALLY_EXPANDED,
-                            maxHeight to States.COLLAPSED,
+                            0f to TasksSheetState.EXPANDED,
+                            1400f to TasksSheetState.PARTIALLY_EXPANDED,
+                            maxHeight to TasksSheetState.COLLAPSED,
                         )
                     )
             ) {
@@ -315,62 +309,62 @@ fun MyBottomSheet(
 }
 
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun TasksAndCalendarScreen(
-    tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory),
-    calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
-) {
-    val uiTasksState by tasksViewModel.uiState.collectAsState()
-    val uiCalendarState by calendarViewModel.uiState.collectAsState()
-
-    Box {
-        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-            bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
-        )
-        val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-        var sheetPeekHeight by remember { mutableStateOf(0.dp) }
-
-
-        val taskSheetModifier = when (tasksButtonState) {
-            0 -> Modifier.height(0.dp)
-            else -> Modifier.wrapContentHeight()
-        }
-        BottomSheetScaffold(
-            modifier = Modifier.requiredHeightIn(max = screenHeight),
-            sheetContent = {
-                TaskSheet(
-                    taskSheetModifier = taskSheetModifier,
-                    uiTasksState.taskLists,
-                    uiTasksState.tasks,
-                    uiTasksState.currentSelectedTaskList,
-                    onTaskListSelected = { taskList: TaskList ->
-                        tasksViewModel.updateCurrentSelectedTaskList(taskList)
-                    },
-                    onTaskSelected = { taskDao: TaskDao ->
-                        tasksViewModel.updateCurrentSelectedTask(taskDao)
-                    },
-                    onTaskCompleted = { taskDao: TaskDao ->
-                    }
-                )
-            },
-            scaffoldState = bottomSheetScaffoldState,
-            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            sheetPeekHeight = sheetPeekHeight
-        ) {
-            Box(
-                modifier = Modifier
-                    .padding()
-                    .requiredHeightIn(max = LocalConfiguration.current.screenHeightDp.dp)
-            ) {
-                Calendar(
-                    tasksViewModel,
-                    calendarViewModel
-                )
-            }
-        }
-    }
-}
+//@OptIn(ExperimentalMaterialApi::class)
+//@Composable
+//fun TasksAndCalendarScreen(
+//    tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory),
+//    calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
+//) {
+//    val uiTasksState by tasksViewModel.uiState.collectAsState()
+//    val uiCalendarState by calendarViewModel.uiState.collectAsState()
+//
+//    Box {
+//        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+//            bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
+//        )
+//        val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+//        var sheetPeekHeight by remember { mutableStateOf(0.dp) }
+//
+//
+//        val taskSheetModifier = when (tasksButtonState) {
+//            0 -> Modifier.height(0.dp)
+//            else -> Modifier.wrapContentHeight()
+//        }
+//        BottomSheetScaffold(
+//            modifier = Modifier.requiredHeightIn(max = screenHeight),
+//            sheetContent = {
+//                TaskSheet(
+//                    taskSheetModifier = taskSheetModifier,
+//                    uiTasksState.taskLists,
+//                    uiTasksState.tasks,
+//                    uiTasksState.currentSelectedTaskList,
+//                    onTaskListSelected = { taskList: TaskList ->
+//                        tasksViewModel.updateCurrentSelectedTaskList(taskList)
+//                    },
+//                    onTaskSelected = { taskDao: TaskDao ->
+//                        tasksViewModel.updateCurrentSelectedTask(taskDao)
+//                    },
+//                    onTaskCompleted = { taskDao: TaskDao ->
+//                    }
+//                )
+//            },
+//            scaffoldState = bottomSheetScaffoldState,
+//            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+//            sheetPeekHeight = sheetPeekHeight
+//        ) {
+//            Box(
+//                modifier = Modifier
+//                    .padding()
+//                    .requiredHeightIn(max = LocalConfiguration.current.screenHeightDp.dp)
+//            ) {
+//                Calendar(
+//                    tasksViewModel,
+//                    calendarViewModel
+//                )
+//            }
+//        }
+//    }
+//}
 
 @Preview(showBackground = true)
 @Composable
