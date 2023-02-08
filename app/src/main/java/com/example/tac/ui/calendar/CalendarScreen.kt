@@ -44,19 +44,7 @@ fun Calendar(tasksViewModel: TasksViewModel, calendarViewModel: CalendarViewMode
                 hourHeight = hourHeight
             )
         }
-        FloatingActionButton(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp),
-            onClick = {
-                tasksViewModel.getTaskListsAndTasks()
-                calendarViewModel.getCalendarsAndEvents()
-            },
-            content = {
-                Icon(painter = painterResource(id = R.drawable.round_refresh_24),
-                    contentDescription = "Refresh")
-            }
-        )
+
     }
 }
 
