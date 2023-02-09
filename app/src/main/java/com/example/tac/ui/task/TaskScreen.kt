@@ -3,6 +3,7 @@ package com.example.tac.ui.task
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.example.tac.R
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
+import com.example.tac.ui.theme.accent_gray
 
 @Composable
 fun TaskSheet(
@@ -27,12 +29,12 @@ fun TaskSheet(
     onTaskSelected: (TaskDao) -> Unit,
     onTaskCompleted: (TaskDao) -> Unit
 ) {
-//    Column(modifier = taskSheetModifier) {
     Column(
         modifier = Modifier
-            .border(BorderStroke(1.dp, SolidColor(Color.Black)))
+            .border(BorderStroke(1.dp, SolidColor(Color.Black)), RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
             .fillMaxHeight()
             .fillMaxWidth()
+            .background(accent_gray, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
     ) {
         //projects
         LazyRow() {

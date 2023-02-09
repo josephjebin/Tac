@@ -3,12 +3,17 @@ package com.example.tac.ui.calendar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.ParentDataModifier
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.example.tac.data.calendar.EventDao
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
@@ -21,6 +26,7 @@ fun Schedule(
     modifier: Modifier = Modifier,
     eventContent: @Composable (event: EventDao) -> Unit = { Event(event = it) },
 ) {
+    val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
     Layout(
         content = {
             events.sortedBy(EventDao::start).forEach { event ->
@@ -29,7 +35,17 @@ fun Schedule(
                 }
             }
         },
-        modifier = modifier.run { verticalScroll(rememberScrollState()) },
+        modifier = modifier
+            .drawBehind {
+                repeat(23) {
+                    drawLine(
+                        dividerColor,
+                        start = Offset(0f, (it + 1) * hourHeight.toPx()),
+                        end = Offset(size.width, (it + 1) * hourHeight.toPx()),
+                        strokeWidth = 1.dp.toPx()
+                    )
+                }
+            }
     ) { measureables, constraints ->
         val height = hourHeight.roundToPx() * 24
         val placeablesWithEvents = measureables.map { measurable ->

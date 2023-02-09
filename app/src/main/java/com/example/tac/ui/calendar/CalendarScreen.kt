@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
+import androidx.compose.material.*
 
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,74 +17,33 @@ import androidx.compose.ui.unit.dp
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.R
 import com.example.tac.data.calendar.EventDao
+import com.example.tac.ui.task.TasksSheetState
 import com.example.tac.ui.theme.surfaceGray
 import java.time.LocalDateTime
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Calendar(tasksViewModel: TasksViewModel, calendarViewModel: CalendarViewModel) {
+fun Calendar(calendarModifier: Modifier) {
     val hourHeight = 64.dp
-    Box(modifier = Modifier.background(surfaceGray).requiredHeightIn(max = LocalConfiguration.current.screenHeightDp.dp)) {
-//        LazyVerticalGrid(columns = GridCells.Fixed(1)) {
-//            items(items = get24Hours(), key = { hour -> hour }) { hour ->
-//                CalendarRow(hour)
-//            }
-//        }
-        Row(Modifier.requiredHeightIn(max = LocalConfiguration.current.screenHeightDp.dp)) {
-//        val verticalScrollState = rememberScrollState()
+    val verticalScrollState = rememberScrollState()
+    Column(modifier = calendarModifier) {
+        //TODO: DAY HEADER
 
-//            HoursSidebar(
-//                hourHeight = hourHeight,
-////                modifier = Modifier.verticalScroll(verticalScrollState)
-//            )
+        Row(modifier = Modifier.weight(1f)) {
+            HoursSidebar(
+                hourHeight = hourHeight,
+                modifier = Modifier.verticalScroll(verticalScrollState)
+            )
+
             Schedule(
-//                modifier = Modifier.verticalScroll(verticalScrollState),
                 events = sampleEvents,
-                hourHeight = hourHeight
+                hourHeight = hourHeight,
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(verticalScrollState)
             )
         }
-
     }
-}
-
-@Composable
-fun CalendarRow(hour: String) {
-    Row(modifier = Modifier.border(BorderStroke(2.dp, Color.DarkGray))) {
-        Column(
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .width(60.dp)
-                .align(Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(text = "$hour:")
-        }
-
-        Column() {
-            val rowModifier: Modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .border(BorderStroke(2.dp, Color.LightGray))
-                    .padding(start = 8.dp)
-            Row(modifier = rowModifier) {
-                Text(text = "00")
-            }
-            Row(modifier = rowModifier) {
-                Text(text = "15")
-            }
-            Row(modifier = rowModifier) {
-                Text(text = "30")
-            }
-            Row(modifier = rowModifier) {
-                Text(text = "45")
-            }
-        }
-    }
-}
-
-private fun get24Hours(): List<String> {
-    val hours = mutableListOf<String>()
-    for (i in 0..23) hours.add("$i")
-    return hours
 }
 
 private val sampleEvents = listOf(

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.net.http.SslCertificate.restoreState
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -14,6 +15,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +24,8 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,8 +35,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tac.data.Constants
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
+import com.example.tac.ui.calendar.Calendar
 import com.example.tac.ui.calendar.CalendarViewModel
 import com.example.tac.ui.task.TaskSheet
+import com.example.tac.ui.task.TasksSheetState
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.ui.theme.TacTheme
 import com.example.tac.ui.theme.accent_gray
@@ -162,15 +168,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Tac() {
-    TasksAndCalendarScreen2()
+    Surface(color = MaterialTheme.colors.background) {
+        TasksAndCalendarScreen2()
+    }
 }
 
-
-enum class TasksSheetState {
-    EXPANDED,
-    PARTIALLY_EXPANDED,
-    COLLAPSED
-}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -178,18 +180,24 @@ fun TasksAndCalendarScreen2(
     tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory),
     calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val swipeableState = rememberSwipeableState(initialValue = TasksSheetState.EXPANDED)
     val uiTasksState by tasksViewModel.uiState.collectAsState()
     val uiCalendarState by calendarViewModel.uiState.collectAsState()
 
+    val coroutineScope = rememberCoroutineScope()
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
+    )
+    val swipeableState = rememberSwipeableState(initialValue = TasksSheetState.PARTIALLY_EXPANDED)
+    var sheetPeekHeight by remember { mutableStateOf(0.dp) }
 
     Box {
-        Text(text = "calendar")
-
+        val calendarPadding = when(swipeableState.currentValue) {
+            TasksSheetState.COLLAPSED -> 64.dp
+            else -> 296.dp
+        }
+        Calendar(Modifier.padding(PaddingValues(bottom = calendarPadding)))
         MyBottomSheet(swipeableState = swipeableState, body = {
             TaskSheet(
-//            taskSheetModifier = taskSheetModifier,
                 uiTasksState.taskLists,
                 uiTasksState.tasks,
                 uiTasksState.currentSelectedTaskList,
@@ -204,7 +212,6 @@ fun TasksAndCalendarScreen2(
             )
         })
 
-
         MyBottomBar(
             tasksSheetState = swipeableState.currentValue,
             updateTasksSheetState = { newTasksSheetState: TasksSheetState ->
@@ -214,21 +221,73 @@ fun TasksAndCalendarScreen2(
             }
         )
 
-        FloatingActionButton(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp),
-            onClick = {
-                tasksViewModel.getTaskListsAndTasks()
-                calendarViewModel.getCalendarsAndEvents()
-            },
-            content = {
-                Icon(
-                    painter = painterResource(id = R.drawable.round_refresh_24),
-                    contentDescription = "Refresh"
-                )
-            }
+        MyFAB(modifier = Modifier
+            .align(Alignment.TopEnd)
+            .padding(top = 40.dp, end = 16.dp),
+            onClick = {tasksViewModel.getTaskListsAndTasks()
+                calendarViewModel.getCalendarsAndEvents()}
         )
+    }
+}
+
+@Composable
+fun MyFAB(modifier: Modifier, onClick: () -> Unit) {
+    FloatingActionButton(
+        modifier = modifier,
+        onClick = onClick,
+        content = {
+            Icon(
+                painter = painterResource(id = R.drawable.round_refresh_24),
+                contentDescription = "Refresh"
+            )
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun MyBottomSheet(
+    body: @Composable () -> Unit,
+    swipeableState: SwipeableState<TasksSheetState>
+) {
+    BoxWithConstraints  {
+        val constraintsScope = this
+        val maxHeight = with(LocalDensity.current) {
+            constraintsScope.maxHeight.toPx()
+        }
+
+        val columnModifier = when (swipeableState.currentValue) {
+            TasksSheetState.EXPANDED -> Modifier
+                .fillMaxHeight()
+                .padding(PaddingValues(bottom = 56.dp))
+            TasksSheetState.PARTIALLY_EXPANDED -> Modifier
+                .height(320.dp)
+                .padding(PaddingValues(bottom = 70.dp))
+            else -> Modifier.height(0.dp)
+        }
+
+        Column(columnModifier) {
+            Box(
+                Modifier
+                    .offset {
+                        IntOffset(
+                            x = 0,
+                            y = swipeableState.offset.value.roundToInt()
+                        )
+                    }
+                    .swipeable(
+                        state = swipeableState,
+                        orientation = Orientation.Vertical,
+                        anchors = mapOf(
+                            0f to TasksSheetState.EXPANDED,
+                            1300f to TasksSheetState.PARTIALLY_EXPANDED,
+                            maxHeight to TasksSheetState.COLLAPSED,
+                        )
+                    )
+            ) {
+                body()
+            }
+        }
     }
 }
 
@@ -237,7 +296,7 @@ fun MyBottomBar(
     tasksSheetState: TasksSheetState,
     updateTasksSheetState: (TasksSheetState) -> Unit
 ) {
-    Box(Modifier.fillMaxHeight()) {
+    Box(modifier = Modifier.fillMaxHeight()) {
         BottomAppBar(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -303,49 +362,7 @@ fun MyBottomBar(
             }
         }
     }
-}
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun MyBottomSheet(
-    body: @Composable () -> Unit,
-    swipeableState: SwipeableState<TasksSheetState>
-) {
-    BoxWithConstraints() {
-        val constraintsScope = this
-        val maxHeight = with(LocalDensity.current) {
-            constraintsScope.maxHeight.toPx()
-        }
-
-        val columnModifier = when(swipeableState.currentValue) {
-            TasksSheetState.EXPANDED ->
-                Modifier.fillMaxHeight().padding(PaddingValues(bottom = 56.dp))
-            TasksSheetState.PARTIALLY_EXPANDED -> Modifier.height(320.dp).padding(PaddingValues(bottom = 70.dp))
-            else -> Modifier.height(0.dp)
-        }
-        Column(columnModifier) {
-            Box(
-                Modifier
-                    .offset {
-                        IntOffset(
-                            x = 0,
-                            y = swipeableState.offset.value.roundToInt()
-                        )
-                    }
-                    .swipeable(
-                        state = swipeableState,
-                        orientation = Orientation.Vertical,
-                        anchors = mapOf(
-                            0f to TasksSheetState.EXPANDED,
-                            1300f to TasksSheetState.PARTIALLY_EXPANDED,
-                            maxHeight to TasksSheetState.COLLAPSED,
-                        )
-                    )
-            ) {
-                body()
-            }
-        }
-    }
 }
 
 
