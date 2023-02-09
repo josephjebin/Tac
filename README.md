@@ -3,10 +3,8 @@
 Tac is a unified way to edit tasks and calendars. You can Tac(k) tasks onto the calendar by dragging and dropping.
 
 Current State
-- App Bar
-[Tac App Bar.webm](https://user-images.githubusercontent.com/98223838/213302812-e792cb12-f94a-4fd9-9efd-7337d40014aa.webm)
-- Tasks Api
-[Tac Tasks Api.webm](https://user-images.githubusercontent.com/98223838/213302976-b1f36f3a-8d27-4dfb-98d7-0bd8073d2cab.webm)
+[workingCalendar2.webm](https://user-images.githubusercontent.com/98223838/217734241-49aa3a14-2f81-4c42-a049-87a7be446f89.webm)
+
 
 Backlog
 
