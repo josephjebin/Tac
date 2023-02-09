@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.net.http.SslCertificate.restoreState
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
@@ -14,18 +13,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.modifier.modifierLocalConsumer
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -195,7 +187,7 @@ fun TasksAndCalendarScreen2(
             TasksSheetState.COLLAPSED -> 64.dp
             else -> 296.dp
         }
-        Calendar(Modifier.padding(PaddingValues(bottom = calendarPadding)))
+        Calendar(Modifier.padding(PaddingValues(bottom = calendarPadding)), uiCalendarState)
         MyBottomSheet(swipeableState = swipeableState, body = {
             TaskSheet(
                 uiTasksState.taskLists,

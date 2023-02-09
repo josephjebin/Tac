@@ -2,32 +2,20 @@ package com.example.tac.ui.calendar
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.*
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.example.tac.ui.task.TasksViewModel
-import com.example.tac.R
 import com.example.tac.data.calendar.EventDao
-import com.example.tac.ui.task.TasksSheetState
-import com.example.tac.ui.theme.surfaceGray
 import java.time.LocalDateTime
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Calendar(calendarModifier: Modifier) {
+fun Calendar(modifier: Modifier, uiCalendarState: CalendarState) {
     val hourHeight = 64.dp
     val verticalScrollState = rememberScrollState()
-    Column(modifier = calendarModifier) {
-        //TODO: DAY HEADER
+    Column(modifier = modifier) {
+        DayHeader(uiCalendarState.selectedDate)
 
         Row(modifier = Modifier.weight(1f)) {
             HoursSidebar(
