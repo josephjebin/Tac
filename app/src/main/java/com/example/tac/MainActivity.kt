@@ -216,8 +216,10 @@ fun TasksAndCalendarScreen2(
         MyFAB(modifier = Modifier
             .align(Alignment.TopEnd)
             .padding(top = 40.dp, end = 16.dp),
-            onClick = {tasksViewModel.getTaskListsAndTasks()
-                calendarViewModel.getCalendarsAndEvents()}
+            onClick = {
+                tasksViewModel.getTaskListsAndTasks()
+                calendarViewModel.getCalendarsAndEvents()
+            }
         )
     }
 }
@@ -243,6 +245,7 @@ fun MyBottomSheet(
     swipeableState: SwipeableState<TasksSheetState>
 ) {
     BoxWithConstraints  {
+        //logic to obtain screen size
         val constraintsScope = this
         val maxHeight = with(LocalDensity.current) {
             constraintsScope.maxHeight.toPx()

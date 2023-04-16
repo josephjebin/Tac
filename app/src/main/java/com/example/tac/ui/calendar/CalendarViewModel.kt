@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.tac.TacApplication
 import com.example.tac.data.Constants
 import com.example.tac.data.calendar.CalendarService
+import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.GoogleCalendar
 import com.example.tac.data.calendar.GoogleEvent
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,22 +40,21 @@ class CalendarViewModel(authState: AuthState, authorizationService : Authorizati
         viewModelScope.launch {
             val calendars = calendarService.getCalendarList()
             updateCalendarsState(calendars)
-            val events = mutableListOf<GoogleEvent>()
+            val events = mutableListOf<EventDao>()
             for(calendar in calendars) {
-                events.addAll(calendarService.getEvents(calendar.id))
+                calendarService.getEvents(calendar.id).forEach { events.add(EventDao(it)) }
             }
-            println(events)
             updateEventsState(events)
         }
     }
 
-    fun updateCalendarsState(newCalendars: List<GoogleCalendar>) {
+    private fun updateCalendarsState(newCalendars: List<GoogleCalendar>) {
         _uiState.update {calendarState ->
             calendarState.copy(calendars = newCalendars)
         }
     }
 
-    fun updateEventsState(newEvents: List<GoogleEvent>) {
+    private fun updateEventsState(newEvents: List<EventDao>) {
         _uiState.update {calendarState ->
             calendarState.copy(events = newEvents)
         }

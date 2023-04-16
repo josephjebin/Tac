@@ -11,7 +11,10 @@ import com.example.tac.data.calendar.EventDao
 import java.time.LocalDateTime
 
 @Composable
-fun Calendar(modifier: Modifier, uiCalendarState: CalendarState) {
+fun Calendar(
+    modifier: Modifier,
+    uiCalendarState: CalendarState
+) {
     val hourHeight = 64.dp
     val verticalScrollState = rememberScrollState()
     Column(modifier = modifier) {
@@ -25,6 +28,9 @@ fun Calendar(modifier: Modifier, uiCalendarState: CalendarState) {
 
             Schedule(
                 events = sampleEvents,
+//                events = uiCalendarState.events.filter { eventDao ->
+//                    eventDao.start.toLocalDate().equals(uiCalendarState.selectedDate)
+//                },
                 hourHeight = hourHeight,
                 modifier = Modifier
                     .weight(1f)
