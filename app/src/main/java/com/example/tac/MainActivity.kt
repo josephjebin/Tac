@@ -52,9 +52,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         initAuthServiceConfig()
         initAuthService()
-        if (!restoreState()) {
+//        if (!restoreState()) {
             attemptAuthorization()
-        }
+//        }
 
         setContent {
             TacTheme {
@@ -176,15 +176,17 @@ fun TasksAndCalendarScreen2(
     val uiCalendarState by calendarViewModel.uiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
-    )
+//    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+//        bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
+//    )
     val swipeableState = rememberSwipeableState(initialValue = TasksSheetState.PARTIALLY_EXPANDED)
-    var sheetPeekHeight by remember { mutableStateOf(0.dp) }
+//    var sheetPeekHeight by remember { mutableStateOf(0.dp) }
 
     Box {
         val calendarPadding = when(swipeableState.currentValue) {
+            //when the TasksSheet is collapsed --> the calendar only needs a bottom padding of 64.dp to show the bottom bar
             TasksSheetState.COLLAPSED -> 64.dp
+            //when the TasksSheet is expanded, the calendar needs a larger bottom padding to not overlap the bottom bar
             else -> 296.dp
         }
         Calendar(Modifier.padding(PaddingValues(bottom = calendarPadding)), uiCalendarState)
@@ -217,7 +219,7 @@ fun TasksAndCalendarScreen2(
             .align(Alignment.TopEnd)
             .padding(top = 40.dp, end = 16.dp),
             onClick = {
-                tasksViewModel.getTaskListsAndTasks()
+//                tasksViewModel.getTaskListsAndTasks()
                 calendarViewModel.getCalendarsAndEvents()
             }
         )

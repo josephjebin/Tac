@@ -79,4 +79,7 @@ dependencies {
 
     //AppAuth
     implementation 'net.openid:appauth:0.11.1'
+
+    //Google Event Models
+    implementation 'com.google.apis:google-api-services-calendar:v3-rev20220715-2.0.0'
 }

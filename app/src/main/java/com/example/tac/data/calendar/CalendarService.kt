@@ -12,6 +12,8 @@ import net.openid.appauth.AuthorizationService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import com.google.api.services.calendar.model.Event
+
 
 class CalendarService(val authState: AuthState, val authorizationService: AuthorizationService) {
     val TAG = "CalendarService"
@@ -44,8 +46,8 @@ class CalendarService(val authState: AuthState, val authorizationService: Author
         return result
     }
 
-    suspend fun getEvents(calendarId: String): List<GoogleEvent> {
-        var result: List<GoogleEvent> = mutableListOf()
+    suspend fun getEvents(calendarId: String): List<Event> {
+        var result: List<Event> = mutableListOf()
         withContext(Dispatchers.IO) {
             authState.performActionWithFreshTokens(authorizationService) { accessToken, idToken, ex ->
                 Log.i(TAG, "Trying to get events for id: $calendarId")
@@ -61,7 +63,7 @@ class CalendarService(val authState: AuthState, val authorizationService: Author
                     var jsonBody = response.body?.string() ?: ""
                     Log.i(TAG, "Response from calendar api for calendar $calendarId: $jsonBody")
                     jsonBody = JSONObject(jsonBody).getString("items").toString()
-                    result = mapper.readValue(jsonBody, object : TypeReference<List<GoogleEvent>>() {})
+                    result = mapper.readValue(jsonBody, object : TypeReference<List<Event>>() {})
                 } catch (e: Exception) {
                     Log.e(TAG, e.toString() + e.cause + e.message + e.localizedMessage + e.stackTraceToString())
                 }

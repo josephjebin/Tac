@@ -1,8 +1,6 @@
 package com.example.tac.ui.calendar
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,18 +16,20 @@ import com.example.tac.data.calendar.EventDao
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
+import com.google.api.services.calendar.model.Event
+
 
 @Composable
 fun Schedule(
-    events: List<EventDao>,
+    events: List<Event>,
     hourHeight: Dp,
     modifier: Modifier = Modifier,
-    eventContent: @Composable (event: EventDao) -> Unit = { Event(event = it) },
+    eventContent: @Composable (event: Event) -> Unit = { EventBox(event = it) },
 ) {
     val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
     Layout(
         content = {
-            events.sortedBy(EventDao::start).forEach { event ->
+            events.sortedBy(Event::start).forEach { event ->
                 Box(modifier = Modifier.eventData(event)) {
                     eventContent(event)
                 }

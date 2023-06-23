@@ -13,6 +13,7 @@ import com.example.tac.data.calendar.CalendarService
 import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.GoogleCalendar
 import com.example.tac.data.calendar.GoogleEvent
+import com.google.api.services.calendar.model.Event;
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +26,7 @@ import net.openid.appauth.browser.BrowserAllowList
 import net.openid.appauth.browser.VersionedBrowserMatcher
 import org.json.JSONException
 
-class CalendarViewModel(authState: AuthState, authorizationService : AuthorizationService):
+class CalendarViewModel(authState: AuthState, authorizationService: AuthorizationService) :
     ViewModel() {
     val TAG = "CalendarViewModel"
     private val _uiState = MutableStateFlow(CalendarState(listOf(), listOf()))
@@ -40,22 +41,22 @@ class CalendarViewModel(authState: AuthState, authorizationService : Authorizati
         viewModelScope.launch {
             val calendars = calendarService.getCalendarList()
             updateCalendarsState(calendars)
-            val events = mutableListOf<EventDao>()
-            for(calendar in calendars) {
-                calendarService.getEvents(calendar.id).forEach { events.add(EventDao(it)) }
+            val events = mutableListOf<Event>()
+            for (calendar in calendars) {
+                calendarService.getEvents(calendar.id).forEach { events.add(it) }
             }
             updateEventsState(events)
         }
     }
 
     private fun updateCalendarsState(newCalendars: List<GoogleCalendar>) {
-        _uiState.update {calendarState ->
+        _uiState.update { calendarState ->
             calendarState.copy(calendars = newCalendars)
         }
     }
 
-    private fun updateEventsState(newEvents: List<EventDao>) {
-        _uiState.update {calendarState ->
+    private fun updateEventsState(newEvents: List<Event>) {
+        _uiState.update { calendarState ->
             calendarState.copy(events = newEvents)
         }
     }
@@ -63,7 +64,8 @@ class CalendarViewModel(authState: AuthState, authorizationService : Authorizati
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as TacApplication)
+                val application =
+                    (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as TacApplication)
 
                 var authState = AuthState()
                 val jsonString = application
@@ -71,8 +73,10 @@ class CalendarViewModel(authState: AuthState, authorizationService : Authorizati
                     .getString(Constants.AUTH_STATE, null)
 
                 if (jsonString != null && !TextUtils.isEmpty(jsonString)) {
-                    try { authState = AuthState.jsonDeserialize(jsonString) }
-                    catch (jsonException: JSONException) { }
+                    try {
+                        authState = AuthState.jsonDeserialize(jsonString)
+                    } catch (jsonException: JSONException) {
+                    }
                 }
 
                 val appAuthConfiguration = AppAuthConfiguration.Builder()
@@ -85,7 +89,8 @@ class CalendarViewModel(authState: AuthState, authorizationService : Authorizati
 
                 val authorizationService = AuthorizationService(
                     application,
-                    appAuthConfiguration)
+                    appAuthConfiguration
+                )
 
                 CalendarViewModel(authState, authorizationService)
             }
