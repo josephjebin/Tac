@@ -12,7 +12,6 @@ import com.example.tac.data.Constants
 import com.example.tac.data.calendar.CalendarService
 import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.GoogleCalendar
-import com.example.tac.data.calendar.GoogleEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,7 +41,7 @@ class CalendarViewModel(authState: AuthState, authorizationService : Authorizati
             updateCalendarsState(calendars)
             val events = mutableListOf<EventDao>()
             for(calendar in calendars) {
-                calendarService.getEvents(calendar.id).forEach { events.add(EventDao(it)) }
+                calendarService.initEvents(calendar.id, _uiState.value.constantMaxDate).forEach { events.add(EventDao(it)) }
             }
             updateEventsState(events)
         }
