@@ -52,9 +52,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         initAuthServiceConfig()
         initAuthService()
-        if (!restoreState()) {
+//        if (!restoreState()) {
             attemptAuthorization()
-        }
+//        }
 
         setContent {
             TacTheme {
@@ -217,7 +217,7 @@ fun TasksAndCalendarScreen2(
             .align(Alignment.TopEnd)
             .padding(top = 40.dp, end = 16.dp),
             onClick = {
-                tasksViewModel.getTaskListsAndTasks()
+//                tasksViewModel.getTaskListsAndTasks()
                 calendarViewModel.getCalendarsAndEvents()
             }
         )

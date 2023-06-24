@@ -27,10 +27,10 @@ fun Calendar(
             )
 
             Schedule(
-                events = sampleEvents,
-//                events = uiCalendarState.events.filter { eventDao ->
-//                    eventDao.start.toLocalDate().equals(uiCalendarState.selectedDate)
-//                },
+//                events = sampleEvents,
+                events = uiCalendarState.events.filter { eventDao ->
+                    eventDao.start.toLocalDate().equals(uiCalendarState.selectedDate)
+                },
                 hourHeight = hourHeight,
                 modifier = Modifier
                     .weight(1f)
