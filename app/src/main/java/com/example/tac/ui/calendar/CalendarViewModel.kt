@@ -35,13 +35,13 @@ class CalendarViewModel(authState: AuthState, authorizationService : Authorizati
         calendarService = CalendarService(authState, authorizationService)
     }
 
-    fun getCalendarsAndEvents() {
+    fun initCalendarsAndEvents() {
         viewModelScope.launch {
             val calendars = calendarService.getCalendarList()
             updateCalendarsState(calendars)
             val events = mutableListOf<EventDao>()
             for(calendar in calendars) {
-                calendarService.initEvents(calendar.id, _uiState.value.constantMaxDate).forEach { events.add(EventDao(it)) }
+                calendarService.initEvents(calendar.id, _uiState.value.selectedDate, _uiState.value.constantMaxDate).forEach { events.add(EventDao(it)) }
             }
             updateEventsState(events)
         }

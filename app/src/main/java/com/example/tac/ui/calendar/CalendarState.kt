@@ -10,6 +10,6 @@ import java.util.*
 data class CalendarState (
     val calendars: List<GoogleCalendar>,
     val events: List<EventDao>,
-    var selectedDate: LocalDate = LocalDate.now(),
+    var selectedDate: DateTime = DateTime(Date()),
     var constantMaxDate: DateTime = DateTime(Date())
 )

@@ -218,7 +218,7 @@ fun TasksAndCalendarScreen2(
             .padding(top = 40.dp, end = 16.dp),
             onClick = {
 //                tasksViewModel.getTaskListsAndTasks()
-                calendarViewModel.getCalendarsAndEvents()
+                calendarViewModel.initCalendarsAndEvents()
             }
         )
     }

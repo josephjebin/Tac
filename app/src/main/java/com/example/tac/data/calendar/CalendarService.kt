@@ -14,6 +14,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import java.time.LocalDate
 
 
 class CalendarService(val authState: AuthState, val authorizationService: AuthorizationService) {
@@ -27,15 +28,6 @@ class CalendarService(val authState: AuthState, val authorizationService: Author
             authState.performActionWithFreshTokens(authorizationService) { accessToken, idToken, ex ->
                 Log.i(TAG, "Trying to get calendars")
                 val client = OkHttpClient()
-
-                val url = URL_CALENDAR + "users/me/calendarList"
-                    .toHttpUrl()
-                    .newBuilder()
-                    .addQueryParameter("singleEvents", "true")
-                    .addQueryParameter("timeMin", "true")
-                    .addQueryParameter("timeMax", "true")
-                    .build()
-
                 val request = Request.Builder()
                     .get()
                     .url(URL_CALENDAR + "users/me/calendarList")
@@ -61,15 +53,27 @@ class CalendarService(val authState: AuthState, val authorizationService: Author
         return result
     }
 
-    suspend fun initEvents(calendarId: String, constantMaxDate: DateTime): List<GoogleEvent> {
+    suspend fun initEvents(
+        calendarId: String,
+        startDate: DateTime,
+        constantMaxDate: DateTime
+    ): List<GoogleEvent> {
         var result: List<GoogleEvent> = mutableListOf()
         withContext(Dispatchers.IO) {
             authState.performActionWithFreshTokens(authorizationService) { accessToken, idToken, ex ->
                 Log.i(TAG, "Trying to get events for id: $calendarId")
                 val client = OkHttpClient()
+                val url = URL_CALENDAR + "calendars/$calendarId/events"
+                    .toHttpUrl()
+                    .newBuilder()
+                    .addQueryParameter("singleEvents", "true")
+                    .addQueryParameter("timeMin", startDate.toStringRfc3339())
+                    .addQueryParameter("timeMax", constantMaxDate.toStringRfc3339())
+                    .build()
+
                 val request = Request.Builder()
                     .get()
-                    .url(URL_CALENDAR + "calendars/$calendarId/events")
+                    .url(url)
                     .addHeader("Authorization", "Bearer $accessToken")
                     .build()
 
@@ -78,8 +82,7 @@ class CalendarService(val authState: AuthState, val authorizationService: Author
                     var jsonBody = response.body?.string() ?: ""
                     Log.i(TAG, "Response from calendar api for calendar $calendarId: $jsonBody")
                     jsonBody = JSONObject(jsonBody).getString("items").toString()
-                    result =
-                        mapper.readValue(jsonBody, object : TypeReference<List<GoogleEvent>>() {})
+                    result = mapper.readValue(jsonBody, object : TypeReference<List<GoogleEvent>>() {})
                 } catch (e: Exception) {
                     Log.e(
                         TAG,
