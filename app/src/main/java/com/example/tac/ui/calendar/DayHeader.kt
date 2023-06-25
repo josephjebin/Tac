@@ -7,11 +7,18 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.api.client.util.DateTime
 import java.time.LocalDate
+import java.util.*
 
 @Composable
-fun DayHeader(selectedDate: LocalDate) {
+fun DayHeader(selectedDate: DateTime) {
     Row() {
+
+        val dateTime = GregorianCalendar(TimeZone.getTimeZone("GMT"))
+        val localTime = selectedDate.value + selectedDate.timeZoneShift * 60000L
+        dateTime.timeInMillis = localTime
+        val localDate = LocalDate
         Text(text = "${selectedDate.dayOfWeek}")
 
         Spacer(modifier = Modifier.width(24.dp))

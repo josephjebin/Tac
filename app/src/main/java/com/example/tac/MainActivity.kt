@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.tac.data.Constants
+import com.example.tac.data.constants.Constants
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import com.example.tac.ui.calendar.Calendar
@@ -115,8 +115,8 @@ class MainActivity : ComponentActivity() {
             authServiceConfig,
             Constants.CLIENT_ID,
             ResponseTypeValues.CODE,
-            Uri.parse(Constants.URL_AUTH_REDIRECT)
-        ).setScopes(Constants.SCOPE_CALENDAR, Constants.SCOPE_TASKS).build()
+            Uri.parse(Constants.URL_AUTH_REDIRECT))
+            .setScopes(Constants.SCOPE_CALENDAR, Constants.SCOPE_TASKS).build()
 
         val authIntent = authorizationService.getAuthorizationRequestIntent(request)
 

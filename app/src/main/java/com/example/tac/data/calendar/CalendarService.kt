@@ -1,7 +1,7 @@
 package com.example.tac.data.calendar
 
 import android.util.Log
-import com.example.tac.data.Constants.Companion.URL_CALENDAR
+import com.example.tac.data.constants.Constants.Companion.URL_CALENDAR
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -14,7 +14,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
-import java.time.LocalDate
 
 
 class CalendarService(val authState: AuthState, val authorizationService: AuthorizationService) {

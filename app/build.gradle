@@ -79,4 +79,7 @@ dependencies {
 
     //AppAuth
     implementation 'net.openid:appauth:0.11.1'
+
+    //Google APIs
+    implementation group: 'com.google.api-client', name: 'google-api-client', version: '2.2.0'
 }
