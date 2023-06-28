@@ -1,13 +1,9 @@
 package com.example.tac.ui.task
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import com.example.tac.R
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
+import com.example.tac.ui.theme.accent_gray
 
 @Composable
 fun TaskSheet(
-    taskSheetModifier: Modifier = Modifier,
     taskLists: List<TaskList>,
     tasks: List<TaskDao>,
     currentSelectedTaskList: TaskList,
@@ -33,20 +29,27 @@ fun TaskSheet(
     onTaskSelected: (TaskDao) -> Unit,
     onTaskCompleted: (TaskDao) -> Unit
 ) {
-    Column(modifier = taskSheetModifier) {
+    Column(
+        modifier = Modifier
+            .border(BorderStroke(1.dp, SolidColor(Color.Black)), RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+            .fillMaxHeight()
+            .fillMaxWidth()
+            .background(accent_gray, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+    ) {
         //projects
         LazyRow() {
             itemsIndexed(taskLists) { index, taskList ->
                 Card(
                     modifier = Modifier
-                        .padding(16.dp, 24.dp)
+                        .padding(16.dp, 16.dp)
                         .border(BorderStroke(1.dp, SolidColor(Color.Black)))
                         .clickable { onTaskListSelected(taskList) }
-                        .padding(horizontal = 8.dp, vertical = 4.dp)) {
-                    Text(text = taskList.title)
+                ) {
+                    Text(modifier = Modifier.padding(8.dp), text = taskList.title)
                 }
             }
         }
+
 
         val filteredTasks =
             tasks.filter { taskDao -> taskDao.taskList == currentSelectedTaskList.title }
@@ -83,7 +86,13 @@ fun TaskRow(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Text(modifier = Modifier.align(Alignment.CenterVertically).widthIn(max = 160.dp), text = taskDao.title, overflow = TextOverflow.Ellipsis)
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .widthIn(max = 160.dp),
+            text = taskDao.title,
+            overflow = TextOverflow.Ellipsis
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 

@@ -52,8 +52,8 @@ android {
 }
 
 dependencies {
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.0.10'
-    implementation 'androidx.activity:activity-compose:1.6.1'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.2'
+    implementation 'androidx.activity:activity-compose:1.1.1'
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.material:material:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
@@ -79,4 +79,7 @@ dependencies {
 
     //AppAuth
     implementation 'net.openid:appauth:0.11.1'
+
+    //Google APIs
+    implementation group: 'com.google.api-client', name: 'google-api-client', version: '2.2.0'
 }
