@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.tac.TacApplication
-import com.example.tac.data.Constants
+import com.example.tac.data.constants.Constants
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import com.example.tac.data.tasks.TasksService

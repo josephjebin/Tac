@@ -2,6 +2,7 @@ package com.example.tac.data.calendar
 
 import android.util.Log
 import com.example.tac.data.constants.Constants.Companion.URL_CALENDAR
+import com.example.tac.data.constants.Constants.Companion.URL_CALENDAR_WITHOUT_HOST
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -10,10 +11,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.openid.appauth.AuthState
 import net.openid.appauth.AuthorizationService
-import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import java.time.ZonedDateTime
+import java.util.*
 
 
 class CalendarService(val authState: AuthState, val authorizationService: AuthorizationService) {
@@ -54,20 +57,27 @@ class CalendarService(val authState: AuthState, val authorizationService: Author
 
     suspend fun initEvents(
         calendarId: String,
-        startDate: DateTime,
-        constantMaxDate: DateTime
+        startDate: ZonedDateTime,
+        endDate: ZonedDateTime
     ): List<GoogleEvent> {
         var result: List<GoogleEvent> = mutableListOf()
         withContext(Dispatchers.IO) {
             authState.performActionWithFreshTokens(authorizationService) { accessToken, idToken, ex ->
                 Log.i(TAG, "Trying to get events for id: $calendarId")
+
                 val client = OkHttpClient()
-                val url = URL_CALENDAR + "calendars/$calendarId/events"
-                    .toHttpUrl()
-                    .newBuilder()
+                val url = HttpUrl
+                    .Builder()
+                    .scheme("https")
+                    .host(URL_CALENDAR_WITHOUT_HOST)
+                    .addPathSegment("calendar")
+                    .addPathSegment("v3")
+                    .addPathSegment("calendars")
+                    .addPathSegment(calendarId)
+                    .addPathSegment("events")
                     .addQueryParameter("singleEvents", "true")
-                    .addQueryParameter("timeMin", startDate.toStringRfc3339())
-                    .addQueryParameter("timeMax", constantMaxDate.toStringRfc3339())
+                    .addQueryParameter("timeMin", DateTime(Date.from(startDate.toInstant())).toString())
+                    .addQueryParameter("timeMax", DateTime(Date.from(endDate.toInstant())).toStringRfc3339())
                     .build()
 
                 val request = Request.Builder()

@@ -16,6 +16,7 @@ class Constants {
 
         val SCOPE_CALENDAR = "https://www.googleapis.com/auth/calendar"
         val URL_CALENDAR = "https://www.googleapis.com/calendar/v3/"
+        val URL_CALENDAR_WITHOUT_HOST = "www.googleapis.com"
 
         val URL_LOGOUT_REDIRECT = "com.example.tac:/logout"
     }
