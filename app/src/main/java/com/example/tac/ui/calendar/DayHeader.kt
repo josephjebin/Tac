@@ -7,10 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.google.api.client.util.DateTime
-import java.time.LocalDate
 import java.time.ZonedDateTime
-import java.util.*
 
 @Composable
 fun DayHeader(selectedDate: ZonedDateTime) {

@@ -10,11 +10,14 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -78,7 +81,7 @@ class MainActivity : ComponentActivity() {
         if (jsonString != null && !TextUtils.isEmpty(jsonString)) {
             try {
                 authState = AuthState.jsonDeserialize(jsonString)
-                return true
+                return !authState.hasClientSecretExpired()
             } catch (jsonException: JSONException) {
             }
         }
@@ -161,28 +164,24 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Tac() {
     Surface(color = MaterialTheme.colors.background) {
-        TasksAndCalendarScreen2()
+        TasksAndCalendarScreen()
     }
 }
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TasksAndCalendarScreen2(
+fun TasksAndCalendarScreen(
     tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory),
     calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
 ) {
     val uiTasksState by tasksViewModel.uiState.collectAsState()
     val uiCalendarState by calendarViewModel.uiState.collectAsState()
-
     val coroutineScope = rememberCoroutineScope()
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
-    )
     val swipeableState = rememberSwipeableState(initialValue = TasksSheetState.PARTIALLY_EXPANDED)
-    var sheetPeekHeight by remember { mutableStateOf(0.dp) }
 
     Box {
+        //calendar padding is used to offset the bottom of the calendar dependent on the tasks sheet
         val calendarPadding = when(swipeableState.currentValue) {
             TasksSheetState.COLLAPSED -> 64.dp
             else -> 296.dp
@@ -217,7 +216,7 @@ fun TasksAndCalendarScreen2(
             .align(Alignment.TopEnd)
             .padding(top = 40.dp, end = 16.dp),
             onClick = {
-//                tasksViewModel.getTaskListsAndTasks()
+                tasksViewModel.getTaskListsAndTasks()
                 calendarViewModel.initCalendarsAndEvents()
             }
         )
@@ -310,12 +309,7 @@ fun MyBottomBar(
                 )
             }
 
-            //TODO: replace with enum
-            //0 -> minimized
-            //1 -> slightly expanded
-            //2 -> fully expanded
-            val tasksButtonModifier: Modifier
-            tasksButtonModifier = when (tasksSheetState) {
+            val tasksButtonModifier: Modifier = when (tasksSheetState) {
                 TasksSheetState.COLLAPSED -> {
                     Modifier
                         .weight(1f)
