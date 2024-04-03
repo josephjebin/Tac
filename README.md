@@ -4,7 +4,7 @@ Tac is a unified way to edit tasks and calendars. You can Tac(k) tasks onto the 
 
 Current State
 [workingCalendar2.webm](https://user-images.githubusercontent.com/98223838/217734241-49aa3a14-2f81-4c42-a049-87a7be446f89.webm)
-
+- need to remove redirect uri and incorporate logic from ConnectToGoogleApisOnAndroid to get main working again
 
 Backlog
 - (DONE) Connect to Tasks API
