@@ -96,15 +96,15 @@ class TasksViewModel: ViewModel() {
 
     private fun dummyDataTasks(): List<TaskDao> {
         return listOf(
-            TaskDao(title = "Apply to Motion!", parent = "Career", totalDuration = 45),
-            TaskDao(title = "Make Tac Prototype", parent = "Career", totalDuration = 45),
-            TaskDao(title = "LeetCode", parent = "Career", totalDuration = 45),
-            TaskDao(title = "Get a job", parent = "Finance", totalDuration = 45),
-            TaskDao(title = "Revise budget", parent = "Finance", totalDuration = 45),
-            TaskDao(title = "Categorize expenses", parent = "Finance", totalDuration = 45),
-            TaskDao(title = "Gym", parent = "Fitness", totalDuration = 45),
-            TaskDao(title = "Stretch", parent = "Fitness", totalDuration = 45),
-            TaskDao(title = "Walk", parent = "Fitness", totalDuration = 45)
+            TaskDao(title = "Apply to Motion!", taskList = "Career", totalDuration = 45),
+            TaskDao(title = "Make Tac Prototype", taskList = "Career", totalDuration = 45),
+            TaskDao(title = "LeetCode", taskList = "Career", totalDuration = 45),
+            TaskDao(title = "Get a job", taskList = "Finance", totalDuration = 45),
+            TaskDao(title = "Revise budget", taskList = "Finance", totalDuration = 45),
+            TaskDao(title = "Categorize expenses", taskList = "Finance", totalDuration = 45),
+            TaskDao(title = "Gym", taskList = "Fitness", totalDuration = 45),
+            TaskDao(title = "Stretch", taskList = "Fitness", totalDuration = 45),
+            TaskDao(title = "Walk", taskList = "Fitness", totalDuration = 45)
         )
     }
 

@@ -181,13 +181,13 @@ fun TasksAndCalendarScreen(
     val swipeableState = rememberSwipeableState(initialValue = TasksSheetState.PARTIALLY_EXPANDED)
 
     Box {
-        //calendar padding is used to offset the bottom of the calendar dependent on the tasks sheet
+        //calendar padding is used to offset the bottom of the calendar dependent on the tasks sheet's size
         val calendarPadding = when(swipeableState.currentValue) {
             TasksSheetState.COLLAPSED -> 64.dp
             else -> 296.dp
         }
         Calendar(Modifier.padding(PaddingValues(bottom = calendarPadding)), uiCalendarState)
-        MyBottomSheet(swipeableState = swipeableState, body = {
+        MyBottomSheet(swipeableState = swipeableState) {
             TaskSheet(
                 uiTasksState.taskLists,
                 uiTasksState.tasks,
@@ -201,7 +201,7 @@ fun TasksAndCalendarScreen(
                 onTaskCompleted = { taskDao: TaskDao ->
                 }
             )
-        })
+        }
 
         MyBottomBar(
             tasksSheetState = swipeableState.currentValue,
@@ -240,8 +240,8 @@ fun TasksAndCalendarScreen(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MyBottomSheet(
-    body: @Composable () -> Unit,
-    swipeableState: SwipeableState<TasksSheetState>
+    swipeableState: SwipeableState<TasksSheetState>,
+    body: @Composable () -> Unit
 ) {
     BoxWithConstraints  {
         //logic to obtain screen size
