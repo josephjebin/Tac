@@ -173,7 +173,7 @@ fun Tac() {
 @Composable
 fun TasksAndCalendarScreen(
     tasksViewModel: TasksViewModel = TasksViewModel(),
-    calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
+    calendarViewModel: CalendarViewModel = CalendarViewModel()
 ) {
     val uiTasksState by tasksViewModel.uiState.collectAsState()
     val uiCalendarState by calendarViewModel.uiState.collectAsState()
@@ -212,30 +212,30 @@ fun TasksAndCalendarScreen(
             }
         )
 
-        MyFAB(modifier = Modifier
-            .align(Alignment.TopEnd)
-            .padding(top = 40.dp, end = 16.dp),
-            onClick = {
+//        MyFAB(modifier = Modifier
+//            .align(Alignment.TopEnd)
+//            .padding(top = 40.dp, end = 16.dp),
+//            onClick = {
 //                tasksViewModel.getTaskListsAndTasks()
 //                calendarViewModel.initCalendarsAndEvents()
-            }
-        )
+//            }
+//        )
     }
 }
-
-@Composable
-fun MyFAB(modifier: Modifier, onClick: () -> Unit) {
-    FloatingActionButton(
-        modifier = modifier,
-        onClick = onClick,
-        content = {
-            Icon(
-                painter = painterResource(id = R.drawable.round_refresh_24),
-                contentDescription = "Refresh"
-            )
-        }
-    )
-}
+//
+//@Composable
+//fun MyFAB(modifier: Modifier, onClick: () -> Unit) {
+//    FloatingActionButton(
+//        modifier = modifier,
+//        onClick = onClick,
+//        content = {
+//            Icon(
+//                painter = painterResource(id = R.drawable.round_refresh_24),
+//                contentDescription = "Refresh"
+//            )
+//        }
+//    )
+//}
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
