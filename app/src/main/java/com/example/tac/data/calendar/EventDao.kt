@@ -6,13 +6,7 @@ import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-data class EventDao (
-    var name: String = "",
-    val color: Color = onSurfaceGray,
-    var start: ZonedDateTime = ZonedDateTime.now(),
-    var end: ZonedDateTime = ZonedDateTime.now(),
-    var description: String = ""
-) {
+data class EventDao(var busy: Boolean): Plan() {
     constructor(event: GoogleEvent): this() {
         val inputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssz")
         this.name = event.summary

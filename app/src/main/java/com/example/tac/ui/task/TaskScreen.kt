@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.tac.R
 import com.example.tac.data.tasks.TaskDao
@@ -115,7 +114,7 @@ fun TaskRow(
                     contentDescription = "Duration"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "${taskDao.duration} minutes")
+                Text(text = "${taskDao.totalDuration} minutes")
             }
         }
     }

@@ -53,11 +53,11 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initAuthServiceConfig()
-        initAuthService()
-        if (!restoreState()) {
-            attemptAuthorization()
-        }
+//        initAuthServiceConfig()
+//        initAuthService()
+//        if (!restoreState()) {
+//            attemptAuthorization()
+//        }
 
         setContent {
             TacTheme {
@@ -66,99 +66,99 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun persistState() {
-        application.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(Constants.AUTH_STATE, authState.jsonSerializeString())
-            .apply()
-    }
+//    fun persistState() {
+//        application.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+//            .edit()
+//            .putString(Constants.AUTH_STATE, authState.jsonSerializeString())
+//            .apply()
+//    }
 
-    fun restoreState(): Boolean {
-        val jsonString = application
-            .getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .getString(Constants.AUTH_STATE, null)
+//    fun restoreState(): Boolean {
+//        val jsonString = application
+//            .getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+//            .getString(Constants.AUTH_STATE, null)
+//
+//        if (jsonString != null && !TextUtils.isEmpty(jsonString)) {
+//            try {
+//                authState = AuthState.jsonDeserialize(jsonString)
+//                return !authState.hasClientSecretExpired()
+//            } catch (jsonException: JSONException) {
+//            }
+//        }
+//
+//        return false
+//    }
 
-        if (jsonString != null && !TextUtils.isEmpty(jsonString)) {
-            try {
-                authState = AuthState.jsonDeserialize(jsonString)
-                return !authState.hasClientSecretExpired()
-            } catch (jsonException: JSONException) {
-            }
-        }
+//    private fun initAuthServiceConfig() {
+//        authServiceConfig = AuthorizationServiceConfiguration(
+//            Uri.parse(Constants.URL_AUTHORIZATION),
+//            Uri.parse(Constants.URL_TOKEN_EXCHANGE),
+//            null,
+//            Uri.parse(Constants.URL_LOGOUT)
+//        )
+//    }
 
-        return false
-    }
+//    private fun initAuthService() {
+//        val appAuthConfiguration = AppAuthConfiguration.Builder()
+//            .setBrowserMatcher(
+//                BrowserAllowList(
+//                    VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
+//                    VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB
+//                )
+//            ).build()
+//
+//        authorizationService = AuthorizationService(
+//            application,
+//            appAuthConfiguration
+//        )
+//    }
 
-    private fun initAuthServiceConfig() {
-        authServiceConfig = AuthorizationServiceConfiguration(
-            Uri.parse(Constants.URL_AUTHORIZATION),
-            Uri.parse(Constants.URL_TOKEN_EXCHANGE),
-            null,
-            Uri.parse(Constants.URL_LOGOUT)
-        )
-    }
+//    fun attemptAuthorization() {
+//        val request = AuthorizationRequest.Builder(
+//            authServiceConfig,
+//            Constants.CLIENT_ID,
+//            ResponseTypeValues.CODE,
+//            Uri.parse(Constants.URL_AUTH_REDIRECT))
+//            .setScopes(Constants.SCOPE_CALENDAR, Constants.SCOPE_TASKS).build()
+//
+//        val authIntent = authorizationService.getAuthorizationRequestIntent(request)
+//
+//        Log.i(TAG, "Trying to get auth code")
+//
+//        val authorizationLauncher =
+//            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//                run {
+//                    Log.i(TAG, "Result code from activity result: ${result.resultCode}")
+//                    if (result.resultCode == Activity.RESULT_OK) {
+//                        Log.i(TAG, "Trying to handle auth response: ${result.data}")
+//                        handleAuthorizationResponse(result.data!!)
+//                    }
+//                }
+//            }
+//
+//        authorizationLauncher.launch(authIntent)
+//    }
 
-    private fun initAuthService() {
-        val appAuthConfiguration = AppAuthConfiguration.Builder()
-            .setBrowserMatcher(
-                BrowserAllowList(
-                    VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
-                    VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB
-                )
-            ).build()
-
-        authorizationService = AuthorizationService(
-            application,
-            appAuthConfiguration
-        )
-    }
-
-    fun attemptAuthorization() {
-        val request = AuthorizationRequest.Builder(
-            authServiceConfig,
-            Constants.CLIENT_ID,
-            ResponseTypeValues.CODE,
-            Uri.parse(Constants.URL_AUTH_REDIRECT))
-            .setScopes(Constants.SCOPE_CALENDAR, Constants.SCOPE_TASKS).build()
-
-        val authIntent = authorizationService.getAuthorizationRequestIntent(request)
-
-        Log.i(TAG, "Trying to get auth code")
-
-        val authorizationLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                run {
-                    Log.i(TAG, "Result code from activity result: ${result.resultCode}")
-                    if (result.resultCode == Activity.RESULT_OK) {
-                        Log.i(TAG, "Trying to handle auth response: ${result.data}")
-                        handleAuthorizationResponse(result.data!!)
-                    }
-                }
-            }
-
-        authorizationLauncher.launch(authIntent)
-    }
-
-    private fun handleAuthorizationResponse(intent: Intent) {
-        val authorizationResponse: AuthorizationResponse? = AuthorizationResponse.fromIntent(intent)
-        val error = AuthorizationException.fromIntent(intent)
-
-        authState = AuthState(authorizationResponse, error)
-
-        val tokenExchangeRequest = authorizationResponse?.createTokenExchangeRequest()
-        if (tokenExchangeRequest != null) {
-            authorizationService.performTokenRequest(tokenExchangeRequest) { response, exception ->
-                if (exception != null) {
-                    authState = AuthState()
-                } else {
-                    if (response != null) {
-                        authState.update(response, exception)
-                    }
-                }
-                persistState()
-            }
-        }
-    }
+//    private fun handleAuthorizationResponse(intent: Intent) {
+//        val authorizationResponse: AuthorizationResponse? = AuthorizationResponse.fromIntent(intent)
+//        val error = AuthorizationException.fromIntent(intent)
+//
+//        authState = AuthState(authorizationResponse, error)
+//
+//        val tokenExchangeRequest = authorizationResponse?.createTokenExchangeRequest()
+//        if (tokenExchangeRequest != null) {
+//            authorizationService.performTokenRequest(tokenExchangeRequest) { response, exception ->
+//                if (exception != null) {
+//                    authState = AuthState()
+//                } else {
+//                    if (response != null) {
+//                        authState.update(response, exception)
+//                    }
+//                }
+//                persistState()
+//            }
+//        }
+//    }
 }
 
 @Composable
@@ -172,7 +172,7 @@ fun Tac() {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TasksAndCalendarScreen(
-    tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory),
+    tasksViewModel: TasksViewModel = TasksViewModel(),
     calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
 ) {
     val uiTasksState by tasksViewModel.uiState.collectAsState()
@@ -216,8 +216,8 @@ fun TasksAndCalendarScreen(
             .align(Alignment.TopEnd)
             .padding(top = 40.dp, end = 16.dp),
             onClick = {
-                tasksViewModel.getTaskListsAndTasks()
-                calendarViewModel.initCalendarsAndEvents()
+//                tasksViewModel.getTaskListsAndTasks()
+//                calendarViewModel.initCalendarsAndEvents()
             }
         )
     }
