@@ -3,10 +3,15 @@ package com.example.tac
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -15,18 +20,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import com.example.tac.data.tasks.TaskDao
-import com.example.tac.data.tasks.TaskList
 import com.example.tac.ui.calendar.Calendar
 import com.example.tac.ui.calendar.CalendarViewModel
-import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksSheetState
 import com.example.tac.ui.task.TasksSheetState.*
 import com.example.tac.ui.task.TasksViewModel
@@ -177,65 +179,58 @@ fun TasksAndCalendarScreen(
     //calendarBottomPadding is used to offset the bottom of the calendar dependent on the tasks sheet's size
 //    val calendarBottomPadding = remember { mutableIntStateOf(64) }
 
-    Box {
-        when (tasksSheetState.value) {
-            COLLAPSED -> {
-                //height of bottom bar + tasks sheet peek height
-//                calendarBottomPadding.intValue = 0
-                tasksSheetSize.intValue = 240
-            }
-
-            PARTIALLY_EXPANDED -> {
-//                calendarBottomPadding.intValue = 720
-                tasksSheetSize.intValue = 640
-            }
-
-            EXPANDED -> {
-                tasksSheetSize.intValue = screenHeight.value.toInt()
-            }
+    Scaffold(
+        bottomBar = {
+            MyBottomBar(tasksSheetState = tasksSheetState)
         }
+    ) {
+        Column(
+            modifier = Modifier.padding(it),
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            val taskSheetModifier = when (tasksSheetState.value) {
+                COLLAPSED -> {
+                    //height of bottom bar + tasks sheet peek height
+//                calendarBottomPadding.intValue = 0
+                    Modifier
+                        .fillMaxWidth()
+                        .height(24.dp)
+                }
 
+                PARTIALLY_EXPANDED -> {
+//                calendarBottomPadding.intValue = 720
+                    Modifier
+                        .fillMaxWidth()
+                        .height(400.dp)
+                }
 
-        Column(verticalArrangement = Arrangement.Bottom) {
+                EXPANDED -> {
+                    Modifier
+//                    .padding(bottom = 64.dp)
+                        .fillMaxSize()
+                }
+            }
+
             //CALENDAR
-//            Calendar(Modifier.padding(PaddingValues(bottom = calendarBottomPadding.intValue.dp)), uiCalendarState)
-            Box(modifier = Modifier
+            if (tasksSheetState.value != EXPANDED) {
+                Box(
+                    modifier = Modifier
 //                .padding(bottom = calendarBottomPadding.intValue.dp)
-                .weight(1.0f)
-                .background(Color.Green)
-            ) {
-                Text(text = "Calendar")
+                        .weight(1.0f)
+                        .fillMaxWidth()
+                ) {
+                    Calendar(uiCalendarState)
+                }
             }
 
             //TASKS SHEET
-            MyBottomSheet(tasksSheetSize.intValue)
+            MyBottomSheet(
+                modifier = taskSheetModifier
+                    .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+            )
 
-            Row {
-                //TO-DO LIST BUTTON
-                Button(
-                    onClick = {
-                        if(tasksSheetState.value == COLLAPSED || tasksSheetState.value == PARTIALLY_EXPANDED)
-                            tasksSheetState.value = EXPANDED
-                        else
-                            tasksSheetState.value = PARTIALLY_EXPANDED
-                    }
-                ) {
-                    Text("to do list button: ${tasksSheetState.value}")
-                }
-
-                //CALENDAR BUTTON
-                Button(
-                    onClick = {
-                        tasksSheetState.value = COLLAPSED
-                    }
-                ) {
-                    Text(text = "Calendar button")
-                }
-            }
         }
-
-
-
+    }
 
 
 //            TaskSheet(
@@ -257,8 +252,6 @@ fun TasksAndCalendarScreen(
 //            peekHeight = peekHeight.intValue,
 //            updatePeekHeight = { newPeekHeight -> peekHeight.intValue = newPeekHeight }
 //        )
-
-    }
 
 
 //    val bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
@@ -414,14 +407,12 @@ fun TasksAndCalendarScreen(
 
 @Composable
 fun MyBottomSheet(
-    bottomSheetSize: Int,
+    modifier: Modifier,
 //    body: @Composable () -> Unit
 ) {
     Box {
         Box(
-            modifier = Modifier
-                .size(bottomSheetSize.dp)
-                .padding(bottom = 72.dp)
+            modifier = modifier
                 .background(Color.Magenta)
         ) {
 
@@ -472,83 +463,54 @@ fun MyBottomSheet(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MyBottomBar(
-    bottomSheetState: BottomSheetState,
-    peekHeight: Int,
-    updatePeekHeight: (Int) -> Unit
+    tasksSheetState: MutableState<TasksSheetState>
 ) {
-    Box {
-        BottomAppBar(
+    Row(
+//        horizontalArrangement = Arrangement.SpaceEvenly,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .background(accent_gray)
+    ) {
+        //CALENDAR BUTTON
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .background(accent_gray)
+                .weight(1.0f)
+                .height(48.dp)
+                .border(1.dp, Color.Black)
+                .clickable {
+                    tasksSheetState.value = COLLAPSED
+                }
         ) {
-            val coroutineScope = rememberCoroutineScope()
+            Icon(
+                painter = painterResource(id = R.drawable.round_calendar_today_24),
+                contentDescription = "Calendar button"
+            )
+        }
 
-            //calendar button
-            IconButton(
-                modifier = Modifier.weight(1f),
-                onClick = {
-                    coroutineScope.launch {
-                        bottomSheetState.collapse()
-                        updatePeekHeight(48)
-                    }
+        //TO-DO LIST BUTTON
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .weight(1.0f)
+                .height(48.dp)
+                .border(1.dp, Color.Black)
+                .clickable {
+                    if (tasksSheetState.value == COLLAPSED || tasksSheetState.value == PARTIALLY_EXPANDED)
+                        tasksSheetState.value = EXPANDED
+                    else
+                        tasksSheetState.value = PARTIALLY_EXPANDED
                 }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.round_calendar_today_24),
-                    contentDescription = "Calendar button"
-                )
-            }
-
-            val tasksButtonModifier: Modifier =
-                if (peekHeight == 0) {
-                    Modifier
-                        .weight(1f)
-                        .background(primaryGray)
-                } else if (peekHeight < 100) {
-                    Modifier
-                        .weight(1f)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    primaryGray,
-                                    accent_gray
-                                )
-                            )
-                        )
-                } else {
-                    Modifier
-                        .weight(1f)
-                        .background(accent_gray)
-                }
-
-            //tasks button
-            IconButton(modifier = tasksButtonModifier,
-                onClick = {
-                    if (bottomSheetState.isCollapsed) {
-                        //shows to-do list
-                        if (peekHeight == 48) updatePeekHeight(400)
-                        //to-do list is already visible. fully expand it
-                        else coroutineScope.launch {
-                            bottomSheetState.expand()
-                        }
-                    } else coroutineScope.launch {
-                        //to-do list is fully expanded. shrink it
-                        bottomSheetState.collapse()
-                    }
-                }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.round_task_24),
-                    contentDescription = "Tasks button"
-                )
-            }
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.round_task_24),
+                contentDescription = "Tasks button"
+            )
         }
     }
-
 }
 
 

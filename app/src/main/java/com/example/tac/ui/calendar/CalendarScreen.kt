@@ -9,12 +9,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun Calendar(
-    modifier: Modifier,
     uiCalendarState: CalendarState
 ) {
     val hourHeight = 64.dp
     val verticalScrollState = rememberScrollState()
-    Column(modifier = modifier) {
+    Column {
         DayHeader(uiCalendarState.selectedDate)
 
         Row(modifier = Modifier.weight(1f)) {
