@@ -27,8 +27,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.tac.data.tasks.TaskDao
+import com.example.tac.data.tasks.TaskList
 import com.example.tac.ui.calendar.Calendar
 import com.example.tac.ui.calendar.CalendarViewModel
+import com.example.tac.ui.calendar.DayHeader
+import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksSheetState
 import com.example.tac.ui.task.TasksSheetState.*
 import com.example.tac.ui.task.TasksViewModel
@@ -180,9 +184,8 @@ fun TasksAndCalendarScreen(
 //    val calendarBottomPadding = remember { mutableIntStateOf(64) }
 
     Scaffold(
-        bottomBar = {
-            MyBottomBar(tasksSheetState = tasksSheetState)
-        }
+        topBar = { DayHeader(uiCalendarState.selectedDate) },
+        bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
     ) {
         Column(
             modifier = Modifier.padding(it),
@@ -194,7 +197,7 @@ fun TasksAndCalendarScreen(
 //                calendarBottomPadding.intValue = 0
                     Modifier
                         .fillMaxWidth()
-                        .height(24.dp)
+                        .height(32.dp)
                 }
 
                 PARTIALLY_EXPANDED -> {
@@ -224,28 +227,25 @@ fun TasksAndCalendarScreen(
             }
 
             //TASKS SHEET
-            MyBottomSheet(
+            TaskSheet(
+                uiTasksState.taskLists,
+                uiTasksState.tasks,
+                uiTasksState.currentSelectedTaskList,
+                onTaskListSelected = { taskList: TaskList ->
+                    tasksViewModel.updateCurrentSelectedTaskList(taskList)
+                },
+                onTaskSelected = { taskDao: TaskDao ->
+                    tasksViewModel.updateCurrentSelectedTask(taskDao)
+                },
+                onTaskCompleted = { taskDao: TaskDao ->
+                },
                 modifier = taskSheetModifier
-                    .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
             )
-
         }
     }
 
 
-//            TaskSheet(
-//                uiTasksState.taskLists,
-//                uiTasksState.tasks,
-//                uiTasksState.currentSelectedTaskList,
-//                onTaskListSelected = { taskList: TaskList ->
-//                    tasksViewModel.updateCurrentSelectedTaskList(taskList)
-//                },
-//                onTaskSelected = { taskDao: TaskDao ->
-//                    tasksViewModel.updateCurrentSelectedTask(taskDao)
-//                },
-//                onTaskCompleted = { taskDao: TaskDao ->
-//                }
-//            )
+//
 
 //        MyBottomBar(
 //            bottomSheetState,
@@ -408,15 +408,13 @@ fun TasksAndCalendarScreen(
 @Composable
 fun MyBottomSheet(
     modifier: Modifier,
-//    body: @Composable () -> Unit
+    body: @Composable () -> Unit
 ) {
     Box {
         Box(
             modifier = modifier
                 .background(Color.Magenta)
         ) {
-
-            Text(text = "bottom sheet!")
 
         }
 

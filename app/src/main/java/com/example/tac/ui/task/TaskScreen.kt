@@ -26,10 +26,11 @@ fun TaskSheet(
     currentSelectedTaskList: TaskList,
     onTaskListSelected: (TaskList) -> Unit,
     onTaskSelected: (TaskDao) -> Unit,
-    onTaskCompleted: (TaskDao) -> Unit
+    onTaskCompleted: (TaskDao) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .border(BorderStroke(1.dp, SolidColor(Color.Black)), RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
             .fillMaxHeight()
             .fillMaxWidth()

@@ -14,8 +14,6 @@ fun Calendar(
     val hourHeight = 64.dp
     val verticalScrollState = rememberScrollState()
     Column {
-        DayHeader(uiCalendarState.selectedDate)
-
         Row(modifier = Modifier.weight(1f)) {
             HoursSidebar(
                 hourHeight = hourHeight,
