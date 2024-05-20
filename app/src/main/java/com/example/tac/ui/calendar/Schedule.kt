@@ -1,8 +1,6 @@
 package com.example.tac.ui.calendar
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,7 +22,7 @@ fun Schedule(
     events: List<EventDao>,
     hourHeight: Dp,
     modifier: Modifier = Modifier,
-    eventContent: @Composable (event: EventDao) -> Unit = { Event(event = it) },
+    eventContent: @Composable (event: EventDao) -> Unit = { Plan(event = it) },
 ) {
     val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
     Layout(

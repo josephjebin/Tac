@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun Event(
+fun Plan(
     event: EventDao,
     modifier: Modifier = Modifier,
 ) {
