@@ -57,7 +57,7 @@ fun LongPressDraggable(
                         val offset = (state.dragPosition + state.dragOffset)
                         alpha = .8f
                         translationX = offset.x.minus(targetSize.width / 2)
-                        translationY = offset.y.minus(targetSize.height / 2)
+                        translationY = offset.y.minus(targetSize.height)
                     }
                     .onGloballyPositioned {
                         targetSize = it.size

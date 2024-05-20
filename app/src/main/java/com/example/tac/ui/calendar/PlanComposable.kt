@@ -12,13 +12,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.example.tac.data.calendar.EventDao
+import com.example.tac.data.calendar.Plan
 import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun Plan(
-    event: EventDao,
+fun PlanComposable(
+    plan: Plan,
     modifier: Modifier = Modifier,
 ) {
     val EventTimeFormatter = DateTimeFormatter.ofPattern("h:mm a")
@@ -26,22 +26,22 @@ fun Plan(
         modifier = modifier
             .fillMaxSize()
             .padding(end = 2.dp, bottom = 2.dp)
-            .background(event.color, shape = RoundedCornerShape(4.dp))
+            .background(plan.color, shape = RoundedCornerShape(4.dp))
             .padding(4.dp)
     ) {
         Text(
-            text = "${event.start.format(EventTimeFormatter)} - ${event.end.format(EventTimeFormatter)}",
+            text = "${plan.start.format(EventTimeFormatter)} - ${plan.end.format(EventTimeFormatter)}",
             style = MaterialTheme.typography.caption,
         )
 
         Text(
-            text = event.name,
+            text = plan.name,
             style = MaterialTheme.typography.body1,
             fontWeight = FontWeight.Bold,
         )
 
         Text(
-            text = event.description,
+            text = plan.description,
             style = MaterialTheme.typography.body2,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

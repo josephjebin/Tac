@@ -24,6 +24,9 @@ fun Calendar(
                 events = uiCalendarState.events.filter { eventDao ->
                     eventDao.start.toLocalDate().equals(uiCalendarState.selectedDate.toLocalDate())
                 },
+                scheduledTasks = uiCalendarState.scheduledTasks.filter { scheduledTask ->
+                   scheduledTask.start.toLocalDate().equals(uiCalendarState.selectedDate.toLocalDate())
+                },
                 hourHeight = hourHeight,
                 modifier = Modifier
                     .weight(1f)
