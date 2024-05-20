@@ -13,8 +13,8 @@ fun Calendar(
 ) {
     val hourHeight = 64.dp
     val verticalScrollState = rememberScrollState()
-    Column {
-        Row(modifier = Modifier.weight(1f)) {
+    Box {
+        Row {
             HoursSidebar(
                 hourHeight = hourHeight,
                 modifier = Modifier.verticalScroll(verticalScrollState)
