@@ -1,5 +1,6 @@
 package com.example.tac.ui.calendar
 
+import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.ViewModel
 import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.GoogleCalendar
@@ -48,6 +49,18 @@ class CalendarViewModel(): ViewModel() {
                 end = ZonedDateTime.of(LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 0)), ZoneId.systemDefault())
             )
         )
+    }
+
+    fun updateSidebarWidth(newWidth: Dp) {
+        _uiState.update { calendarState ->
+            calendarState.copy(sidebarWidth = newWidth)
+        }
+    }
+
+    fun updateScheduleWidth(newWidth: Dp) {
+        _uiState.update { calendarState ->
+            calendarState.copy(scheduleWidth = newWidth)
+        }
     }
 
 //    var calendarService: CalendarService

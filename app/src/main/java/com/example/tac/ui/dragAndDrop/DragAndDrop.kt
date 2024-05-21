@@ -3,7 +3,7 @@ package com.example.tac.ui.dragAndDrop
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -17,7 +17,9 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 
 internal class DragTargetInfo {
     var isDragging: Boolean by mutableStateOf(false)
@@ -26,6 +28,7 @@ internal class DragTargetInfo {
     var draggableType by mutableStateOf(DraggableType.TASK)
     var draggableComposable by mutableStateOf<(@Composable () -> Unit)?>(null)
     var dataToDrop by mutableStateOf<Any?>(null)
+    var size by mutableStateOf(IntSize.Zero)
 }
 
 enum class DraggableType {
@@ -39,13 +42,14 @@ internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
 @Composable
 fun LongPressDraggable(
     modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit
+//    planWidth: Dp,
+    content: @Composable() (BoxScope.() -> Unit)
 ) {
     val state = remember { DragTargetInfo() }
     CompositionLocalProvider(
         LocalDragTargetInfo provides state
     ) {
-        Box(modifier = modifier.fillMaxSize())
+        Box()
         {
             content()
             if (state.isDragging) {
@@ -56,7 +60,12 @@ fun LongPressDraggable(
                     .graphicsLayer {
                         val offset = (state.dragPosition + state.dragOffset)
                         alpha = .8f
-                        translationX = offset.x.minus(targetSize.width / 2)
+                        scaleX = 1.0f
+                        scaleY = 1.0f
+                        translationX =
+                            if (state.draggableType == DraggableType.TASK)
+                                offset.x.minus(targetSize.width / 2)
+                            else 0.0f
                         translationY = offset.y.minus(targetSize.height)
                     }
                     .onGloballyPositioned {
@@ -65,7 +74,11 @@ fun LongPressDraggable(
                 ) {
                     if(state.draggableType == DraggableType.TASK) {
 
-                    } else state.draggableComposable?.invoke()
+                    } else {
+//                        Box(modifier = Modifier.width(88.dp)) {
+                        state.draggableComposable?.invoke()
+//                        }
+                    }
                 }
             }
         }

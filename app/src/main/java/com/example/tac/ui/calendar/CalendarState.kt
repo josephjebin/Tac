@@ -1,5 +1,7 @@
 package com.example.tac.ui.calendar
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.GoogleCalendar
 import com.example.tac.data.calendar.ScheduledTask
@@ -10,5 +12,7 @@ data class CalendarState (
     val events: List<EventDao>,
     val scheduledTasks: MutableList<ScheduledTask>,
     var selectedDate: ZonedDateTime = ZonedDateTime.now(),
-    var dateRangeEnd: ZonedDateTime = selectedDate.plusWeeks(1)
+    var dateRangeEnd: ZonedDateTime = selectedDate.plusWeeks(1),
+    var sidebarWidth: Dp = 0.dp,
+    var scheduleWidth: Dp = 0.dp
 )

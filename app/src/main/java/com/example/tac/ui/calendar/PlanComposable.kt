@@ -24,8 +24,8 @@ fun PlanComposable(
     val EventTimeFormatter = DateTimeFormatter.ofPattern("h:mm a")
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .padding(end = 2.dp, bottom = 2.dp)
+//            .fillMaxSize()
+//            .padding(end = 2.dp)
             .background(plan.color, shape = RoundedCornerShape(4.dp))
             .padding(4.dp)
     ) {
