@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.IntSize
 import com.example.tac.data.calendar.Plan
 import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.ui.calendar.PlanComposable
+import com.example.tac.ui.task.TasksSheetState
 import java.time.ZonedDateTime
 
 internal class DragTargetInfo {
@@ -38,17 +39,10 @@ internal class DragTargetInfo {
     )
 }
 
-enum class DraggableType {
-    EVENT,
-    SCHEDULED_TASK,
-    TASK
-}
-
 internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
 
 @Composable
 fun RootDragInfoProvider(
-    modifier: Modifier = Modifier,
 //    planWidth: Dp,
     content: @Composable() (BoxScope.() -> Unit)
 ) {
@@ -95,8 +89,8 @@ fun ScheduleDraggable() {
 @Composable
 fun DragTarget(
     dataToDrop: Plan,
+    onTaskDrag: (() -> Unit) = {},
     modifier: Modifier,
-    draggableModifier: Modifier,
     content: @Composable () -> Unit
 ) {
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
@@ -108,13 +102,14 @@ fun DragTarget(
         }
         .pointerInput(Unit) {
             detectDragGesturesAfterLongPress(onDragStart = {
+                onTaskDrag()
                 currentState.isDragging = true
                 currentState.dataToDrop = dataToDrop
                 currentState.dragPosition = currentPosition + it
                 currentState.draggableComposable = {
                     PlanComposable(
                         plan = dataToDrop,
-                        modifier = draggableModifier
+                        modifier = modifier
                     )
                 }
             }, onDrag = { change, dragAmount ->

@@ -46,8 +46,7 @@ fun Schedule(
 
                 DragTarget(
                     dataToDrop = event,
-                    modifier = planComposableModifier,
-                    draggableModifier = planComposableModifier
+                    modifier = planComposableModifier
                 ) {
                     PlanComposable(
                         plan = event,
@@ -69,10 +68,13 @@ fun Schedule(
 
                 DragTarget(
                     dataToDrop = scheduledTask,
-                    modifier = planComposableModifier,
-                    draggableModifier = planComposableModifier
+                    modifier = planComposableModifier
                 ) {
-                    PlanComposable(plan = scheduledTask)
+                    PlanComposable(
+                        plan = scheduledTask, modifier = Modifier
+                            .height(eventHeight)
+                            .fillMaxWidth()
+                    )
                 }
             }
         },

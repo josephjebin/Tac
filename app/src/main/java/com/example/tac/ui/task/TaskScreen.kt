@@ -14,10 +14,14 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import com.example.tac.R
+import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
+import com.example.tac.ui.dragAndDrop.DragTarget
 import com.example.tac.ui.theme.accent_gray
+import java.time.ZonedDateTime
 
 @Composable
 fun TaskSheet(
@@ -27,16 +31,21 @@ fun TaskSheet(
     onTaskListSelected: (TaskList) -> Unit,
     onTaskSelected: (TaskDao) -> Unit,
     onTaskCompleted: (TaskDao) -> Unit,
-//    onTaskDrag: () -> Unit,
+    onTaskDrag: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
-            .border(BorderStroke(1.dp, SolidColor(Color.Black)), RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+            .border(
+                BorderStroke(1.dp, SolidColor(Color.Black)),
+                RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+            )
             .fillMaxHeight()
             .fillMaxWidth()
             .background(accent_gray, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
     ) {
+        val hourHeight = 64.dp
+
         //projects
         LazyRow() {
             itemsIndexed(taskLists) { index, taskList ->
@@ -57,11 +66,28 @@ fun TaskSheet(
         //tasks
         LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
             itemsIndexed(filteredTasks) { index, taskDao ->
-                TaskRow(
-                    taskDao = taskDao,
-                    onTaskSelected = onTaskSelected,
-                    onTaskCompleted = onTaskCompleted
-                )
+                val eventDurationMinutes = taskDao.neededDuration
+                val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
+
+                DragTarget(
+                    dataToDrop = ScheduledTask(
+                        name = taskDao.title,
+                        parentTaskId = taskDao.id,
+                        //stub
+                        start = ZonedDateTime.now(),
+                        end = ZonedDateTime.now().plusMinutes(30),
+                    ),
+                    onTaskDrag = onTaskDrag,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(eventHeight)
+                ) {
+                    TaskRow(
+                        taskDao = taskDao,
+                        onTaskSelected = onTaskSelected,
+                        onTaskCompleted = onTaskCompleted
+                    )
+                }
 
                 if (index < taskLists.lastIndex) Divider(color = Color.Black, thickness = 1.dp)
             }
