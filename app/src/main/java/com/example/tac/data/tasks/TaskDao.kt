@@ -23,7 +23,7 @@ data class TaskDao(
     var taskList: String = "",
     var scheduledDuration: Int = 0,
     var workedDuration: Int = 0,
-    var totalDuration: Int = 15,
+    var neededDuration: Int = 15,
     var priority: Priority = Priority.Priority4
 ) {
     constructor(task: Task, taskList: String) : this() {
@@ -47,6 +47,6 @@ data class TaskDao(
         links = task.links
         this.taskList = taskList
         //TODO: make dynamic
-        totalDuration = 15
+        neededDuration = 15
     }
 }

@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import com.example.tac.R
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
-import com.example.tac.ui.dragAndDrop.TaskRow
 import com.example.tac.ui.theme.accent_gray
 
 @Composable
@@ -61,11 +60,66 @@ fun TaskSheet(
                 TaskRow(
                     taskDao = taskDao,
                     onTaskSelected = onTaskSelected,
-                    onTaskCompleted = onTaskCompleted,
-//                    onTaskDrag = onTaskDrag
+                    onTaskCompleted = onTaskCompleted
                 )
 
                 if (index < taskLists.lastIndex) Divider(color = Color.Black, thickness = 1.dp)
+            }
+        }
+    }
+}
+
+
+@Composable
+fun TaskRow(
+    taskDao: TaskDao,
+    onTaskSelected: (TaskDao) -> Unit,
+    onTaskCompleted: (TaskDao) -> Unit
+) {
+    Row(modifier = Modifier
+        .fillMaxWidth()
+        .height(54.dp)
+//        .padding(4.dp)
+        .clickable { onTaskSelected(taskDao) }
+    ) {
+        IconButton(
+            modifier = Modifier.align(Alignment.CenterVertically),
+            onClick = { onTaskCompleted(taskDao) }) {
+            Icon(painterResource(id = R.drawable.priority3_button), "")
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .widthIn(max = 160.dp),
+            text = taskDao.title,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+            //due date
+            Row() {
+                Icon(
+                    modifier = Modifier.scale(.8f),
+                    painter = painterResource(id = R.drawable.round_calendar_today_24),
+                    contentDescription = "Due date"
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = taskDao.due)
+            }
+            //duration
+            Row() {
+                Icon(
+                    modifier = Modifier.scale(.8f),
+                    painter = painterResource(id = R.drawable.round_access_time_24),
+                    contentDescription = "Duration"
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "${taskDao.neededDuration} minutes")
             }
         }
     }

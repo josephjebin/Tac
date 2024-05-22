@@ -1,19 +1,10 @@
 package com.example.tac.ui.dragAndDrop
 
-import androidx.compose.foundation.clickable
+import android.annotation.SuppressLint
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -21,30 +12,30 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.dp
-import com.example.tac.R
-import com.example.tac.data.tasks.TaskDao
+import com.example.tac.data.calendar.Plan
+import com.example.tac.data.calendar.ScheduledTask
+import com.example.tac.ui.calendar.PlanComposable
+import java.time.ZonedDateTime
 
 internal class DragTargetInfo {
     var isDragging: Boolean by mutableStateOf(false)
     var dragPosition by mutableStateOf(Offset.Zero)
     var dragOffset by mutableStateOf(Offset.Zero)
-    var draggableType by mutableStateOf(DraggableType.TASK)
     var draggableComposable by mutableStateOf<(@Composable () -> Unit)?>(null)
-    var dataToDrop by mutableStateOf<Any?>(null)
-    var size by mutableStateOf(IntSize.Zero)
+    var dataToDrop by mutableStateOf<Plan>(
+        ScheduledTask(
+            name = "default",
+            parentTaskId = "0",
+            start = ZonedDateTime.now(),
+            end = ZonedDateTime.now()
+        )
+    )
 }
 
 enum class DraggableType {
@@ -56,7 +47,7 @@ enum class DraggableType {
 internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
 
 @Composable
-fun LongPressDraggable(
+fun RootDragInfoProvider(
     modifier: Modifier = Modifier,
 //    planWidth: Dp,
     content: @Composable() (BoxScope.() -> Unit)
@@ -68,46 +59,45 @@ fun LongPressDraggable(
         Box()
         {
             content()
-            if (state.isDragging) {
-                var targetSize by remember {
-                    mutableStateOf(IntSize.Zero)
-                }
+        }
+    }
+}
 
-                Box(modifier = Modifier
-                    .graphicsLayer {
-                        val offset = (state.dragPosition + state.dragOffset)
-                        alpha = .8f
-                        scaleX = 1.0f
-                        scaleY = 1.0f
-                        translationX =
-                            if (state.draggableType == DraggableType.TASK)
-                                offset.x.minus(targetSize.width / 2)
-                            else 0.0f
-                        translationY = offset.y.minus(targetSize.height)
-                    }
-                    .onGloballyPositioned {
-                        targetSize = it.size
-                    }
-                ) {
-                    if(state.draggableType == DraggableType.TASK) {
+@Composable
+fun ScheduleDraggable() {
+    val state = LocalDragTargetInfo.current
 
-                    } else {
-//                        Box(modifier = Modifier.width(88.dp)) {
-                        state.draggableComposable?.invoke()
-//                        }
-                    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (state.isDragging) {
+            var targetSize by remember {
+                mutableStateOf(IntSize.Zero)
+            }
+
+            Box(modifier = Modifier
+                .graphicsLayer {
+                    val offset = (state.dragPosition + state.dragOffset)
+                    alpha = .8f
+                    scaleX = 1.0f
+                    scaleY = 1.0f
+                    translationX = 0.0f
+                    translationY = offset.y.minus(targetSize.height)
                 }
+                .onGloballyPositioned {
+                    targetSize = it.size
+                }
+            ) {
+                    state.draggableComposable?.invoke()
             }
         }
     }
 }
 
 @Composable
-fun <T> EventDragTarget(
+fun DragTarget(
+    dataToDrop: Plan,
     modifier: Modifier,
-    dataToDrop: T,
-//    viewModel:
-    content: @Composable (() -> Unit)
+    draggableModifier: Modifier,
+    content: @Composable () -> Unit
 ) {
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
     val currentState = LocalDragTargetInfo.current
@@ -118,11 +108,15 @@ fun <T> EventDragTarget(
         }
         .pointerInput(Unit) {
             detectDragGesturesAfterLongPress(onDragStart = {
-                currentState.dataToDrop = dataToDrop
-                currentState.draggableType = DraggableType.EVENT
                 currentState.isDragging = true
+                currentState.dataToDrop = dataToDrop
                 currentState.dragPosition = currentPosition + it
-                currentState.draggableComposable = content
+                currentState.draggableComposable = {
+                    PlanComposable(
+                        plan = dataToDrop,
+                        modifier = draggableModifier
+                    )
+                }
             }, onDrag = { change, dragAmount ->
                 change.consume()
                 currentState.dragOffset += Offset(dragAmount.x, dragAmount.y)
@@ -139,178 +133,31 @@ fun <T> EventDragTarget(
     }
 }
 
-
-@Composable
-fun <T> ScheduledTaskDragTarget(
-    modifier: Modifier,
-    dataToDrop: T,
-//    viewModel:
-    content: @Composable (() -> Unit)
-) {
-    var currentPosition by remember { mutableStateOf(Offset.Zero) }
-    val currentState = LocalDragTargetInfo.current
-
-    Box(modifier = modifier
-        .onGloballyPositioned {
-            currentPosition = it.localToWindow(Offset.Zero)
-        }
-        .pointerInput(Unit) {
-            detectDragGesturesAfterLongPress(onDragStart = {
-                currentState.dataToDrop = dataToDrop
-                currentState.draggableType = DraggableType.SCHEDULED_TASK
-                currentState.isDragging = true
-                currentState.dragPosition = currentPosition + it
-                currentState.draggableComposable = content
-            }, onDrag = { change, dragAmount ->
-                change.consume()
-                currentState.dragOffset += Offset(dragAmount.x, dragAmount.y)
-            }, onDragEnd = {
-                currentState.isDragging = false
-                currentState.dragOffset = Offset.Zero
-            }, onDragCancel = {
-                currentState.dragOffset = Offset.Zero
-                currentState.isDragging = false
-            })
-        }
-    ) {
-        content()
-    }
-}
-
-@Composable
-fun <T> TaskDragTarget(
-    modifier: Modifier,
-    dataToDrop: T,
-//    viewModel:
-    content: @Composable (() -> Unit)
-) {
-    var currentPosition by remember { mutableStateOf(Offset.Zero) }
-    val currentState = LocalDragTargetInfo.current
-
-    Box(modifier = modifier
-        .onGloballyPositioned {
-            currentPosition = it.localToWindow(Offset.Zero)
-        }
-        .pointerInput(Unit) {
-            detectDragGesturesAfterLongPress(onDragStart = {
-                currentState.dataToDrop = dataToDrop
-                currentState.draggableType = DraggableType.TASK
-                currentState.isDragging = true
-                currentState.dragPosition = currentPosition + it
-                currentState.draggableComposable = content
-            }, onDrag = { change, dragAmount ->
-                change.consume()
-                currentState.dragOffset += Offset(dragAmount.x, dragAmount.y)
-            }, onDragEnd = {
-                currentState.isDragging = false
-                currentState.dragOffset = Offset.Zero
-            }, onDragCancel = {
-                currentState.dragOffset = Offset.Zero
-                currentState.isDragging = false
-            })
-        }
-    ) {
-        content()
-    }
-}
-
-
-@Composable
-fun TaskRow(
-    taskDao: TaskDao,
-//    onTaskDrag: () -> Unit,
-    onTaskSelected: (TaskDao) -> Unit,
-    onTaskCompleted: (TaskDao) -> Unit
-) {
-    var currentPosition by remember { mutableStateOf(Offset.Zero) }
-    val currentState = LocalDragTargetInfo.current
-
-    Row(modifier = Modifier
-        .fillMaxWidth()
-        .height(54.dp)
-        .clickable { onTaskSelected(taskDao) }
-//        .pointerInput(Unit) {
-//            detectDragGesturesAfterLongPress(onDragStart = {
-//                currentState.dataToDrop = ""
-//                currentState.draggableType = DraggableType.TASK
-//                currentState.isDragging = true
-//                currentState.dragPosition = currentPosition + it
-//                currentState.draggableComposable = content
-//            }, onDrag = { change, dragAmount ->
-//                change.consume()
-//                currentState.dragOffset += Offset(dragAmount.x, dragAmount.y)
-//            }, onDragEnd = {
-//                currentState.isDragging = false
-//                currentState.dragOffset = Offset.Zero
-//            }, onDragCancel = {
-//                currentState.dragOffset = Offset.Zero
-//                currentState.isDragging = false
-//            })
+//
+//@Composable
+//fun <Plan> DropTarget(
+//    modifier: Modifier,
+//    content: @Composable() (BoxScope.(isInBound: Boolean, data: Plan) -> Unit)
+//) {
+//    val dragInfo = LocalDragTargetInfo.current
+//    val dragPosition = dragInfo.dragPosition
+//    val dragOffset = dragInfo.dragOffset
+//    var isCurrentDropTarget by remember {
+//        mutableStateOf(false)
+//    }
+//
+//    Box(modifier = modifier.onGloballyPositioned {
+//        it.boundsInWindow().let { rect ->
+//            isCurrentDropTarget = rect.contains(dragPosition + dragOffset)
 //        }
-    ) {
-        IconButton(
-            modifier = Modifier.align(Alignment.CenterVertically),
-            onClick = { onTaskCompleted(taskDao) }) {
-            Icon(painterResource(id = R.drawable.priority3_button), "")
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .widthIn(max = 160.dp),
-            text = taskDao.title,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-            //due date
-            Row() {
-                Icon(
-                    modifier = Modifier.scale(.8f),
-                    painter = painterResource(id = R.drawable.round_calendar_today_24),
-                    contentDescription = "Due date"
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = taskDao.due)
-            }
-            //duration
-            Row() {
-                Icon(
-                    modifier = Modifier.scale(.8f),
-                    painter = painterResource(id = R.drawable.round_access_time_24),
-                    contentDescription = "Duration"
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "${taskDao.totalDuration} minutes")
-            }
-        }
-    }
-}
-
-
-@Composable
-fun <T> DropTarget(
-    modifier: Modifier,
-    content: @Composable() (BoxScope.(isInBound: Boolean, data: T?) -> Unit)
-) {
-    val dragInfo = LocalDragTargetInfo.current
-    val dragPosition = dragInfo.dragPosition
-    val dragOffset = dragInfo.dragOffset
-    var isCurrentDropTarget by remember {
-        mutableStateOf(false)
-    }
-
-    Box(modifier = modifier.onGloballyPositioned {
-        it.boundsInWindow().let { rect ->
-            isCurrentDropTarget = rect.contains(dragPosition + dragOffset)
-        }
-    }) {
-        val data =
-            if (isCurrentDropTarget && !dragInfo.isDragging) dragInfo.dataToDrop as T? else null
-        content(isCurrentDropTarget, data)
-    }
-}
+//    }) {
+//        if(dragInfo.dataToDrop is EventDao) {
+//
+//        } else {
+//
+//        }
+//        val data =
+//            if (isCurrentDropTarget && !dragInfo.isDragging) dragInfo.dataToDrop as Plan else null
+//        content(isCurrentDropTarget, data)
+//    }
+//}

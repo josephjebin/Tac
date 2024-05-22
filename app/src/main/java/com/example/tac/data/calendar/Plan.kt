@@ -5,11 +5,11 @@ import com.example.tac.ui.theme.onSurfaceGray
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-open class Plan(
+abstract class Plan(
     open var name: String = "",
-    open var color: Color = onSurfaceGray,
     open var start: ZonedDateTime = ZonedDateTime.now(),
-    open var end: ZonedDateTime = ZonedDateTime.now(),
+    open var end: ZonedDateTime = ZonedDateTime.now().plusMinutes(30),
+    open var color: Color = onSurfaceGray,
     open var description: String = ""
 ) {
     constructor(event: GoogleEvent): this() {

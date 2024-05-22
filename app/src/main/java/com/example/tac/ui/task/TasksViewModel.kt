@@ -1,30 +1,12 @@
 package com.example.tac.ui.task
 
-import android.content.Context
-import android.text.TextUtils
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.tac.TacApplication
-import com.example.tac.data.constants.Constants
-import com.example.tac.data.tasks.Task
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
-import com.example.tac.data.tasks.TasksService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import net.openid.appauth.AppAuthConfiguration
-import net.openid.appauth.AuthState
-import net.openid.appauth.AuthorizationService
-import net.openid.appauth.browser.BrowserAllowList
-import net.openid.appauth.browser.VersionedBrowserMatcher
-import org.json.JSONException
 
 
 //class TasksViewModel(authState: AuthState, authorizationService : AuthorizationService): ViewModel() {
@@ -96,15 +78,15 @@ class TasksViewModel: ViewModel() {
 
     private fun dummyDataTasks(): List<TaskDao> {
         return listOf(
-            TaskDao(title = "Apply", taskList = "Career", totalDuration = 45),
-            TaskDao(title = "Make Tac Prototype", taskList = "Career", totalDuration = 45),
-            TaskDao(title = "LeetCode", taskList = "Career", totalDuration = 45),
-            TaskDao(title = "Get a job", taskList = "Finance", totalDuration = 45),
-            TaskDao(title = "Revise budget", taskList = "Finance", totalDuration = 45),
-            TaskDao(title = "Categorize expenses", taskList = "Finance", totalDuration = 45),
-            TaskDao(title = "Gym", taskList = "Fitness", totalDuration = 45),
-            TaskDao(title = "Stretch", taskList = "Fitness", totalDuration = 45),
-            TaskDao(title = "Walk", taskList = "Fitness", totalDuration = 45)
+            TaskDao(id = "1", title = "Apply", taskList = "Career", neededDuration = 120),
+            TaskDao(id = "2", title = "Make Tac Prototype", taskList = "Career", neededDuration = 45),
+            TaskDao(id = "3", title = "LeetCode", taskList = "Career", neededDuration = 45),
+            TaskDao(id = "4", title = "Get a job", taskList = "Finance", neededDuration = 45),
+            TaskDao(id = "5", title = "Revise budget", taskList = "Finance", neededDuration = 45),
+            TaskDao(id = "6", title = "Categorize expenses", taskList = "Finance", neededDuration = 45),
+            TaskDao(id = "7", title = "Gym", taskList = "Fitness", neededDuration = 45),
+            TaskDao(id = "8", title = "Stretch", taskList = "Fitness", neededDuration = 45),
+            TaskDao(id = "9", title = "Walk", taskList = "Fitness", neededDuration = 45)
         )
     }
 

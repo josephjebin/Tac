@@ -1,5 +1,6 @@
 package com.example.tac.ui.calendar
 
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.ViewModel
 import com.example.tac.data.calendar.EventDao
@@ -14,16 +15,15 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.TimeZone
 
 //class CalendarViewModel(authState: AuthState, authorizationService : AuthorizationService):
-class CalendarViewModel(): ViewModel() {
+class CalendarViewModel() : ViewModel() {
     val TAG = "CalendarViewModel"
     private val _uiState = MutableStateFlow(
         CalendarState(
             calendars = listOf(),
             events = dummyEvents(),
-            scheduledTasks = mutableListOf()
+            scheduledTasks = dummyScheduledTasks()
         )
     )
     val uiState: StateFlow<CalendarState> = _uiState.asStateFlow()
@@ -33,20 +33,57 @@ class CalendarViewModel(): ViewModel() {
             EventDao(
                 true,
                 name = "Breakfast",
-                start = ZonedDateTime.of(LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0)), ZoneId.systemDefault()),
-                end = ZonedDateTime.of(LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 0)), ZoneId.systemDefault())
+                start = ZonedDateTime.of(
+                    LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0)),
+                    ZoneId.systemDefault()
+                ),
+                end = ZonedDateTime.of(
+                    LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 0)),
+                    ZoneId.systemDefault()
+                )
             ),
             EventDao(
                 true,
                 name = "Lunch",
-                start = ZonedDateTime.of(LocalDateTime.of(LocalDate.now(), LocalTime.NOON), ZoneId.systemDefault()),
-                end = ZonedDateTime.of(LocalDateTime.of(LocalDate.now(), LocalTime.of(14, 0)), ZoneId.systemDefault())
+                start = ZonedDateTime.of(
+                    LocalDateTime.of(LocalDate.now(), LocalTime.NOON),
+                    ZoneId.systemDefault()
+                ),
+                end = ZonedDateTime.of(
+                    LocalDateTime.of(LocalDate.now(), LocalTime.of(14, 0)),
+                    ZoneId.systemDefault()
+                )
             ),
             EventDao(
                 true,
                 name = "Dinner",
-                start = ZonedDateTime.of(LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0)), ZoneId.systemDefault()),
-                end = ZonedDateTime.of(LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 0)), ZoneId.systemDefault())
+                start = ZonedDateTime.of(
+                    LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0)),
+                    ZoneId.systemDefault()
+                ),
+                end = ZonedDateTime.of(
+                    LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 0)),
+                    ZoneId.systemDefault()
+                )
+            )
+        )
+    }
+
+    private fun dummyScheduledTasks(): MutableList<ScheduledTask> {
+        return mutableListOf(
+            ScheduledTask(
+                name = "Apply",
+                parentTaskId = "1",
+                start = ZonedDateTime.of(
+                    LocalDateTime.of(LocalDate.now(), LocalTime.of(7, 30)),
+                    ZoneId.systemDefault()
+                ),
+                end = ZonedDateTime.of(
+                    LocalDateTime.of(LocalDate.now(), LocalTime.of(8, 15)),
+                    ZoneId.systemDefault()
+                ),
+                workedDuration = 0,
+                color = Color.Gray
             )
         )
     }

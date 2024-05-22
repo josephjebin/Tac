@@ -19,14 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import com.example.tac.ui.calendar.Calendar
 import com.example.tac.ui.calendar.CalendarViewModel
 import com.example.tac.ui.calendar.DayHeader
-import com.example.tac.ui.dragAndDrop.LongPressDraggable
+import com.example.tac.ui.dragAndDrop.RootDragInfoProvider
 import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksSheetState
 import com.example.tac.ui.task.TasksSheetState.*
@@ -177,7 +176,7 @@ fun TasksAndCalendarScreen(
         topBar = { DayHeader(uiCalendarState.selectedDate) },
         bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
     ) {
-        LongPressDraggable {
+        RootDragInfoProvider {
             Column(
                 modifier = Modifier.padding(it),
                 verticalArrangement = Arrangement.Bottom
@@ -186,7 +185,7 @@ fun TasksAndCalendarScreen(
                     COLLAPSED -> {
                         Modifier
                             .fillMaxWidth()
-                            .height(32.dp)
+                            .height(48.dp)
                     }
 
                     PARTIALLY_EXPANDED -> {
