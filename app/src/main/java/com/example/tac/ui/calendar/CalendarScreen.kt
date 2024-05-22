@@ -34,27 +34,26 @@ fun Calendar(
                     .verticalScroll(verticalScrollState)
             )
 
-
             Box(modifier = Modifier) {
-                LongPressDraggable {
-                    Schedule(
-                        events = uiCalendarState.events.filter { eventDao ->
-                            eventDao.start.toLocalDate()
-                                .equals(uiCalendarState.selectedDate.toLocalDate())
-                        },
-                        scheduledTasks = uiCalendarState.scheduledTasks.filter { scheduledTask ->
-                            scheduledTask.start.toLocalDate()
-                                .equals(uiCalendarState.selectedDate.toLocalDate())
-                        },
-                        hourHeight = hourHeight,
-                        modifier = Modifier
-                            //                        .onGloballyPositioned {
-                            //                            updateScheduleWidth(it.size.width.dp)
-                            //                        }
-                            .verticalScroll(verticalScrollState)
-                    )
-                }
+                Schedule(
+                    events = uiCalendarState.events.filter { eventDao ->
+                        eventDao.start.toLocalDate()
+                            .equals(uiCalendarState.selectedDate.toLocalDate())
+                    },
+                    scheduledTasks = uiCalendarState.scheduledTasks.filter { scheduledTask ->
+                        scheduledTask.start.toLocalDate()
+                            .equals(uiCalendarState.selectedDate.toLocalDate())
+                    },
+                    hourHeight = hourHeight,
+                    modifier = Modifier
+                        //                        .onGloballyPositioned {
+                        //                            updateScheduleWidth(it.size.width.dp)
+                        //                        }
+                        .verticalScroll(verticalScrollState)
+                )
+
             }
         }
     }
+
 }

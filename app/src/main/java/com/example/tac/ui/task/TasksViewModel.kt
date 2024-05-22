@@ -96,7 +96,7 @@ class TasksViewModel: ViewModel() {
 
     private fun dummyDataTasks(): List<TaskDao> {
         return listOf(
-            TaskDao(title = "Apply to Motion!", taskList = "Career", totalDuration = 45),
+            TaskDao(title = "Apply", taskList = "Career", totalDuration = 45),
             TaskDao(title = "Make Tac Prototype", taskList = "Career", totalDuration = 45),
             TaskDao(title = "LeetCode", taskList = "Career", totalDuration = 45),
             TaskDao(title = "Get a job", taskList = "Finance", totalDuration = 45),

@@ -177,60 +177,64 @@ fun TasksAndCalendarScreen(
         topBar = { DayHeader(uiCalendarState.selectedDate) },
         bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
     ) {
-        Column(
-            modifier = Modifier.padding(it),
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            val taskSheetModifier = when (tasksSheetState.value) {
-                COLLAPSED -> {
-                    Modifier
-                        .fillMaxWidth()
-                        .height(32.dp)
+        LongPressDraggable {
+            Column(
+                modifier = Modifier.padding(it),
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                val taskSheetModifier = when (tasksSheetState.value) {
+                    COLLAPSED -> {
+                        Modifier
+                            .fillMaxWidth()
+                            .height(32.dp)
+                    }
+
+                    PARTIALLY_EXPANDED -> {
+                        Modifier
+                            .fillMaxWidth()
+                            .height(400.dp)
+                    }
+
+                    EXPANDED -> {
+                        Modifier
+                            .fillMaxSize()
+                    }
                 }
 
-                PARTIALLY_EXPANDED -> {
-                    Modifier
-                        .fillMaxWidth()
-                        .height(400.dp)
-                }
+                //CALENDAR
+                if (tasksSheetState.value != EXPANDED) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1.0f)
+                            .fillMaxWidth()
+                    ) {
 
-                EXPANDED -> {
-                    Modifier
-                        .fillMaxSize()
-                }
-            }
-
-            //CALENDAR
-            if (tasksSheetState.value != EXPANDED) {
-                Box(
-                    modifier = Modifier
-                        .weight(1.0f)
-                        .fillMaxWidth()
-                ) {
-                    Calendar(
-                        uiCalendarState,
+                        Calendar(
+                            uiCalendarState,
 //                            updateSidebarWidth = { newWidth: Dp -> calendarViewModel.updateSidebarWidth(newWidth) },
 //                            updateScheduleWidth = { newWidth: Dp -> calendarViewModel.updateScheduleWidth(newWidth) }
-                    )
+                        )
 
+
+                    }
                 }
-            }
 
-            //TASKS SHEET
-            TaskSheet(
-                uiTasksState.taskLists,
-                uiTasksState.tasks,
-                uiTasksState.currentSelectedTaskList,
-                onTaskListSelected = { taskList: TaskList ->
-                    tasksViewModel.updateCurrentSelectedTaskList(taskList)
-                },
-                onTaskSelected = { taskDao: TaskDao ->
-                    tasksViewModel.updateCurrentSelectedTask(taskDao)
-                },
-                onTaskCompleted = { taskDao: TaskDao ->
-                },
-                modifier = taskSheetModifier
-            )
+                //TASKS SHEET
+                TaskSheet(
+                    uiTasksState.taskLists,
+                    uiTasksState.tasks,
+                    uiTasksState.currentSelectedTaskList,
+                    onTaskListSelected = { taskList: TaskList ->
+                        tasksViewModel.updateCurrentSelectedTaskList(taskList)
+                    },
+                    onTaskSelected = { taskDao: TaskDao ->
+                        tasksViewModel.updateCurrentSelectedTask(taskDao)
+                    },
+                    onTaskCompleted = { taskDao: TaskDao ->
+                    },
+                    modifier = taskSheetModifier
+                )
+            }
         }
 
     }

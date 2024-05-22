@@ -45,8 +45,8 @@ fun Schedule(
             events.sortedBy(EventDao::start).forEach { event ->
                 val eventDurationMinutes = ChronoUnit.MINUTES.between(event.start, event.end)
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
-                val configuration = LocalConfiguration.current
-                val screenWidth = configuration.screenWidthDp.dp
+//                val configuration = LocalConfiguration.current
+//                val screenWidth = configuration.screenWidthDp.dp
 
 //                Box(modifier = Modifier
 //                    .eventData(event)
