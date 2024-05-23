@@ -2,6 +2,7 @@ package com.example.tac.ui.calendar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
@@ -23,7 +24,7 @@ fun PlanComposable(
     val EventTimeFormatter = DateTimeFormatter.ofPattern("h:mm a")
     Column(
         modifier = modifier
-//            .fillMaxSize()
+            .fillMaxSize()
 //            .padding(end = 2.dp)
             .background(plan.color, shape = RoundedCornerShape(4.dp))
             .padding(4.dp)

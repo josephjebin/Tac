@@ -47,8 +47,8 @@ fun TaskSheet(
         val hourHeight = 64.dp
 
         //projects
-        LazyRow() {
-            itemsIndexed(taskLists) { index, taskList ->
+        Row {
+            taskLists.forEach { taskList ->
                 Card(
                     modifier = Modifier
                         .padding(16.dp, 16.dp)
@@ -64,36 +64,40 @@ fun TaskSheet(
         val filteredTasks =
             tasks.filter { taskDao -> taskDao.taskList == currentSelectedTaskList.title }
         //tasks
-        LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
-            itemsIndexed(filteredTasks) { index, taskDao ->
-                val eventDurationMinutes = taskDao.neededDuration
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+//            itemsIndexed(filteredTasks) { index, taskDao ->
+            filteredTasks.forEachIndexed { index, task ->
+                val eventDurationMinutes = task.neededDuration
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
 
                 DragTarget(
                     dataToDrop = ScheduledTask(
-                        name = taskDao.title,
-                        parentTaskId = taskDao.id,
+                        name = task.title,
+                        parentTaskId = task.id,
                         //stub
                         start = ZonedDateTime.now(),
                         end = ZonedDateTime.now().plusMinutes(30),
                     ),
                     onTaskDrag = onTaskDrag,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    draggableModifier = Modifier
                         .height(eventHeight)
+                        .fillMaxWidth()
                 ) {
                     TaskRow(
-                        taskDao = taskDao,
+                        taskDao = task,
                         onTaskSelected = onTaskSelected,
                         onTaskCompleted = onTaskCompleted
                     )
                 }
 
                 if (index < taskLists.lastIndex) Divider(color = Color.Black, thickness = 1.dp)
+
             }
+
         }
     }
 }
+
 
 
 @Composable
@@ -145,7 +149,7 @@ fun TaskRow(
                     contentDescription = "Duration"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "${taskDao.neededDuration} minutes")
+                Text(text = "${taskDao.neededDuration} mins")
             }
         }
     }

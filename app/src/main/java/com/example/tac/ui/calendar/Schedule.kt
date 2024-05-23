@@ -46,13 +46,14 @@ fun Schedule(
 
                 DragTarget(
                     dataToDrop = event,
-                    modifier = planComposableModifier
+                    modifier = planComposableModifier,
+                    draggableModifier = planComposableModifier
                 ) {
                     PlanComposable(
                         plan = event,
-                        modifier = Modifier
-                            .height(eventHeight)
-                            .fillMaxWidth()
+//                        modifier = Modifier
+//                            .height(eventHeight)
+//                            .fillMaxWidth()
                     )
                 }
             }
@@ -60,19 +61,20 @@ fun Schedule(
             scheduledTasks.sortedBy(ScheduledTask::start).forEach { scheduledTask ->
                 val eventDurationMinutes =
                     ChronoUnit.MINUTES.between(scheduledTask.start, scheduledTask.end)
-                val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
+                val taskHeight = ((eventDurationMinutes / 60f) * hourHeight)
                 val planComposableModifier = Modifier
                     .scheduledTaskData(scheduledTask)
-                    .height(eventHeight)
+                    .height(taskHeight)
                     .fillMaxWidth()
 
                 DragTarget(
                     dataToDrop = scheduledTask,
-                    modifier = planComposableModifier
+                    modifier = planComposableModifier,
+                    draggableModifier = planComposableModifier
                 ) {
                     PlanComposable(
                         plan = scheduledTask, modifier = Modifier
-                            .height(eventHeight)
+                            .height(taskHeight)
                             .fillMaxWidth()
                     )
                 }

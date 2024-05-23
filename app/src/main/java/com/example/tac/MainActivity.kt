@@ -231,7 +231,7 @@ fun TasksAndCalendarScreen(
                     },
                     onTaskCompleted = { taskDao: TaskDao ->
                     },
-                    onTaskDrag = { tasksSheetState.value = COLLAPSED},
+                    onTaskDrag = { tasksSheetState.value = COLLAPSED },
                     modifier = taskSheetModifier
                 )
             }

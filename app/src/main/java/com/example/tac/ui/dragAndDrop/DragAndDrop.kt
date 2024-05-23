@@ -1,10 +1,10 @@
 package com.example.tac.ui.dragAndDrop
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.IntSize
 import com.example.tac.data.calendar.Plan
 import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.ui.calendar.PlanComposable
-import com.example.tac.ui.task.TasksSheetState
 import java.time.ZonedDateTime
 
 internal class DragTargetInfo {
@@ -74,13 +73,21 @@ fun ScheduleDraggable() {
                     scaleX = 1.0f
                     scaleY = 1.0f
                     translationX = 0.0f
-                    translationY = offset.y.minus(targetSize.height)
+                    translationY = offset.y.minus(targetSize.height / 2)
                 }
                 .onGloballyPositioned {
                     targetSize = it.size
                 }
             ) {
-                    state.draggableComposable?.invoke()
+//                Text(
+//                    text = """
+//                        targetSize: $targetSize
+//                        currentPosition: ${state.dragPosition}
+//                        currentOffset: ${state.dragOffset}
+//                        translationY: ${(state.dragPosition + state.dragOffset).y.minus(targetSize.height / 2)}
+//                    """.trimIndent()
+//                )
+                state.draggableComposable?.invoke()
             }
         }
     }
@@ -90,10 +97,24 @@ fun ScheduleDraggable() {
 fun DragTarget(
     dataToDrop: Plan,
     onTaskDrag: (() -> Unit) = {},
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
+    draggableModifier: Modifier,
     content: @Composable () -> Unit
 ) {
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
+    var currentData by remember { mutableStateOf<Plan>(
+            ScheduledTask(
+                name = "default",
+                parentTaskId = "0",
+                start = ZonedDateTime.now(),
+                end = ZonedDateTime.now()
+            )
+        )
+    }
+    var planComposableModifier by remember { mutableStateOf<Modifier>(Modifier) }
+
+    currentData = dataToDrop
+    planComposableModifier = draggableModifier
     val currentState = LocalDragTargetInfo.current
 
     Box(modifier = modifier
@@ -101,27 +122,30 @@ fun DragTarget(
             currentPosition = it.localToWindow(Offset.Zero)
         }
         .pointerInput(Unit) {
-            detectDragGesturesAfterLongPress(onDragStart = {
-                onTaskDrag()
-                currentState.isDragging = true
-                currentState.dataToDrop = dataToDrop
-                currentState.dragPosition = currentPosition + it
-                currentState.draggableComposable = {
-                    PlanComposable(
-                        plan = dataToDrop,
-                        modifier = modifier
-                    )
-                }
-            }, onDrag = { change, dragAmount ->
-                change.consume()
-                currentState.dragOffset += Offset(dragAmount.x, dragAmount.y)
-            }, onDragEnd = {
-                currentState.isDragging = false
-                currentState.dragOffset = Offset.Zero
-            }, onDragCancel = {
-                currentState.dragOffset = Offset.Zero
-                currentState.isDragging = false
-            })
+            detectDragGesturesAfterLongPress(
+                onDragStart = {
+                    onTaskDrag()
+                    currentState.dataToDrop = currentData
+//                    println(currentState.dataToDrop)
+//                    println(name)
+                    currentState.draggableComposable = {
+                        PlanComposable(
+                            plan = currentData,
+                            modifier = planComposableModifier
+                        )
+                    }
+                    currentState.dragPosition = currentPosition + it
+                    currentState.isDragging = true
+                }, onDrag = { change, dragAmount ->
+                    change.consume()
+                    currentState.dragOffset += Offset(dragAmount.x, dragAmount.y)
+                }, onDragEnd = {
+                    currentState.isDragging = false
+                    currentState.dragOffset = Offset.Zero
+                }, onDragCancel = {
+                    currentState.dragOffset = Offset.Zero
+                    currentState.isDragging = false
+                })
         }
     ) {
         content()
