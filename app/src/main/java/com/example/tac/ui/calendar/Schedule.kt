@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -145,6 +146,7 @@ fun DropTargets(
 ) {
     //
     repeat(288) {
+        //pass it to drop target
         DropTarget<Plan>(
             modifier = Modifier
                 .startData(LocalTime.MIN.plusMinutes(it * 5L))

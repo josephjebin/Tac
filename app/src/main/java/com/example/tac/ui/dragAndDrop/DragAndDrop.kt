@@ -1,5 +1,7 @@
 package com.example.tac.ui.dragAndDrop
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -14,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInWindow
@@ -48,7 +51,6 @@ internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
 
 @Composable
 fun RootDragInfoProvider(
-//    planWidth: Dp,
     content: @Composable() (BoxScope.() -> Unit)
 ) {
     val state = remember { DragTargetInfo() }
@@ -75,7 +77,7 @@ fun ScheduleDraggable() {
                     scaleX = 1.0f
                     scaleY = 1.0f
                     translationX = 0.0f
-                    translationY = offset.y.minus(180f).minus(.5f * state.draggableHeight.toPx())
+                    translationY = offset.y.minus(176f).minus(.5f * state.draggableHeight.toPx())
                 }
             ) {
                 state.draggableComposable?.invoke()
@@ -116,7 +118,7 @@ fun DragTarget(
 
 
     currentData = dataToDrop
-    planComposableModifier = draggableModifier
+    planComposableModifier = draggableModifier.background(Color.Transparent).border(1.dp, Color.Blue)
     planComposableHeight = draggableHeight
     val currentState = LocalDragTargetInfo.current
 
@@ -168,6 +170,12 @@ fun <Plan> DropTarget(
         mutableStateOf(false)
     }
 
+    //if last box is covered
+        //the box that is draggableHeight above the last box is the current drop target
+    //else if the first box is covered
+        //the first box is the current drop target
+    //else
+        //the box that is .5 * draggable height above the pointer is the current drop target
     Box(modifier = modifier.onGloballyPositioned {
         it.boundsInWindow().let { rect ->
             isCurrentDropTarget = rect.contains(dragPosition + dragOffset)
