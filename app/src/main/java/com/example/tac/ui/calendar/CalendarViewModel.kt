@@ -75,11 +75,11 @@ class CalendarViewModel() : ViewModel() {
                 name = "Apply",
                 parentTaskId = "1",
                 start = ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.of(7, 30)),
+                    LocalDateTime.of(LocalDate.now(), LocalTime.of(7, 0)),
                     ZoneId.systemDefault()
                 ),
                 end = ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.of(8, 15)),
+                    LocalDateTime.of(LocalDate.now(), LocalTime.of(8, 0)),
                     ZoneId.systemDefault()
                 ),
                 workedDuration = 0,

@@ -16,8 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.Plan
 import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.ui.calendar.PlanComposable
@@ -36,6 +41,7 @@ internal class DragTargetInfo {
             end = ZonedDateTime.now()
         )
     )
+    var draggableHeight by mutableStateOf(0.dp)
 }
 
 internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
@@ -62,10 +68,6 @@ fun ScheduleDraggable() {
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.isDragging) {
-            var targetSize by remember {
-                mutableStateOf(IntSize.Zero)
-            }
-
             Box(modifier = Modifier
                 .graphicsLayer {
                     val offset = (state.dragPosition + state.dragOffset)
@@ -73,21 +75,18 @@ fun ScheduleDraggable() {
                     scaleX = 1.0f
                     scaleY = 1.0f
                     translationX = 0.0f
-                    translationY = offset.y.minus(targetSize.height / 2)
-                }
-                .onGloballyPositioned {
-                    targetSize = it.size
+                    translationY = offset.y.minus(180f).minus(.5f * state.draggableHeight.toPx())
                 }
             ) {
+                state.draggableComposable?.invoke()
 //                Text(
 //                    text = """
-//                        targetSize: $targetSize
-//                        currentPosition: ${state.dragPosition}
-//                        currentOffset: ${state.dragOffset}
-//                        translationY: ${(state.dragPosition + state.dragOffset).y.minus(targetSize.height / 2)}
+//                        targetSize: ${with(LocalDensity.current) { state.draggableHeight.toPx() }}
+//                        currentPosition: ${state.dragPosition.y}
+//                        currentOffset: ${with(LocalDensity.current) { 64.dp.toPx() }}
+//                        translationY: ${with(LocalDensity.current) { (state.dragPosition + state.dragOffset).y}}
 //                    """.trimIndent()
 //                )
-                state.draggableComposable?.invoke()
             }
         }
     }
@@ -96,9 +95,10 @@ fun ScheduleDraggable() {
 @Composable
 fun DragTarget(
     dataToDrop: Plan,
-    onTaskDrag: (() -> Unit) = {},
     modifier: Modifier = Modifier,
     draggableModifier: Modifier,
+    draggableHeight: Dp,
+    onTaskDrag: (() -> Unit) = {},
     content: @Composable () -> Unit
 ) {
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
@@ -112,9 +112,12 @@ fun DragTarget(
         )
     }
     var planComposableModifier by remember { mutableStateOf<Modifier>(Modifier) }
+    var planComposableHeight by remember { mutableStateOf(0.dp) }
+
 
     currentData = dataToDrop
     planComposableModifier = draggableModifier
+    planComposableHeight = draggableHeight
     val currentState = LocalDragTargetInfo.current
 
     Box(modifier = modifier
@@ -126,6 +129,7 @@ fun DragTarget(
                 onDragStart = {
                     onTaskDrag()
                     currentState.dataToDrop = currentData
+                    currentState.draggableHeight = planComposableHeight
 //                    println(currentState.dataToDrop)
 //                    println(name)
                     currentState.draggableComposable = {
@@ -152,31 +156,29 @@ fun DragTarget(
     }
 }
 
-//
-//@Composable
-//fun <Plan> DropTarget(
-//    modifier: Modifier,
-//    content: @Composable() (BoxScope.(isInBound: Boolean, data: Plan) -> Unit)
-//) {
-//    val dragInfo = LocalDragTargetInfo.current
-//    val dragPosition = dragInfo.dragPosition
-//    val dragOffset = dragInfo.dragOffset
-//    var isCurrentDropTarget by remember {
-//        mutableStateOf(false)
-//    }
-//
-//    Box(modifier = modifier.onGloballyPositioned {
-//        it.boundsInWindow().let { rect ->
-//            isCurrentDropTarget = rect.contains(dragPosition + dragOffset)
-//        }
-//    }) {
-//        if(dragInfo.dataToDrop is EventDao) {
-//
-//        } else {
-//
-//        }
-//        val data =
-//            if (isCurrentDropTarget && !dragInfo.isDragging) dragInfo.dataToDrop as Plan else null
-//        content(isCurrentDropTarget, data)
-//    }
-//}
+@Composable
+fun <Plan> DropTarget(
+    modifier: Modifier,
+    content: @Composable() (BoxScope.(isInBound: Boolean, data: Plan?) -> Unit)
+) {
+    val dragInfo = LocalDragTargetInfo.current
+    val dragPosition = dragInfo.dragPosition
+    val dragOffset = dragInfo.dragOffset
+    var isCurrentDropTarget by remember {
+        mutableStateOf(false)
+    }
+
+    Box(modifier = modifier.onGloballyPositioned {
+        it.boundsInWindow().let { rect ->
+            isCurrentDropTarget = rect.contains(dragPosition + dragOffset)
+        }
+    }) {
+        val data = if (isCurrentDropTarget && !dragInfo.isDragging) dragInfo.dataToDrop as Plan else null
+        if(dragInfo.dataToDrop is EventDao) {
+
+        } else {
+
+        }
+        content(isCurrentDropTarget, data)
+    }
+}

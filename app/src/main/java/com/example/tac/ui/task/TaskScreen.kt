@@ -81,7 +81,8 @@ fun TaskSheet(
                     onTaskDrag = onTaskDrag,
                     draggableModifier = Modifier
                         .height(eventHeight)
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    draggableHeight = eventHeight
                 ) {
                     TaskRow(
                         taskDao = task,
