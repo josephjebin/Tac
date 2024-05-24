@@ -7,10 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.tac.ui.dragAndDrop.ScheduleDraggable
+import com.example.tac.ui.task.TasksSheetState
 
 @Composable
 fun Calendar(
     uiCalendarState: CalendarState,
+    tasksSheetState: TasksSheetState
 //    updateSidebarWidth: (Dp) -> Unit,
 //    updateScheduleWidth: (Dp) -> Unit,
 ) {
@@ -38,6 +40,7 @@ fun Calendar(
                             .equals(uiCalendarState.selectedDate.toLocalDate())
                     },
                     hourHeight = hourHeight,
+                    tasksSheetState = tasksSheetState,
                     modifier = Modifier
                         //                        .onGloballyPositioned {
                         //                            updateScheduleWidth(it.size.width.dp)

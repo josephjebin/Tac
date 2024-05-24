@@ -210,6 +210,7 @@ fun TasksAndCalendarScreen(
 
                         Calendar(
                             uiCalendarState,
+                            tasksSheetState.value
 //                            updateSidebarWidth = { newWidth: Dp -> calendarViewModel.updateSidebarWidth(newWidth) },
 //                            updateScheduleWidth = { newWidth: Dp -> calendarViewModel.updateScheduleWidth(newWidth) }
                         )

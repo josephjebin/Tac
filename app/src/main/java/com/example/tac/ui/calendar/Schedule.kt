@@ -1,5 +1,7 @@
 package com.example.tac.ui.calendar
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.MaterialTheme
@@ -18,6 +20,8 @@ import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.Plan
 import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.ui.dragAndDrop.DragTarget
+import com.example.tac.ui.dragAndDrop.DropTarget
+import com.example.tac.ui.task.TasksSheetState
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
@@ -27,6 +31,7 @@ fun Schedule(
     events: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
     hourHeight: Dp,
+    tasksSheetState: TasksSheetState,
     modifier: Modifier = Modifier,
 //    planContent: @Composable (plan: Plan, modifier: Modifier) -> Unit,
 ) {
@@ -34,13 +39,15 @@ fun Schedule(
 //    var scheduleSize by remember {
 //        mutableStateOf(IntSize.Zero)
 //    }
+
+
     Layout(
         content = {
             events.sortedBy(EventDao::start).forEach { event ->
                 val eventDurationMinutes = ChronoUnit.MINUTES.between(event.start, event.end)
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
                 val planComposableModifier = Modifier
-                    .eventData(event)
+                    .startData(event.start.toLocalTime())
                     .height(eventHeight)
                     .fillMaxWidth()
 
@@ -64,7 +71,7 @@ fun Schedule(
                     ChronoUnit.MINUTES.between(scheduledTask.start, scheduledTask.end)
                 val taskHeight = ((eventDurationMinutes / 60f) * hourHeight)
                 val planComposableModifier = Modifier
-                    .scheduledTaskData(scheduledTask)
+                    .startData(scheduledTask.start.toLocalTime())
                     .height(taskHeight)
                     .fillMaxWidth()
 
@@ -78,6 +85,10 @@ fun Schedule(
                         plan = scheduledTask
                     )
                 }
+            }
+
+            if (tasksSheetState == TasksSheetState.COLLAPSED) {
+                DropTargets(hourHeight/12)
             }
         },
         modifier = modifier
@@ -109,7 +120,7 @@ fun Schedule(
                 val eventOffsetMinutes =
                     ChronoUnit.MINUTES.between(
                         LocalTime.MIN,
-                        (measurable.parentData as Plan).start.toLocalTime()
+                        (measurable.parentData as LocalTime)
                     )
                 val eventY = ((eventOffsetMinutes / 60f) * hourHeight.toPx()).roundToInt()
 //                val eventHeight = ((eventDurationMinutes / 60f) * hourHeight.toPx()).roundToInt()
@@ -120,19 +131,30 @@ fun Schedule(
     }
 }
 
-private class EventDataModifier(
-    val event: EventDao,
+private class DataModifier(
+    val start: LocalTime,
 ) : ParentDataModifier {
-    override fun Density.modifyParentData(parentData: Any?) = event
+    override fun Density.modifyParentData(parentData: Any?) = start
 }
 
-private fun Modifier.eventData(event: EventDao) = this.then(EventDataModifier(event))
+private fun Modifier.startData(start: LocalTime) = this.then(DataModifier(start))
 
-private class ScheduledTaskDataModifier(
-    val scheduledTask: ScheduledTask,
-) : ParentDataModifier {
-    override fun Density.modifyParentData(parentData: Any?) = scheduledTask
+@Composable
+fun DropTargets(
+    fiveMinuteHeight: Dp
+) {
+    //
+    repeat(288) {
+        DropTarget<Plan>(
+            modifier = Modifier
+                .startData(LocalTime.MIN.plusMinutes(it * 5L))
+        ) { isCurrentDropTarget, data ->
+            Box(
+                modifier = Modifier
+                    .height(fiveMinuteHeight)
+                    .fillMaxWidth()
+                    .background(if (isCurrentDropTarget) Color.Blue else Color.Transparent)
+            )
+        }
+    }
 }
-
-private fun Modifier.scheduledTaskData(scheduledTask: ScheduledTask) =
-    this.then(ScheduledTaskDataModifier(scheduledTask))
