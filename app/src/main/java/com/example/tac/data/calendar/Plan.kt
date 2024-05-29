@@ -2,6 +2,7 @@ package com.example.tac.data.calendar
 
 import androidx.compose.ui.graphics.Color
 import com.example.tac.ui.theme.onSurfaceGray
+import java.time.Duration
 import java.time.ZonedDateTime
 
 abstract class Plan(
@@ -9,6 +10,7 @@ abstract class Plan(
     open var name: String = "",
     open var start: ZonedDateTime = ZonedDateTime.now(),
     open var end: ZonedDateTime = ZonedDateTime.now().plusMinutes(30),
+    open var duration: Int = Duration.between(start, end).toMinutes().toInt(),
     open var color: Color = onSurfaceGray,
     open var description: String = ""
 ) {

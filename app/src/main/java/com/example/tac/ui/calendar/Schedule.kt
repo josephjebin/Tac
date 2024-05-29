@@ -22,12 +22,17 @@ import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.ui.dragAndDrop.DragTarget
 import com.example.tac.ui.dragAndDrop.DropTarget
 import com.example.tac.ui.task.TasksSheetState
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 @Composable
 fun Schedule(
+    selectedDate: LocalDate,
     events: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
     hourHeight: Dp,
@@ -37,13 +42,8 @@ fun Schedule(
     addScheduledTask: (ScheduledTask) -> Unit,
     addEventDao: (EventDao) -> Unit,
     modifier: Modifier = Modifier,
-//    planContent: @Composable (plan: Plan, modifier: Modifier) -> Unit,
 ) {
     val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
-//    var scheduleSize by remember {
-//        mutableStateOf(IntSize.Zero)
-//    }
-
 
     Layout(
         content = {
@@ -96,6 +96,7 @@ fun Schedule(
             if (tasksSheetState == TasksSheetState.COLLAPSED) {
                 DropTargets(
                     fiveMinuteHeight = hourHeight / 12,
+                    selectedDate = selectedDate,
                     removeScheduledTask = removeScheduledTask,
                     removeEventDao = removeEventDao,
                     addScheduledTask = addScheduledTask,
@@ -146,17 +147,19 @@ fun Schedule(
 @Composable
 fun DropTargets(
     fiveMinuteHeight: Dp,
+    selectedDate: LocalDate,
     removeScheduledTask: (Int) -> Unit,
     removeEventDao: (Int) -> Unit,
     addScheduledTask: (ScheduledTask) -> Unit,
     addEventDao: (EventDao) -> Unit
 ) {
     repeat(288) {
-        //pass it to drop target
+        val timeSlot: LocalTime = LocalTime.MIN.plusMinutes(it * 5L)
+
         DropTarget<Plan>(
             index = it,
             modifier = Modifier
-                .startData(LocalTime.MIN.plusMinutes(it * 5L))
+                .startData(timeSlot)
         ) { isCurrentDropTarget, isRescheduling, data ->
             Box(
                 modifier = Modifier
@@ -165,6 +168,10 @@ fun DropTargets(
                     .background(if (isCurrentDropTarget) Color.LightGray else Color.Transparent)
             ) {
                 if (data != null) {
+                    data.start = ZonedDateTime.of(
+                        LocalDateTime.of(selectedDate, timeSlot),
+                        ZoneId.systemDefault()
+                    )
                     if (isRescheduling) {
                         if (data is ScheduledTask) {
                             removeScheduledTask(data.id)

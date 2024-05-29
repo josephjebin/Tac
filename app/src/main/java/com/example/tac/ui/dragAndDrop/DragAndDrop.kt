@@ -183,18 +183,23 @@ fun <Plan> DropTarget(
     val topOfDraggable = dragInfo.topOfDraggable
 
     //if the first box is covered
-        //the first box is the current drop target
+    //the first box is the current drop target
     //else if last box is covered
-        //the box that is draggableHeight above the last box is the current drop target
+    //the box that is draggableHeight above the last box is the current drop target
     //else
-        //the box that is .5 * draggable height above the pointer && the box above is not covered is the current drop target
+    //the box that is .5 * draggable height above the pointer && the box above is not covered is the current drop target
     Box(modifier = modifier.onGloballyPositioned {
         it.boundsInWindow().let { rect ->
-            if(rect.contains(topOfDraggable)) dragInfo.currentDropTarget = index
+            if (rect.contains(topOfDraggable)) dragInfo.currentDropTarget = index
         }
     }) {
-        val data = if (dragInfo.currentDropTarget == index && !dragInfo.isDragging) dragInfo.dataToDrop as Plan else null
+        val data =
+            if (dragInfo.currentDropTarget == index && !dragInfo.isDragging) dragInfo.dataToDrop as Plan else null
 
-        content(dragInfo.isDragging && dragInfo.currentDropTarget == index, dragInfo.isRescheduling, data)
+        content(
+            dragInfo.isDragging && dragInfo.currentDropTarget == index,
+            dragInfo.isRescheduling,
+            data
+        )
     }
 }

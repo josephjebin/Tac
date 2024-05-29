@@ -1,7 +1,6 @@
 package com.example.tac.ui.calendar
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.ViewModel
 import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.GoogleCalendar

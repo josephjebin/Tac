@@ -32,13 +32,14 @@ fun Calendar(
 
             Box(modifier = Modifier) {
                 Schedule(
+                    selectedDate = uiCalendarState.selectedDate,
                     events = uiCalendarState.events.filter { eventDao ->
                         eventDao.start.toLocalDate()
-                            .equals(uiCalendarState.selectedDate.toLocalDate())
+                            .equals(uiCalendarState.selectedDate)
                     },
                     scheduledTasks = uiCalendarState.scheduledTasks.filter { scheduledTask ->
                         scheduledTask.start.toLocalDate()
-                            .equals(uiCalendarState.selectedDate.toLocalDate())
+                            .equals(uiCalendarState.selectedDate)
                     },
                     hourHeight = hourHeight,
                     tasksSheetState = tasksSheetState,

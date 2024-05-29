@@ -19,5 +19,6 @@ data class ScheduledTask(
     name = name,
     start = start,
     end = end,
+    duration = scheduledDuration,
     color = color
 )
