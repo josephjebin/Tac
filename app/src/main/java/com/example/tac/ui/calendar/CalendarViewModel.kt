@@ -1,5 +1,6 @@
 package com.example.tac.ui.calendar
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.example.tac.data.calendar.EventDao
@@ -21,7 +22,7 @@ class CalendarViewModel() : ViewModel() {
     private val _uiState = MutableStateFlow(
         CalendarState(
             calendars = listOf(),
-            events = dummyEvents(),
+            events = mutableStateOf(dummyEvents()),
             scheduledTasks = dummyScheduledTasks()
         )
     )
@@ -33,39 +34,51 @@ class CalendarViewModel() : ViewModel() {
                 id = 0,
                 busy = true,
                 name = "Breakfast",
-                start = ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0)),
-                    ZoneId.systemDefault()
+                start = mutableStateOf(
+                    ZonedDateTime.of(
+                        LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0)),
+                        ZoneId.systemDefault()
+                    )
                 ),
-                end = ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 0)),
-                    ZoneId.systemDefault()
+                end = mutableStateOf(
+                    ZonedDateTime.of(
+                        LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 0)),
+                        ZoneId.systemDefault()
+                    )
                 )
             ),
             EventDao(
                 id = 1,
                 busy = true,
                 name = "Lunch",
-                start = ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.NOON),
-                    ZoneId.systemDefault()
+                start = mutableStateOf(
+                    ZonedDateTime.of(
+                        LocalDateTime.of(LocalDate.now(), LocalTime.NOON),
+                        ZoneId.systemDefault()
+                    )
                 ),
-                end = ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.of(14, 0)),
-                    ZoneId.systemDefault()
+                end = mutableStateOf(
+                    ZonedDateTime.of(
+                        LocalDateTime.of(LocalDate.now(), LocalTime.of(14, 0)),
+                        ZoneId.systemDefault()
+                    )
                 )
             ),
             EventDao(
                 id = 2,
                 busy = true,
                 name = "Dinner",
-                start = ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0)),
-                    ZoneId.systemDefault()
+                start = mutableStateOf(
+                    ZonedDateTime.of(
+                        LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0)),
+                        ZoneId.systemDefault()
+                    )
                 ),
-                end = ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 0)),
-                    ZoneId.systemDefault()
+                end = mutableStateOf(
+                    ZonedDateTime.of(
+                        LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 0)),
+                        ZoneId.systemDefault()
+                    )
                 )
             )
         )
@@ -77,13 +90,17 @@ class CalendarViewModel() : ViewModel() {
                 id = 0,
                 name = "Apply",
                 parentTaskId = "1",
-                start = ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.of(7, 0)),
-                    ZoneId.systemDefault()
+                start = mutableStateOf(
+                    ZonedDateTime.of(
+                        LocalDateTime.of(LocalDate.now(), LocalTime.of(7, 0)),
+                        ZoneId.systemDefault()
+                    )
                 ),
-                end = ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.of(8, 0)),
-                    ZoneId.systemDefault()
+                end = mutableStateOf(
+                    ZonedDateTime.of(
+                        LocalDateTime.of(LocalDate.now(), LocalTime.of(8, 0)),
+                        ZoneId.systemDefault()
+                    )
                 ),
                 workedDuration = 0,
                 color = Color.Gray
@@ -115,12 +132,12 @@ class CalendarViewModel() : ViewModel() {
             calendarState.copy(calendars = newCalendars)
         }
     }
-
-    private fun updateEventsState(newEvents: MutableList<EventDao>) {
-        _uiState.update { calendarState ->
-            calendarState.copy(events = newEvents)
-        }
-    }
+//
+//    private fun updateEventsState(newEvents: MutableList<EventDao>) {
+//        _uiState.update { calendarState ->
+//            calendarState.copy(events = newEvents)
+//        }
+//    }
 
     fun addScheduledTask(newTask: ScheduledTask) {
         _uiState.value.scheduledTasks.add(newTask)
@@ -131,11 +148,11 @@ class CalendarViewModel() : ViewModel() {
     }
 
     fun addEventDao(newEventDao: EventDao) {
-        _uiState.value.events.add(newEventDao)
+        _uiState.value.events.value.add(newEventDao)
     }
 
     fun removeEventDaoWithId(eventDaoId: Int) {
-        _uiState.value.events.removeIf { eventDao -> eventDao.id == eventDaoId }
+        _uiState.value.events.value.removeIf { eventDao -> eventDao.id == eventDaoId }
     }
 
 //    companion object {

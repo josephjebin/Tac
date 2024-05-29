@@ -209,7 +209,15 @@ fun TasksAndCalendarScreen(
                     ) {
 
                         Calendar(
-                            uiCalendarState,
+                            selectedDate = uiCalendarState.selectedDate,
+                            events = uiCalendarState.events.value.filter { eventDao ->
+                                eventDao.start.value.toLocalDate()
+                                    .equals(uiCalendarState.selectedDate)
+                            },
+                            scheduledTasks = uiCalendarState.scheduledTasks.filter { scheduledTask ->
+                                scheduledTask.start.value.toLocalDate()
+                                    .equals(uiCalendarState.selectedDate)
+                            },
                             tasksSheetState.value,
                             removeScheduledTask = { scheduledTaskId: Int -> calendarViewModel.removeScheduledTaskWithId(scheduledTaskId) },
                             removeEventDao = { eventDaoId: Int -> calendarViewModel.removeEventDaoWithId(eventDaoId) },

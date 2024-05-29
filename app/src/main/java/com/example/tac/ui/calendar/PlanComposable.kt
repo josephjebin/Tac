@@ -30,7 +30,7 @@ fun PlanComposable(
             .padding(4.dp)
     ) {
         Text(
-            text = "${plan.start.format(EventTimeFormatter)} - ${plan.end.format(EventTimeFormatter)}",
+            text = "${plan.start.value.format(EventTimeFormatter)} - ${plan.end.value.format(EventTimeFormatter)}",
             style = MaterialTheme.typography.caption,
         )
 

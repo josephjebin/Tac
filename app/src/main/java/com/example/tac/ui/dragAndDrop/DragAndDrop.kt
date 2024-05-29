@@ -38,8 +38,8 @@ internal class DragTargetInfo {
             id = 0,
             name = "default",
             parentTaskId = "0",
-            start = ZonedDateTime.now(),
-            end = ZonedDateTime.now()
+            start = mutableStateOf(ZonedDateTime.now()),
+            end = mutableStateOf(ZonedDateTime.now())
         )
     )
     var draggableHeight by mutableStateOf(0.dp)
@@ -112,8 +112,8 @@ fun DragTarget(
                 id = 0,
                 name = "default",
                 parentTaskId = "0",
-                start = ZonedDateTime.now(),
-                end = ZonedDateTime.now()
+                start = mutableStateOf(ZonedDateTime.now()),
+                end = mutableStateOf(ZonedDateTime.now())
             )
         )
     }

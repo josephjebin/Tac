@@ -47,11 +47,12 @@ fun Schedule(
 
     Layout(
         content = {
-            events.sortedBy(EventDao::start).forEach { event ->
-                val eventDurationMinutes = ChronoUnit.MINUTES.between(event.start, event.end)
+
+            events.sortedBy { eventDao -> eventDao.start.value }.forEach { event ->
+                val eventDurationMinutes = ChronoUnit.MINUTES.between(event.start.value, event.end.value)
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
                 val planComposableModifier = Modifier
-                    .startData(event.start.toLocalTime())
+                    .startData(event.start.value.toLocalTime())
                     .height(eventHeight)
                     .fillMaxWidth()
 
@@ -71,12 +72,12 @@ fun Schedule(
                 }
             }
 
-            scheduledTasks.sortedBy(ScheduledTask::start).forEach { scheduledTask ->
+            scheduledTasks.sortedBy { scheduledTask -> scheduledTask.start.value }.forEach { scheduledTask ->
                 val eventDurationMinutes =
-                    ChronoUnit.MINUTES.between(scheduledTask.start, scheduledTask.end)
+                    ChronoUnit.MINUTES.between(scheduledTask.start.value, scheduledTask.end.value)
                 val taskHeight = ((eventDurationMinutes / 60f) * hourHeight)
                 val planComposableModifier = Modifier
-                    .startData(scheduledTask.start.toLocalTime())
+                    .startData(scheduledTask.start.value.toLocalTime())
                     .height(taskHeight)
                     .fillMaxWidth()
 
@@ -168,7 +169,7 @@ fun DropTargets(
                     .background(if (isCurrentDropTarget) Color.LightGray else Color.Transparent)
             ) {
                 if (data != null) {
-                    data.start = ZonedDateTime.of(
+                    data.start.value = ZonedDateTime.of(
                         LocalDateTime.of(selectedDate, timeSlot),
                         ZoneId.systemDefault()
                     )

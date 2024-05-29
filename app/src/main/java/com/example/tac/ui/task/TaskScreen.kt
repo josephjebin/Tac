@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -76,8 +77,8 @@ fun TaskSheet(
                         name = task.title,
                         parentTaskId = task.id,
                         //stub
-                        start = ZonedDateTime.now(),
-                        end = ZonedDateTime.now().plusMinutes(30),
+                        start = mutableStateOf(ZonedDateTime.now()),
+                        end = mutableStateOf(ZonedDateTime.now().plusMinutes(30))
                     ),
                     isRescheduling = false,
                     onTaskDrag = onTaskDrag,

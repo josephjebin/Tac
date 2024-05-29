@@ -1,5 +1,7 @@
 package com.example.tac.data.calendar
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import com.example.tac.ui.theme.onSurfaceGray
 import java.time.Duration
@@ -8,9 +10,9 @@ import java.time.ZonedDateTime
 abstract class Plan(
     open var id: Int,
     open var name: String = "",
-    open var start: ZonedDateTime = ZonedDateTime.now(),
-    open var end: ZonedDateTime = ZonedDateTime.now().plusMinutes(30),
-    open var duration: Int = Duration.between(start, end).toMinutes().toInt(),
+    open var start: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now()),
+    open var end: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now().plusMinutes(30)),
+    open var duration: Int = Duration.between(start.value, end.value).toMinutes().toInt(),
     open var color: Color = onSurfaceGray,
     open var description: String = ""
 ) {

@@ -10,10 +10,14 @@ import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.ui.dragAndDrop.ScheduleDraggable
 import com.example.tac.ui.task.TasksSheetState
+import java.time.LocalDate
 
 @Composable
 fun Calendar(
-    uiCalendarState: CalendarState,
+//    uiCalendarState: CalendarState,
+    selectedDate: LocalDate,
+    events: List<EventDao>,
+    scheduledTasks: List<ScheduledTask>,
     tasksSheetState: TasksSheetState,
     removeScheduledTask: (Int) -> Unit,
     removeEventDao: (Int) -> Unit,
@@ -32,15 +36,9 @@ fun Calendar(
 
             Box(modifier = Modifier) {
                 Schedule(
-                    selectedDate = uiCalendarState.selectedDate,
-                    events = uiCalendarState.events.filter { eventDao ->
-                        eventDao.start.toLocalDate()
-                            .equals(uiCalendarState.selectedDate)
-                    },
-                    scheduledTasks = uiCalendarState.scheduledTasks.filter { scheduledTask ->
-                        scheduledTask.start.toLocalDate()
-                            .equals(uiCalendarState.selectedDate)
-                    },
+                    selectedDate = selectedDate,
+                    events = events,
+                    scheduledTasks = scheduledTasks,
                     hourHeight = hourHeight,
                     tasksSheetState = tasksSheetState,
                     removeScheduledTask = removeScheduledTask,
