@@ -210,9 +210,11 @@ fun TasksAndCalendarScreen(
 
                         Calendar(
                             uiCalendarState,
-                            tasksSheetState.value
-//                            updateSidebarWidth = { newWidth: Dp -> calendarViewModel.updateSidebarWidth(newWidth) },
-//                            updateScheduleWidth = { newWidth: Dp -> calendarViewModel.updateScheduleWidth(newWidth) }
+                            tasksSheetState.value,
+                            removeScheduledTask = { scheduledTaskId: Int -> calendarViewModel.removeScheduledTaskWithId(scheduledTaskId) },
+                            removeEventDao = { eventDaoId: Int -> calendarViewModel.removeEventDaoWithId(eventDaoId) },
+                            addScheduledTask = { scheduledTask -> calendarViewModel.addScheduledTask(scheduledTask) },
+                            addEventDao = { eventDao -> calendarViewModel.addEventDao(eventDao) },
                         )
 
 

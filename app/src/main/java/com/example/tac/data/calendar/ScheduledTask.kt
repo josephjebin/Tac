@@ -6,6 +6,7 @@ import java.time.ZonedDateTime
 
 
 data class ScheduledTask(
+    override var id: Int,
     override var name: String,
     val parentTaskId: String,
     override var start: ZonedDateTime,
@@ -14,6 +15,7 @@ data class ScheduledTask(
     var workedDuration: Int = 0,
     override var color: Color = Color.Gray
 ): Plan(
+    id = id,
     name = name,
     start = start,
     end = end,

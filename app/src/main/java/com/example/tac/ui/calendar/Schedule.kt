@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -33,6 +32,10 @@ fun Schedule(
     scheduledTasks: List<ScheduledTask>,
     hourHeight: Dp,
     tasksSheetState: TasksSheetState,
+    removeScheduledTask: (Int) -> Unit,
+    removeEventDao: (Int) -> Unit,
+    addScheduledTask: (ScheduledTask) -> Unit,
+    addEventDao: (EventDao) -> Unit,
     modifier: Modifier = Modifier,
 //    planContent: @Composable (plan: Plan, modifier: Modifier) -> Unit,
 ) {
@@ -56,7 +59,8 @@ fun Schedule(
                     dataToDrop = event,
                     modifier = planComposableModifier,
                     draggableModifier = planComposableModifier,
-                    draggableHeight = eventHeight
+                    draggableHeight = eventHeight,
+                    isRescheduling = true
                 ) {
                     PlanComposable(
                         plan = event,
@@ -80,7 +84,8 @@ fun Schedule(
                     dataToDrop = scheduledTask,
                     modifier = planComposableModifier,
                     draggableModifier = planComposableModifier,
-                    draggableHeight = taskHeight
+                    draggableHeight = taskHeight,
+                    isRescheduling = true
                 ) {
                     PlanComposable(
                         plan = scheduledTask
@@ -89,7 +94,13 @@ fun Schedule(
             }
 
             if (tasksSheetState == TasksSheetState.COLLAPSED) {
-                DropTargets(hourHeight/12)
+                DropTargets(
+                    fiveMinuteHeight = hourHeight / 12,
+                    removeScheduledTask = removeScheduledTask,
+                    removeEventDao = removeEventDao,
+                    addScheduledTask = addScheduledTask,
+                    addEventDao = addEventDao
+                )
             }
         },
         modifier = modifier
@@ -132,31 +143,52 @@ fun Schedule(
     }
 }
 
+@Composable
+fun DropTargets(
+    fiveMinuteHeight: Dp,
+    removeScheduledTask: (Int) -> Unit,
+    removeEventDao: (Int) -> Unit,
+    addScheduledTask: (ScheduledTask) -> Unit,
+    addEventDao: (EventDao) -> Unit
+) {
+    repeat(288) {
+        //pass it to drop target
+        DropTarget<Plan>(
+            index = it,
+            modifier = Modifier
+                .startData(LocalTime.MIN.plusMinutes(it * 5L))
+        ) { isCurrentDropTarget, isRescheduling, data ->
+            Box(
+                modifier = Modifier
+                    .height(fiveMinuteHeight)
+                    .fillMaxWidth()
+                    .background(if (isCurrentDropTarget) Color.LightGray else Color.Transparent)
+            ) {
+                if (data != null) {
+                    if (isRescheduling) {
+                        if (data is ScheduledTask) {
+                            removeScheduledTask(data.id)
+                        } else {
+                            removeEventDao(data.id)
+                        }
+                    }
+
+                    if (data is ScheduledTask) {
+                        addScheduledTask(data)
+                    } else {
+                        addEventDao(data as EventDao)
+                    }
+                }
+            }
+        }
+    }
+}
+
 private class DataModifier(
     val start: LocalTime,
 ) : ParentDataModifier {
     override fun Density.modifyParentData(parentData: Any?) = start
 }
 
-private fun Modifier.startData(start: LocalTime) = this.then(DataModifier(start))
+fun Modifier.startData(start: LocalTime) = this.then(DataModifier(start))
 
-@Composable
-fun DropTargets(
-    fiveMinuteHeight: Dp
-) {
-    //
-    repeat(288) {
-        //pass it to drop target
-        DropTarget<Plan>(
-            modifier = Modifier
-                .startData(LocalTime.MIN.plusMinutes(it * 5L))
-        ) { isCurrentDropTarget, data ->
-            Box(
-                modifier = Modifier
-                    .height(fiveMinuteHeight)
-                    .fillMaxWidth()
-                    .background(if (isCurrentDropTarget) Color.Blue else Color.Transparent)
-            )
-        }
-    }
-}

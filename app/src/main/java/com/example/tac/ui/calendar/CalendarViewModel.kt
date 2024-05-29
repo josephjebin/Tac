@@ -28,10 +28,11 @@ class CalendarViewModel() : ViewModel() {
     )
     val uiState: StateFlow<CalendarState> = _uiState.asStateFlow()
 
-    fun dummyEvents(): List<EventDao> {
-        return listOf(
+    private fun dummyEvents(): MutableList<EventDao> {
+        return mutableListOf(
             EventDao(
-                true,
+                id = 0,
+                busy = true,
                 name = "Breakfast",
                 start = ZonedDateTime.of(
                     LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0)),
@@ -43,7 +44,8 @@ class CalendarViewModel() : ViewModel() {
                 )
             ),
             EventDao(
-                true,
+                id = 1,
+                busy = true,
                 name = "Lunch",
                 start = ZonedDateTime.of(
                     LocalDateTime.of(LocalDate.now(), LocalTime.NOON),
@@ -55,7 +57,8 @@ class CalendarViewModel() : ViewModel() {
                 )
             ),
             EventDao(
-                true,
+                id = 2,
+                busy = true,
                 name = "Dinner",
                 start = ZonedDateTime.of(
                     LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0)),
@@ -72,6 +75,7 @@ class CalendarViewModel() : ViewModel() {
     private fun dummyScheduledTasks(): MutableList<ScheduledTask> {
         return mutableListOf(
             ScheduledTask(
+                id = 0,
                 name = "Apply",
                 parentTaskId = "1",
                 start = ZonedDateTime.of(
@@ -88,17 +92,6 @@ class CalendarViewModel() : ViewModel() {
         )
     }
 
-    fun updateSidebarWidth(newWidth: Dp) {
-        _uiState.update { calendarState ->
-            calendarState.copy(sidebarWidth = newWidth)
-        }
-    }
-
-    fun updateScheduleWidth(newWidth: Dp) {
-        _uiState.update { calendarState ->
-            calendarState.copy(scheduleWidth = newWidth)
-        }
-    }
 
 //    var calendarService: CalendarService
 
@@ -124,7 +117,7 @@ class CalendarViewModel() : ViewModel() {
         }
     }
 
-    private fun updateEventsState(newEvents: List<EventDao>) {
+    private fun updateEventsState(newEvents: MutableList<EventDao>) {
         _uiState.update { calendarState ->
             calendarState.copy(events = newEvents)
         }
@@ -134,8 +127,16 @@ class CalendarViewModel() : ViewModel() {
         _uiState.value.scheduledTasks.add(newTask)
     }
 
-    fun removeScheduledTask(scheduledTask: ScheduledTask) {
-        _uiState.value.scheduledTasks.remove(scheduledTask)
+    fun removeScheduledTaskWithId(scheduledTaskId: Int) {
+        _uiState.value.scheduledTasks.removeIf { task -> task.id == scheduledTaskId }
+    }
+
+    fun addEventDao(newEventDao: EventDao) {
+        _uiState.value.events.add(newEventDao)
+    }
+
+    fun removeEventDaoWithId(eventDaoId: Int) {
+        _uiState.value.events.removeIf { eventDao -> eventDao.id == eventDaoId }
     }
 
 //    companion object {

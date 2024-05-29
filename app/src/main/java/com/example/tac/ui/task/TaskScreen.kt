@@ -72,12 +72,14 @@ fun TaskSheet(
 
                 DragTarget(
                     dataToDrop = ScheduledTask(
+                        id = 10,
                         name = task.title,
                         parentTaskId = task.id,
                         //stub
                         start = ZonedDateTime.now(),
                         end = ZonedDateTime.now().plusMinutes(30),
                     ),
+                    isRescheduling = false,
                     onTaskDrag = onTaskDrag,
                     draggableModifier = Modifier
                         .height(eventHeight)

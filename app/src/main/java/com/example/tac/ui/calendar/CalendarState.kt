@@ -9,10 +9,9 @@ import java.time.ZonedDateTime
 
 data class CalendarState (
     val calendars: List<GoogleCalendar>,
-    val events: List<EventDao>,
+    val events: MutableList<EventDao>,
     val scheduledTasks: MutableList<ScheduledTask>,
     var selectedDate: ZonedDateTime = ZonedDateTime.now(),
     var dateRangeEnd: ZonedDateTime = selectedDate.plusWeeks(1),
-    var sidebarWidth: Dp = 0.dp,
     var scheduleWidth: Dp = 0.dp
 )

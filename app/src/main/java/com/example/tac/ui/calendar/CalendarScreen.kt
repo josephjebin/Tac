@@ -6,15 +6,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.tac.data.calendar.EventDao
+import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.ui.dragAndDrop.ScheduleDraggable
 import com.example.tac.ui.task.TasksSheetState
 
 @Composable
 fun Calendar(
     uiCalendarState: CalendarState,
-    tasksSheetState: TasksSheetState
-//    updateSidebarWidth: (Dp) -> Unit,
-//    updateScheduleWidth: (Dp) -> Unit,
+    tasksSheetState: TasksSheetState,
+    removeScheduledTask: (Int) -> Unit,
+    removeEventDao: (Int) -> Unit,
+    addScheduledTask: (ScheduledTask) -> Unit,
+    addEventDao: (EventDao) -> Unit,
 ) {
     val hourHeight = 64.dp
     val verticalScrollState = rememberScrollState()
@@ -23,9 +27,6 @@ fun Calendar(
             HoursSidebar(
                 hourHeight = hourHeight,
                 modifier = Modifier
-//                    .onGloballyPositioned {
-//                        updateSidebarWidth(it.size.width.dp)
-//                    }
                     .verticalScroll(verticalScrollState)
             )
 
@@ -41,10 +42,11 @@ fun Calendar(
                     },
                     hourHeight = hourHeight,
                     tasksSheetState = tasksSheetState,
+                    removeScheduledTask = removeScheduledTask,
+                    removeEventDao = removeEventDao,
+                    addScheduledTask = addScheduledTask,
+                    addEventDao = addEventDao,
                     modifier = Modifier
-                        //                        .onGloballyPositioned {
-                        //                            updateScheduleWidth(it.size.width.dp)
-                        //                        }
                         .verticalScroll(verticalScrollState)
                 )
 
