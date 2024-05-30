@@ -20,6 +20,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.tac.data.calendar.EventDao
+import com.example.tac.data.calendar.ScheduledTask
+import com.example.tac.data.tasks.Task
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import com.example.tac.ui.calendar.Calendar
@@ -33,6 +37,7 @@ import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.ui.theme.TacTheme
 import com.example.tac.ui.theme.accent_gray
 import net.openid.appauth.*
+import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
     val TAG = "Tac"
@@ -47,6 +52,8 @@ class MainActivity : ComponentActivity() {
 //        if (!restoreState()) {
 //            attemptAuthorization()
 //        }
+
+
 
         setContent {
             TacTheme {
@@ -151,20 +158,50 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Tac() {
+fun Tac(calendarViewModel: CalendarViewModel = viewModel(),
+        tasksViewModel: TasksViewModel = viewModel()
+) {
     Surface(color = MaterialTheme.colors.background) {
-        TasksAndCalendarScreen()
+        val uiCalendarState by calendarViewModel.uiState.collectAsState()
+        val uiTasksState by tasksViewModel.uiState.collectAsState()
+        TasksAndCalendarScreen(
+            selectedDate = uiCalendarState.selectedDate,
+            events = uiCalendarState.events.value,
+            scheduledTasks = uiCalendarState.scheduledTasks.value,
+            addScheduledTask = { scheduledTask: ScheduledTask -> calendarViewModel.addScheduledTask(scheduledTask) },
+            removeScheduledTask = { scheduledTask: ScheduledTask -> calendarViewModel.removeScheduledTask(scheduledTask) },
+            addEventDao = { eventDao: EventDao -> calendarViewModel.addEventDao(eventDao) },
+            removeEventDao = { eventDao: EventDao -> calendarViewModel.removeEventDao(eventDao) },
+            taskLists = uiTasksState.taskLists,
+            tasks = uiTasksState.tasks,
+            currentSelectedTaskList = uiTasksState.currentSelectedTaskList,
+            onTaskListSelected = { taskList: TaskList ->
+                tasksViewModel.updateCurrentSelectedTaskList(taskList)
+            },
+            onTaskSelected = { taskDao: TaskDao ->
+                tasksViewModel.updateCurrentSelectedTask(taskDao)
+            }
+        )
     }
 }
 
 
 @Composable
 fun TasksAndCalendarScreen(
-    calendarViewModel: CalendarViewModel = CalendarViewModel(),
-    tasksViewModel: TasksViewModel = TasksViewModel()
+    selectedDate: LocalDate,
+    events: List<EventDao>,
+    scheduledTasks: List<ScheduledTask>,
+    addScheduledTask: (ScheduledTask) -> Unit,
+    removeScheduledTask: (ScheduledTask) -> Unit,
+    addEventDao: (EventDao) -> Unit,
+    removeEventDao: (EventDao) -> Unit,
+    taskLists: List<TaskList>,
+    tasks: List<TaskDao>,
+    currentSelectedTaskList: TaskList,
+    onTaskListSelected:  (TaskList) -> Unit,
+    onTaskSelected: (TaskDao) -> Unit
 ) {
-    val uiCalendarState by calendarViewModel.uiState.collectAsState()
-    val uiTasksState by tasksViewModel.uiState.collectAsState()
+
 //    val coroutineScope = rememberCoroutineScope()
 //    val configuration = LocalConfiguration.current
 //    val screenHeight = configuration.screenHeightDp.dp
@@ -173,7 +210,7 @@ fun TasksAndCalendarScreen(
 
 
     Scaffold(
-        topBar = { DayHeader(uiCalendarState.selectedDate) },
+        topBar = { DayHeader(selectedDate) },
         bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
     ) {
         RootDragInfoProvider {
@@ -209,20 +246,20 @@ fun TasksAndCalendarScreen(
                     ) {
 
                         Calendar(
-                            selectedDate = uiCalendarState.selectedDate,
-                            events = uiCalendarState.events.value.filter { eventDao ->
+                            selectedDate = selectedDate,
+                            events = events.filter { eventDao ->
                                 eventDao.start.value.toLocalDate()
-                                    .equals(uiCalendarState.selectedDate)
+                                    .equals(selectedDate)
                             },
-                            scheduledTasks = uiCalendarState.scheduledTasks.filter { scheduledTask ->
+                            scheduledTasks = scheduledTasks.filter { scheduledTask ->
                                 scheduledTask.start.value.toLocalDate()
-                                    .equals(uiCalendarState.selectedDate)
+                                    .equals(selectedDate)
                             },
-                            tasksSheetState.value,
-                            removeScheduledTask = { scheduledTaskId: Int -> calendarViewModel.removeScheduledTaskWithId(scheduledTaskId) },
-                            removeEventDao = { eventDaoId: Int -> calendarViewModel.removeEventDaoWithId(eventDaoId) },
-                            addScheduledTask = { scheduledTask -> calendarViewModel.addScheduledTask(scheduledTask) },
-                            addEventDao = { eventDao -> calendarViewModel.addEventDao(eventDao) },
+                            tasksSheetState = tasksSheetState.value,
+                            addScheduledTask = addScheduledTask,
+                            removeScheduledTask = removeScheduledTask,
+                            addEventDao = addEventDao,
+                            removeEventDao = removeEventDao
                         )
 
 
@@ -231,15 +268,11 @@ fun TasksAndCalendarScreen(
 
                 //TASKS SHEET
                 TaskSheet(
-                    uiTasksState.taskLists,
-                    uiTasksState.tasks,
-                    uiTasksState.currentSelectedTaskList,
-                    onTaskListSelected = { taskList: TaskList ->
-                        tasksViewModel.updateCurrentSelectedTaskList(taskList)
-                    },
-                    onTaskSelected = { taskDao: TaskDao ->
-                        tasksViewModel.updateCurrentSelectedTask(taskDao)
-                    },
+                    taskLists = taskLists,
+                    tasks = tasks,
+                    currentSelectedTaskList = currentSelectedTaskList,
+                    onTaskListSelected = onTaskListSelected,
+                    onTaskSelected = onTaskSelected,
                     onTaskCompleted = { taskDao: TaskDao ->
                     },
                     onTaskDrag = { tasksSheetState.value = COLLAPSED },

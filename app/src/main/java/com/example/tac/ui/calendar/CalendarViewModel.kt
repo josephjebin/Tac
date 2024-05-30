@@ -17,19 +17,26 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 //class CalendarViewModel(authState: AuthState, authorizationService : AuthorizationService):
-class CalendarViewModel() : ViewModel() {
+class CalendarViewModel : ViewModel() {
     val TAG = "CalendarViewModel"
     private val _uiState = MutableStateFlow(
-        CalendarState(
-            calendars = listOf(),
-            events = mutableStateOf(dummyEvents()),
-            scheduledTasks = dummyScheduledTasks()
-        )
+        CalendarState()
     )
     val uiState: StateFlow<CalendarState> = _uiState.asStateFlow()
 
-    private fun dummyEvents(): MutableList<EventDao> {
-        return mutableListOf(
+
+//    var calendarService: CalendarService
+
+    init {
+//        calendarService = CalendarService(authState, authorizationService)
+        _uiState.value = CalendarState(
+            events = mutableStateOf(dummyEvents()),
+            scheduledTasks = mutableStateOf(dummyScheduledTasks())
+        )
+    }
+
+    private fun dummyEvents(): List<EventDao> {
+        return listOf(
             EventDao(
                 id = 0,
                 busy = true,
@@ -84,8 +91,8 @@ class CalendarViewModel() : ViewModel() {
         )
     }
 
-    private fun dummyScheduledTasks(): MutableList<ScheduledTask> {
-        return mutableListOf(
+    private fun dummyScheduledTasks(): List<ScheduledTask> {
+        return listOf(
             ScheduledTask(
                 id = 0,
                 name = "Apply",
@@ -108,13 +115,6 @@ class CalendarViewModel() : ViewModel() {
         )
     }
 
-
-//    var calendarService: CalendarService
-
-//    init {
-//        calendarService = CalendarService(authState, authorizationService)
-//    }
-
 //    fun initCalendarsAndEvents() {
 //        viewModelScope.launch {
 //            val calendars = calendarService.getCalendarList()
@@ -127,11 +127,11 @@ class CalendarViewModel() : ViewModel() {
 //        }
 //    }
 
-    private fun updateCalendarsState(newCalendars: List<GoogleCalendar>) {
-        _uiState.update { calendarState ->
-            calendarState.copy(calendars = newCalendars)
-        }
-    }
+//    private fun updateCalendarsState(newCalendars: List<GoogleCalendar>) {
+//        _uiState.update { calendarState ->
+//            calendarState.copy(calendars = newCalendars)
+//        }
+//    }
 //
 //    private fun updateEventsState(newEvents: MutableList<EventDao>) {
 //        _uiState.update { calendarState ->
@@ -140,19 +140,42 @@ class CalendarViewModel() : ViewModel() {
 //    }
 
     fun addScheduledTask(newTask: ScheduledTask) {
-        _uiState.value.scheduledTasks.add(newTask)
+        _uiState.update { currentState ->
+            currentState.copy(
+                scheduledTasks = mutableStateOf(
+                    currentState.scheduledTasks.value.plus(
+                        newTask
+                    )
+                )
+            )
+        }
     }
 
-    fun removeScheduledTaskWithId(scheduledTaskId: Int) {
-        _uiState.value.scheduledTasks.removeIf { task -> task.id == scheduledTaskId }
+    fun removeScheduledTask(scheduledTask: ScheduledTask) {
+        println("removing: $scheduledTask")
+        println("found: ${_uiState.value.scheduledTasks.value.contains(scheduledTask)}")
+
+//        _uiState.value.scheduledTasks.value -= scheduledTask
+        _uiState.update { currentState ->
+            currentState.copy(
+                scheduledTasks = mutableStateOf(
+                    currentState.scheduledTasks.value.minus(
+                        scheduledTask
+                    )
+                )
+            )
+        }
+        _uiState.value.scheduledTasks.value.forEach {
+            println("remaining: ${{ it.name }}")
+        }
     }
 
     fun addEventDao(newEventDao: EventDao) {
-        _uiState.value.events.value.add(newEventDao)
+        _uiState.value.events.value = _uiState.value.events.value.plus(newEventDao)
     }
 
-    fun removeEventDaoWithId(eventDaoId: Int) {
-        _uiState.value.events.value.removeIf { eventDao -> eventDao.id == eventDaoId }
+    fun removeEventDao(eventDao: EventDao) {
+        _uiState.value.events.value = _uiState.value.events.value.minus(eventDao)
     }
 
 //    companion object {

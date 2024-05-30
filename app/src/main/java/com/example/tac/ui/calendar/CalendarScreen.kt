@@ -19,10 +19,10 @@ fun Calendar(
     events: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
     tasksSheetState: TasksSheetState,
-    removeScheduledTask: (Int) -> Unit,
-    removeEventDao: (Int) -> Unit,
     addScheduledTask: (ScheduledTask) -> Unit,
+    removeScheduledTask: (ScheduledTask) -> Unit,
     addEventDao: (EventDao) -> Unit,
+    removeEventDao: (EventDao) -> Unit
 ) {
     val hourHeight = 64.dp
     val verticalScrollState = rememberScrollState()
@@ -41,10 +41,10 @@ fun Calendar(
                     scheduledTasks = scheduledTasks,
                     hourHeight = hourHeight,
                     tasksSheetState = tasksSheetState,
-                    removeScheduledTask = removeScheduledTask,
-                    removeEventDao = removeEventDao,
                     addScheduledTask = addScheduledTask,
+                    removeScheduledTask = removeScheduledTask,
                     addEventDao = addEventDao,
+                    removeEventDao = removeEventDao,
                     modifier = Modifier
                         .verticalScroll(verticalScrollState)
                 )

@@ -37,17 +37,16 @@ fun Schedule(
     scheduledTasks: List<ScheduledTask>,
     hourHeight: Dp,
     tasksSheetState: TasksSheetState,
-    removeScheduledTask: (Int) -> Unit,
-    removeEventDao: (Int) -> Unit,
     addScheduledTask: (ScheduledTask) -> Unit,
+    removeScheduledTask: (ScheduledTask) -> Unit,
     addEventDao: (EventDao) -> Unit,
+    removeEventDao: (EventDao) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
 
     Layout(
         content = {
-
             events.sortedBy { eventDao -> eventDao.start.value }.forEach { event ->
                 val eventDurationMinutes = ChronoUnit.MINUTES.between(event.start.value, event.end.value)
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
@@ -149,45 +148,31 @@ fun Schedule(
 fun DropTargets(
     fiveMinuteHeight: Dp,
     selectedDate: LocalDate,
-    removeScheduledTask: (Int) -> Unit,
-    removeEventDao: (Int) -> Unit,
     addScheduledTask: (ScheduledTask) -> Unit,
-    addEventDao: (EventDao) -> Unit
+    removeScheduledTask: (ScheduledTask) -> Unit,
+    addEventDao: (EventDao) -> Unit,
+    removeEventDao: (EventDao) -> Unit
 ) {
     repeat(288) {
         val timeSlot: LocalTime = LocalTime.MIN.plusMinutes(it * 5L)
 
         DropTarget<Plan>(
             index = it,
+            timeSlot = timeSlot,
+            selectedDate = selectedDate,
+            addScheduledTask = addScheduledTask,
+            removeScheduledTask = removeScheduledTask,
+            addEventDao = addEventDao,
+            removeEventDao = removeEventDao,
             modifier = Modifier
                 .startData(timeSlot)
-        ) { isCurrentDropTarget, isRescheduling, data ->
+        ) { isCurrentDropTarget ->
             Box(
                 modifier = Modifier
                     .height(fiveMinuteHeight)
                     .fillMaxWidth()
                     .background(if (isCurrentDropTarget) Color.LightGray else Color.Transparent)
-            ) {
-                if (data != null) {
-                    data.start.value = ZonedDateTime.of(
-                        LocalDateTime.of(selectedDate, timeSlot),
-                        ZoneId.systemDefault()
-                    )
-                    if (isRescheduling) {
-                        if (data is ScheduledTask) {
-                            removeScheduledTask(data.id)
-                        } else {
-                            removeEventDao(data.id)
-                        }
-                    }
-
-                    if (data is ScheduledTask) {
-                        addScheduledTask(data)
-                    } else {
-                        addEventDao(data as EventDao)
-                    }
-                }
-            }
+            )
         }
     }
 }

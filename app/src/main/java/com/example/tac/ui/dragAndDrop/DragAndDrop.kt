@@ -23,9 +23,14 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.Plan
 import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.ui.calendar.PlanComposable
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 
 internal class DragTargetInfo {
@@ -38,13 +43,19 @@ internal class DragTargetInfo {
             id = 0,
             name = "default",
             parentTaskId = "0",
-            start = mutableStateOf(ZonedDateTime.now()),
-            end = mutableStateOf(ZonedDateTime.now())
+            start = mutableStateOf(ZonedDateTime.of(
+                LocalDateTime.MIN,
+                ZoneId.systemDefault()
+            )),
+            end = mutableStateOf(ZonedDateTime.of(
+                LocalDateTime.MIN,
+                ZoneId.systemDefault()
+            ))
         )
     )
     var draggableHeight by mutableStateOf(0.dp)
     var topOfDraggable by mutableStateOf(Offset.Zero)
-    var currentDropTarget by mutableIntStateOf(0)
+    var currentDropTarget by mutableIntStateOf(-1)
     var isRescheduling by mutableStateOf(true)
 }
 
@@ -112,8 +123,14 @@ fun DragTarget(
                 id = 0,
                 name = "default",
                 parentTaskId = "0",
-                start = mutableStateOf(ZonedDateTime.now()),
-                end = mutableStateOf(ZonedDateTime.now())
+                start = mutableStateOf(ZonedDateTime.of(
+                    LocalDateTime.MIN,
+                    ZoneId.systemDefault()
+                )),
+                end = mutableStateOf(ZonedDateTime.of(
+                    LocalDateTime.MIN,
+                    ZoneId.systemDefault()
+                ))
             )
         )
     }
@@ -163,9 +180,11 @@ fun DragTarget(
                 }, onDragEnd = {
                     currentState.isDragging = false
                     currentState.dragOffset = Offset.Zero
+//                    currentState.currentDropTarget = -1
                 }, onDragCancel = {
-                    currentState.dragOffset = Offset.Zero
                     currentState.isDragging = false
+                    currentState.dragOffset = Offset.Zero
+//                    currentState.currentDropTarget = -1
                 })
         }
     ) {
@@ -176,8 +195,14 @@ fun DragTarget(
 @Composable
 fun <Plan> DropTarget(
     index: Int,
+    selectedDate: LocalDate,
+    timeSlot: LocalTime,
+    addScheduledTask: (ScheduledTask) -> Unit,
+    removeScheduledTask: (ScheduledTask) -> Unit,
+    addEventDao: (EventDao) -> Unit,
+    removeEventDao: (EventDao) -> Unit,
     modifier: Modifier,
-    content: @Composable() (BoxScope.(isInBound: Boolean, isRescheduling: Boolean, data: Plan?) -> Unit)
+    content: @Composable() (BoxScope.(isInBound: Boolean) -> Unit)
 ) {
     val dragInfo = LocalDragTargetInfo.current
     val topOfDraggable = dragInfo.topOfDraggable
@@ -190,16 +215,40 @@ fun <Plan> DropTarget(
     //the box that is .5 * draggable height above the pointer && the box above is not covered is the current drop target
     Box(modifier = modifier.onGloballyPositioned {
         it.boundsInWindow().let { rect ->
-            if (rect.contains(topOfDraggable)) dragInfo.currentDropTarget = index
+            if(dragInfo.isDragging && rect.contains(topOfDraggable)) dragInfo.currentDropTarget = index
         }
     }) {
-        val data =
-            if (dragInfo.currentDropTarget == index && !dragInfo.isDragging) dragInfo.dataToDrop as Plan else null
+        //user dropped droppable in this drop target
+        if (dragInfo.currentDropTarget == index && !dragInfo.isDragging) {
+            if (dragInfo.isRescheduling) {
+                if (dragInfo.dataToDrop is ScheduledTask) {
+                    removeScheduledTask(dragInfo.dataToDrop as ScheduledTask)
+                } else {
+                    removeEventDao(dragInfo.dataToDrop as EventDao)
+                }
+            }
+
+            dragInfo.dataToDrop.start.value = ZonedDateTime.of(
+                LocalDateTime.of(selectedDate, timeSlot),
+                ZoneId.systemDefault()
+            )
+            dragInfo.dataToDrop.end.value = ZonedDateTime.of(
+                LocalDateTime.of(selectedDate, timeSlot).plusMinutes(dragInfo.dataToDrop.duration.toLong()),
+                ZoneId.systemDefault()
+            )
+
+            if (dragInfo.dataToDrop is ScheduledTask) {
+                addScheduledTask(dragInfo.dataToDrop as ScheduledTask)
+            } else {
+                addEventDao(dragInfo.dataToDrop as EventDao)
+            }
+
+            //after updating viewmodel, reset currentDropTarget to prevent repeated calls to viewmodel
+            dragInfo.currentDropTarget = -1
+        }
 
         content(
             dragInfo.isDragging && dragInfo.currentDropTarget == index,
-            dragInfo.isRescheduling,
-            data
         )
     }
 }
