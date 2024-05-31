@@ -119,27 +119,7 @@ fun DragTarget(
     content: @Composable () -> Unit
 ) {
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
-    var currentData by remember {
-        mutableStateOf<Plan>(
-            ScheduledTask(
-                id = 0,
-                name = "default",
-                parentTaskId = "0",
-                start = mutableStateOf(
-                    ZonedDateTime.of(
-                        LocalDateTime.MIN,
-                        ZoneId.systemDefault()
-                    )
-                ),
-                end = mutableStateOf(
-                    ZonedDateTime.of(
-                        LocalDateTime.MIN,
-                        ZoneId.systemDefault()
-                    )
-                )
-            )
-        )
-    }
+    var currentData by remember { mutableStateOf(dataToDrop) }
 //    var planComposableModifier by remember { mutableStateOf<Modifier>(Modifier) }
     var planComposableHeight by remember { mutableStateOf(0.dp) }
 

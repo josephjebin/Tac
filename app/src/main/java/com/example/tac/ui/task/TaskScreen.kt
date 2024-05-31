@@ -77,6 +77,7 @@ fun TaskSheet(
                         parentTaskId = task.id,
                         //stub
                         start = mutableStateOf(ZonedDateTime.now()),
+                        //stub
                         end = mutableStateOf(ZonedDateTime.now().plusMinutes(30)),
                         scheduledDuration = task.neededDuration
                     ),

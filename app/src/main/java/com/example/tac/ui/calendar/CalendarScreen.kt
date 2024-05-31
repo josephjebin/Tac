@@ -14,6 +14,7 @@ import java.time.LocalDate
 
 @Composable
 fun Calendar(
+    verticalScrollState: ScrollState,
     selectedDate: LocalDate,
     events: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
@@ -24,7 +25,6 @@ fun Calendar(
     removeEventDao: (EventDao) -> Unit
 ) {
     val hourHeight = 64.dp
-    val verticalScrollState = rememberScrollState()
     Box {
         Row {
             HoursSidebar(

@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -232,6 +233,7 @@ fun TasksAndCalendarScreen(
                 }
 
                 //CALENDAR
+                val verticalScrollState = rememberScrollState()
                 if (tasksSheetState.value != EXPANDED) {
                     Box(
                         modifier = Modifier
@@ -240,6 +242,7 @@ fun TasksAndCalendarScreen(
                     ) {
 
                         Calendar(
+                            verticalScrollState = verticalScrollState,
                             selectedDate = selectedDate,
                             events = events.filter { eventDao ->
                                 eventDao.start.value.toLocalDate()
