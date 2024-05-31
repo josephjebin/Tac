@@ -6,6 +6,8 @@ import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -37,26 +39,32 @@ internal class DragTargetInfo {
     var isDragging: Boolean by mutableStateOf(false)
     var dragPosition by mutableStateOf(Offset.Zero)
     var dragOffset by mutableStateOf(Offset.Zero)
-    var draggableComposable by mutableStateOf<(@Composable () -> Unit)?>(null)
+
+    //    var draggableComposable by mutableStateOf<(@Composable () -> Unit)?>(null)
     var dataToDrop by mutableStateOf<Plan>(
         ScheduledTask(
             id = 0,
             name = "default",
             parentTaskId = "0",
-            start = mutableStateOf(ZonedDateTime.of(
-                LocalDateTime.MIN,
-                ZoneId.systemDefault()
-            )),
-            end = mutableStateOf(ZonedDateTime.of(
-                LocalDateTime.MIN,
-                ZoneId.systemDefault()
-            ))
+            start = mutableStateOf(
+                ZonedDateTime.of(
+                    LocalDateTime.MIN,
+                    ZoneId.systemDefault()
+                )
+            ),
+            end = mutableStateOf(
+                ZonedDateTime.of(
+                    LocalDateTime.MIN,
+                    ZoneId.systemDefault()
+                )
+            )
         )
     )
     var draggableHeight by mutableStateOf(0.dp)
     var topOfDraggable by mutableStateOf(Offset.Zero)
     var currentDropTarget by mutableIntStateOf(-1)
     var isRescheduling by mutableStateOf(true)
+    var draggableModifier: Modifier by mutableStateOf(Modifier)
 }
 
 internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
@@ -85,22 +93,17 @@ fun ScheduleDraggable() {
             Box(modifier = Modifier
                 .graphicsLayer {
                     val offset = (state.dragPosition + state.dragOffset)
-                    alpha = 0.2f
+                    alpha = 1f
                     scaleX = 1.0f
                     scaleY = 1.0f
                     translationX = 0.0f
                     translationY = offset.y.minus(176f).minus(.5f * state.draggableHeight.toPx())
                 }
             ) {
-                state.draggableComposable?.invoke()
-//                Text(
-//                    text = """
-//                        targetSize: ${with(LocalDensity.current) { state.draggableHeight.toPx() }}
-//                        currentPosition: ${state.dragPosition.y}
-//                        currentOffset: ${with(LocalDensity.current) { 64.dp.toPx() }}
-//                        translationY: ${with(LocalDensity.current) { (state.dragPosition + state.dragOffset).y}}
-//                    """.trimIndent()
-//                )
+                PlanComposable(
+                    plan = state.dataToDrop,
+                    modifier = state.draggableModifier
+                )
             }
         }
     }
@@ -110,7 +113,6 @@ fun ScheduleDraggable() {
 fun DragTarget(
     dataToDrop: Plan,
     modifier: Modifier = Modifier,
-    draggableModifier: Modifier,
     draggableHeight: Dp,
     isRescheduling: Boolean,
     onTaskDrag: (() -> Unit) = {},
@@ -123,26 +125,30 @@ fun DragTarget(
                 id = 0,
                 name = "default",
                 parentTaskId = "0",
-                start = mutableStateOf(ZonedDateTime.of(
-                    LocalDateTime.MIN,
-                    ZoneId.systemDefault()
-                )),
-                end = mutableStateOf(ZonedDateTime.of(
-                    LocalDateTime.MIN,
-                    ZoneId.systemDefault()
-                ))
+                start = mutableStateOf(
+                    ZonedDateTime.of(
+                        LocalDateTime.MIN,
+                        ZoneId.systemDefault()
+                    )
+                ),
+                end = mutableStateOf(
+                    ZonedDateTime.of(
+                        LocalDateTime.MIN,
+                        ZoneId.systemDefault()
+                    )
+                )
             )
         )
     }
-    var planComposableModifier by remember { mutableStateOf<Modifier>(Modifier) }
+//    var planComposableModifier by remember { mutableStateOf<Modifier>(Modifier) }
     var planComposableHeight by remember { mutableStateOf(0.dp) }
 
-
     currentData = dataToDrop
-    planComposableModifier =
-        draggableModifier
-            .background(Color.Transparent)
-            .border(1.dp, Color.Blue)
+    val draggableModifier = Modifier
+        .height(draggableHeight)
+        .fillMaxWidth()
+        .background(Color.Transparent)
+        .border(1.dp, Color.Blue)
     planComposableHeight = draggableHeight
     val currentState = LocalDragTargetInfo.current
 
@@ -157,14 +163,13 @@ fun DragTarget(
                     currentState.dataToDrop = currentData
                     currentState.draggableHeight = planComposableHeight
                     currentState.isRescheduling = isRescheduling
-//                    println(currentState.dataToDrop)
-//                    println(name)
-                    currentState.draggableComposable = {
-                        PlanComposable(
-                            plan = currentData,
-                            modifier = planComposableModifier
-                        )
-                    }
+                    currentState.draggableModifier = draggableModifier
+//                    currentState.draggableComposable = {
+//                        PlanComposable(
+//                            plan = currentData,
+//                            modifier = planComposableModifier
+//                        )
+//                    }
                     currentState.dragPosition = currentPosition + it
                     currentState.isDragging = true
                     currentState.topOfDraggable = Offset(
@@ -215,7 +220,8 @@ fun <Plan> DropTarget(
     //the box that is .5 * draggable height above the pointer && the box above is not covered is the current drop target
     Box(modifier = modifier.onGloballyPositioned {
         it.boundsInWindow().let { rect ->
-            if(dragInfo.isDragging && rect.contains(topOfDraggable)) dragInfo.currentDropTarget = index
+            if (dragInfo.isDragging && rect.contains(topOfDraggable)) dragInfo.currentDropTarget =
+                index
         }
     }) {
         //user dropped droppable in this drop target
@@ -233,7 +239,8 @@ fun <Plan> DropTarget(
                 ZoneId.systemDefault()
             )
             dragInfo.dataToDrop.end.value = ZonedDateTime.of(
-                LocalDateTime.of(selectedDate, timeSlot).plusMinutes(dragInfo.dataToDrop.duration.toLong()),
+                LocalDateTime.of(selectedDate, timeSlot)
+                    .plusMinutes(dragInfo.dataToDrop.duration.toLong()),
                 ZoneId.systemDefault()
             )
 

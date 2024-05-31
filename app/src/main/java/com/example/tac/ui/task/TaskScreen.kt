@@ -62,11 +62,10 @@ fun TaskSheet(
         }
 
 
+        //tasks
         val filteredTasks =
             tasks.filter { taskDao -> taskDao.taskList == currentSelectedTaskList.title }
-        //tasks
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-//            itemsIndexed(filteredTasks) { index, taskDao ->
             filteredTasks.forEachIndexed { index, task ->
                 val eventDurationMinutes = task.neededDuration
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
@@ -78,13 +77,11 @@ fun TaskSheet(
                         parentTaskId = task.id,
                         //stub
                         start = mutableStateOf(ZonedDateTime.now()),
-                        end = mutableStateOf(ZonedDateTime.now().plusMinutes(30))
+                        end = mutableStateOf(ZonedDateTime.now().plusMinutes(30)),
+                        scheduledDuration = task.neededDuration
                     ),
                     isRescheduling = false,
                     onTaskDrag = onTaskDrag,
-                    draggableModifier = Modifier
-                        .height(eventHeight)
-                        .fillMaxWidth(),
                     draggableHeight = eventHeight
                 ) {
                     TaskRow(
@@ -93,16 +90,12 @@ fun TaskSheet(
                         onTaskCompleted = onTaskCompleted
                     )
                 }
-
                 if (index < taskLists.lastIndex) Divider(color = Color.Black, thickness = 1.dp)
-
             }
 
         }
     }
 }
-
-
 
 @Composable
 fun TaskRow(
@@ -113,7 +106,6 @@ fun TaskRow(
     Row(modifier = Modifier
         .fillMaxWidth()
         .height(54.dp)
-//        .padding(4.dp)
         .clickable { onTaskSelected(taskDao) }
     ) {
         IconButton(

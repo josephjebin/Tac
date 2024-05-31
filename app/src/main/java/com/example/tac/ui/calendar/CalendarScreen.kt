@@ -14,7 +14,6 @@ import java.time.LocalDate
 
 @Composable
 fun Calendar(
-//    uiCalendarState: CalendarState,
     selectedDate: LocalDate,
     events: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,

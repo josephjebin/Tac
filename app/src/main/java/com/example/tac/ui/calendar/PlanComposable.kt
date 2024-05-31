@@ -25,7 +25,6 @@ fun PlanComposable(
     Column(
         modifier = modifier
             .fillMaxSize()
-//            .padding(end = 2.dp)
             .background(plan.color, shape = RoundedCornerShape(4.dp))
             .padding(4.dp)
     ) {

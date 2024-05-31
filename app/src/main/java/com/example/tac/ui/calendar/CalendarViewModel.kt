@@ -23,8 +23,6 @@ class CalendarViewModel : ViewModel() {
         CalendarState()
     )
     val uiState: StateFlow<CalendarState> = _uiState.asStateFlow()
-
-
 //    var calendarService: CalendarService
 
     init {
@@ -140,42 +138,19 @@ class CalendarViewModel : ViewModel() {
 //    }
 
     fun addScheduledTask(newTask: ScheduledTask) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                scheduledTasks = mutableStateOf(
-                    currentState.scheduledTasks.value.plus(
-                        newTask
-                    )
-                )
-            )
-        }
+        _uiState.value.scheduledTasks.value += newTask
     }
 
     fun removeScheduledTask(scheduledTask: ScheduledTask) {
-        println("removing: $scheduledTask")
-        println("found: ${_uiState.value.scheduledTasks.value.contains(scheduledTask)}")
-
-//        _uiState.value.scheduledTasks.value -= scheduledTask
-        _uiState.update { currentState ->
-            currentState.copy(
-                scheduledTasks = mutableStateOf(
-                    currentState.scheduledTasks.value.minus(
-                        scheduledTask
-                    )
-                )
-            )
-        }
-        _uiState.value.scheduledTasks.value.forEach {
-            println("remaining: ${{ it.name }}")
-        }
+        _uiState.value.scheduledTasks.value -= scheduledTask
     }
 
     fun addEventDao(newEventDao: EventDao) {
-        _uiState.value.events.value = _uiState.value.events.value.plus(newEventDao)
+        _uiState.value.events.value += newEventDao
     }
 
     fun removeEventDao(eventDao: EventDao) {
-        _uiState.value.events.value = _uiState.value.events.value.minus(eventDao)
+        _uiState.value.events.value -= eventDao
     }
 
 //    companion object {

@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -201,14 +202,7 @@ fun TasksAndCalendarScreen(
     onTaskListSelected:  (TaskList) -> Unit,
     onTaskSelected: (TaskDao) -> Unit
 ) {
-
-//    val coroutineScope = rememberCoroutineScope()
-//    val configuration = LocalConfiguration.current
-//    val screenHeight = configuration.screenHeightDp.dp
-//    val screenWidth = configuration.screenWidthDp.dp
-    val tasksSheetState = remember { mutableStateOf(COLLAPSED) }
-
-
+    val tasksSheetState = rememberSaveable { mutableStateOf(COLLAPSED) }
     Scaffold(
         topBar = { DayHeader(selectedDate) },
         bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
@@ -283,20 +277,6 @@ fun TasksAndCalendarScreen(
 
     }
 }
-
-//@Composable
-//fun MyFAB(modifier: Modifier, onClick: () -> Unit) {
-//    FloatingActionButton(
-//        modifier = modifier,
-//        onClick = onClick,
-//        content = {
-//            Icon(
-//                painter = painterResource(id = R.drawable.round_refresh_24),
-//                contentDescription = "Refresh"
-//            )
-//        }
-//    )
-//}
 
 @Composable
 fun MyBottomBar(

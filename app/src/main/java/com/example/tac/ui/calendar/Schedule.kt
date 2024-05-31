@@ -58,7 +58,6 @@ fun Schedule(
                 DragTarget(
                     dataToDrop = event,
                     modifier = planComposableModifier,
-                    draggableModifier = planComposableModifier,
                     draggableHeight = eventHeight,
                     isRescheduling = true
                 ) {
@@ -83,7 +82,6 @@ fun Schedule(
                 DragTarget(
                     dataToDrop = scheduledTask,
                     modifier = planComposableModifier,
-                    draggableModifier = planComposableModifier,
                     draggableHeight = taskHeight,
                     isRescheduling = true
                 ) {
