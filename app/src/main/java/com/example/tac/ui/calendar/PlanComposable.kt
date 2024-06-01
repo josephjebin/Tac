@@ -15,35 +15,42 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.tac.data.calendar.Plan
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 
 @Composable
 fun PlanComposable(
-    plan: Plan,
+    name: String,
+    description: String,
+    color: Color,
+    start: LocalTime,
+    end: LocalTime,
     modifier: Modifier = Modifier,
 ) {
     val EventTimeFormatter = DateTimeFormatter.ofPattern("h:mm a")
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(plan.color, shape = RoundedCornerShape(4.dp))
+            .background(color, shape = RoundedCornerShape(4.dp))
             .border(1.dp, Color.Black, shape = RoundedCornerShape(4.dp))
             .padding(4.dp)
     ) {
         Text(
-            text = "${plan.start.value.format(EventTimeFormatter)} - ${plan.end.value.format(EventTimeFormatter)}",
+            text = "${start.format(EventTimeFormatter)} - ${end.format(EventTimeFormatter)}",
             style = MaterialTheme.typography.caption,
         )
 
         Text(
-            text = plan.name,
+            text = name,
             style = MaterialTheme.typography.body1,
             fontWeight = FontWeight.Bold,
         )
 
         Text(
-            text = plan.description,
+            text = description,
             style = MaterialTheme.typography.body2,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

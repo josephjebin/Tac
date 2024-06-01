@@ -37,10 +37,13 @@ import java.time.ZonedDateTime
 
 internal class DragTargetInfo {
     var isDragging: Boolean by mutableStateOf(false)
+    var isRescheduling by mutableStateOf(true)
     var dragPosition by mutableStateOf(Offset.Zero)
     var dragOffset by mutableStateOf(Offset.Zero)
-
-    //    var draggableComposable by mutableStateOf<(@Composable () -> Unit)?>(null)
+    var draggableHeight by mutableStateOf(0.dp)
+    var topOfDraggable by mutableStateOf(Offset.Zero)
+    var currentDropTarget by mutableIntStateOf(-1)
+    var currentDropTargetTime: LocalTime by mutableStateOf(LocalTime.MIN)
     var dataToDrop by mutableStateOf<Plan>(
         ScheduledTask(
             id = 0,
@@ -60,10 +63,6 @@ internal class DragTargetInfo {
             )
         )
     )
-    var draggableHeight by mutableStateOf(0.dp)
-    var topOfDraggable by mutableStateOf(Offset.Zero)
-    var currentDropTarget by mutableIntStateOf(-1)
-    var isRescheduling by mutableStateOf(true)
     var draggableModifier: Modifier by mutableStateOf(Modifier)
 }
 
@@ -87,7 +86,6 @@ fun RootDragInfoProvider(
 @Composable
 fun ScheduleDraggable() {
     val state = LocalDragTargetInfo.current
-
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.isDragging) {
             Box(modifier = Modifier
@@ -101,7 +99,11 @@ fun ScheduleDraggable() {
                 }
             ) {
                 PlanComposable(
-                    plan = state.dataToDrop,
+                    name = state.dataToDrop.name,
+                    description = state.dataToDrop.description,
+                    color = state.dataToDrop.color,
+                    start = state.currentDropTargetTime,
+                    end = state.currentDropTargetTime.plusMinutes(state.dataToDrop.duration.toLong()),
                     modifier = state.draggableModifier
                 )
             }
@@ -118,19 +120,19 @@ fun DragTarget(
     onTaskDrag: (() -> Unit) = {},
     content: @Composable () -> Unit
 ) {
+    val currentState = LocalDragTargetInfo.current
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
     var currentData by remember { mutableStateOf(dataToDrop) }
-//    var planComposableModifier by remember { mutableStateOf<Modifier>(Modifier) }
     var planComposableHeight by remember { mutableStateOf(0.dp) }
+    var planComposableModifier: Modifier by remember { mutableStateOf(Modifier) }
 
     currentData = dataToDrop
-    val draggableModifier = Modifier
-        .height(draggableHeight)
+    planComposableHeight = draggableHeight
+    planComposableModifier = Modifier
+        .height(planComposableHeight)
         .fillMaxWidth()
         .background(Color.Transparent)
         .border(1.dp, Color.Blue)
-    planComposableHeight = draggableHeight
-    val currentState = LocalDragTargetInfo.current
 
     Box(modifier = modifier
         .onGloballyPositioned {
@@ -141,23 +143,17 @@ fun DragTarget(
                 onDragStart = {
                     onTaskDrag()
                     currentState.dataToDrop = currentData
-                    currentState.draggableHeight = planComposableHeight
                     currentState.isRescheduling = isRescheduling
-                    currentState.draggableModifier = draggableModifier
-//                    currentState.draggableComposable = {
-//                        PlanComposable(
-//                            plan = currentData,
-//                            modifier = planComposableModifier
-//                        )
-//                    }
                     currentState.dragPosition = currentPosition + it
-                    currentState.isDragging = true
+                    currentState.draggableHeight = planComposableHeight
                     currentState.topOfDraggable = Offset(
                         (currentPosition + it).x,
                         (currentPosition + it).y
                             .minus(planComposableHeight.toPx() * .5f)
                             .plus(29f)
                     )
+                    currentState.draggableModifier = planComposableModifier
+                    currentState.isDragging = true
                 }, onDrag = { change, dragAmount ->
                     change.consume()
                     currentState.dragOffset += Offset(dragAmount.x, dragAmount.y)
@@ -165,11 +161,9 @@ fun DragTarget(
                 }, onDragEnd = {
                     currentState.isDragging = false
                     currentState.dragOffset = Offset.Zero
-//                    currentState.currentDropTarget = -1
                 }, onDragCancel = {
                     currentState.isDragging = false
                     currentState.dragOffset = Offset.Zero
-//                    currentState.currentDropTarget = -1
                 })
         }
     ) {
@@ -178,7 +172,7 @@ fun DragTarget(
 }
 
 @Composable
-fun <Plan> DropTarget(
+fun DropTarget(
     index: Int,
     selectedDate: LocalDate,
     timeSlot: LocalTime,
@@ -192,16 +186,12 @@ fun <Plan> DropTarget(
     val dragInfo = LocalDragTargetInfo.current
     val topOfDraggable = dragInfo.topOfDraggable
 
-    //if the first box is covered
-    //the first box is the current drop target
-    //else if last box is covered
-    //the box that is draggableHeight above the last box is the current drop target
-    //else
-    //the box that is .5 * draggable height above the pointer && the box above is not covered is the current drop target
     Box(modifier = modifier.onGloballyPositioned {
         it.boundsInWindow().let { rect ->
-            if (dragInfo.isDragging && rect.contains(topOfDraggable)) dragInfo.currentDropTarget =
-                index
+            if (dragInfo.isDragging && rect.contains(topOfDraggable)) {
+                dragInfo.currentDropTarget = index
+                dragInfo.currentDropTargetTime = timeSlot
+            }
         }
     }) {
         //user dropped droppable in this drop target

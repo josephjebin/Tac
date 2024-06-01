@@ -17,16 +17,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.example.tac.data.calendar.EventDao
-import com.example.tac.data.calendar.Plan
 import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.ui.dragAndDrop.DragTarget
 import com.example.tac.ui.dragAndDrop.DropTarget
 import com.example.tac.ui.task.TasksSheetState
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
@@ -48,8 +44,8 @@ fun Schedule(
     Layout(
         content = {
             events.sortedBy { eventDao -> eventDao.start.value }.forEach { event ->
-                val eventDurationMinutes = ChronoUnit.MINUTES.between(event.start.value, event.end.value)
-                val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
+//                val eventDurationMinutes = ChronoUnit.MINUTES.between(event.start.value, event.end.value)
+                val eventHeight = ((event.duration / 60f) * hourHeight)
                 val planComposableModifier = Modifier
                     .startData(event.start.value.toLocalTime())
                     .height(eventHeight)
@@ -62,10 +58,11 @@ fun Schedule(
                     isRescheduling = true
                 ) {
                     PlanComposable(
-                        plan = event,
-//                        modifier = Modifier
-//                            .height(eventHeight)
-//                            .fillMaxWidth()
+                        name = event.name,
+                        description = event.description,
+                        color = event.color,
+                        start = event.start.value.toLocalTime(),
+                        end = event.end.value.toLocalTime()
                     )
                 }
             }
@@ -86,7 +83,11 @@ fun Schedule(
                     isRescheduling = true
                 ) {
                     PlanComposable(
-                        plan = scheduledTask
+                        name = scheduledTask.name,
+                        description = scheduledTask.description,
+                        color = scheduledTask.color,
+                        start = scheduledTask.start.value.toLocalTime(),
+                        end = scheduledTask.end.value.toLocalTime()
                     )
                 }
             }
@@ -154,7 +155,7 @@ fun DropTargets(
     repeat(288) {
         val timeSlot: LocalTime = LocalTime.MIN.plusMinutes(it * 5L)
 
-        DropTarget<Plan>(
+        DropTarget(
             index = it,
             timeSlot = timeSlot,
             selectedDate = selectedDate,
