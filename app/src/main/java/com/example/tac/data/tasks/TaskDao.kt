@@ -46,7 +46,6 @@ data class TaskDao(
         hidden = task.hidden
         links = task.links
         this.taskList = taskList
-        //TODO: make dynamic
         neededDuration = 15
     }
 }

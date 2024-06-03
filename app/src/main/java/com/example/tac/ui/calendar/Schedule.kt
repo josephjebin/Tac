@@ -44,7 +44,6 @@ fun Schedule(
     Layout(
         content = {
             events.sortedBy { eventDao -> eventDao.start.value }.forEach { event ->
-//                val eventDurationMinutes = ChronoUnit.MINUTES.between(event.start.value, event.end.value)
                 val eventHeight = ((event.duration / 60f) * hourHeight)
                 val planComposableModifier = Modifier
                     .startData(event.start.value.toLocalTime())
@@ -104,9 +103,6 @@ fun Schedule(
             }
         },
         modifier = modifier
-//            .onGloballyPositioned {
-//                scheduleSize = it.size
-//            }
             .drawBehind {
                 repeat(23) {
                     drawLine(
@@ -119,14 +115,6 @@ fun Schedule(
             }
     ) { measureables, constraints ->
         val height = hourHeight.roundToPx() * 24
-//        val placeablesWithEvents = measureables.map { measurable ->
-//            val event = measurable.parentData as Plan
-//            val eventDurationMinutes = ChronoUnit.MINUTES.between(event.start, event.end)
-//            val eventHeight = ((eventDurationMinutes / 60f) * hourHeight.toPx()).roundToInt()
-//            val placeable = measurable.measure(constraints.copy(minHeight = eventHeight, maxHeight = eventHeight))
-//            Pair(placeable, event)
-//        }
-
         layout(constraints.maxWidth, height) {
             measureables.forEach { measurable ->
                 val eventOffsetMinutes =
@@ -135,7 +123,6 @@ fun Schedule(
                         (measurable.parentData as LocalTime)
                     )
                 val eventY = ((eventOffsetMinutes / 60f) * hourHeight.toPx()).roundToInt()
-//                val eventHeight = ((eventDurationMinutes / 60f) * hourHeight.toPx()).roundToInt()
                 val placeable = measurable.measure(constraints.copy())
                 placeable.place(0, eventY)
             }
