@@ -213,25 +213,6 @@ fun TasksAndCalendarScreen(
                 modifier = Modifier.padding(it),
                 verticalArrangement = Arrangement.Bottom
             ) {
-                val taskSheetModifier = when (tasksSheetState.value) {
-                    COLLAPSED -> {
-                        Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                    }
-
-                    PARTIALLY_EXPANDED -> {
-                        Modifier
-                            .fillMaxWidth()
-                            .height(400.dp)
-                    }
-
-                    EXPANDED -> {
-                        Modifier
-                            .fillMaxSize()
-                    }
-                }
-
                 //CALENDAR
                 val verticalScrollState = rememberScrollState()
                 if (tasksSheetState.value != EXPANDED) {
@@ -265,6 +246,7 @@ fun TasksAndCalendarScreen(
 
                 //TASKS SHEET
                 TaskSheet(
+                    tasksSheetState = tasksSheetState,
                     taskLists = taskLists,
                     tasks = tasks,
                     currentSelectedTaskList = currentSelectedTaskList,
@@ -273,7 +255,6 @@ fun TasksAndCalendarScreen(
                     onTaskCompleted = { taskDao: TaskDao ->
                     },
                     onTaskDrag = { tasksSheetState.value = COLLAPSED },
-                    modifier = taskSheetModifier
                 )
             }
         }

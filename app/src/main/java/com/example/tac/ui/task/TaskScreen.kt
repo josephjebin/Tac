@@ -6,9 +6,11 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -26,17 +28,36 @@ import java.time.ZonedDateTime
 
 @Composable
 fun TaskSheet(
+    tasksSheetState: MutableState<TasksSheetState>,
     taskLists: List<TaskList>,
     tasks: List<TaskDao>,
     currentSelectedTaskList: TaskList,
     onTaskListSelected: (TaskList) -> Unit,
     onTaskSelected: (TaskDao) -> Unit,
     onTaskCompleted: (TaskDao) -> Unit,
-    onTaskDrag: () -> Unit,
-    modifier: Modifier = Modifier
+    onTaskDrag: () -> Unit
 ) {
+    val taskSheetModifier = when (tasksSheetState.value) {
+        TasksSheetState.COLLAPSED -> {
+            Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+        }
+
+        TasksSheetState.PARTIALLY_EXPANDED -> {
+            Modifier
+                .fillMaxWidth()
+                .height(400.dp)
+        }
+
+        TasksSheetState.EXPANDED -> {
+            Modifier
+                .fillMaxSize()
+        }
+    }
+
     Column(
-        modifier = modifier
+        modifier = taskSheetModifier
             .border(
                 BorderStroke(1.dp, SolidColor(Color.Black)),
                 RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
@@ -47,12 +68,34 @@ fun TaskSheet(
     ) {
         val hourHeight = 64.dp
 
+        //Peek Arrow
+        Box(modifier = Modifier
+            .height(48.dp)
+            .border(
+                BorderStroke(0.dp, Color.Transparent),
+                RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+            )
+            .fillMaxWidth()
+            .clickable {
+
+            }
+        ) {
+            Image(
+                painterResource(id = R.drawable.caret_down),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .rotate(if(tasksSheetState.value == TasksSheetState.COLLAPSED)180f else 0f),
+                contentDescription = "Task Sheet Peek Arrow"
+            )
+        }
+
+
         //projects
         Row {
             taskLists.forEach { taskList ->
                 Card(
                     modifier = Modifier
-                        .padding(16.dp, 16.dp)
+                        .padding(8.dp, 16.dp)
                         .border(BorderStroke(1.dp, SolidColor(Color.Black)))
                         .clickable { onTaskListSelected(taskList) }
                 ) {
