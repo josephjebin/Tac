@@ -1,55 +1,44 @@
 package com.example.tac.ui.task
 
-import android.content.Context
-import android.text.TextUtils
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.tac.TacApplication
-import com.example.tac.data.constants.Constants
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
-import com.example.tac.data.tasks.TasksService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import net.openid.appauth.AppAuthConfiguration
-import net.openid.appauth.AuthState
-import net.openid.appauth.AuthorizationService
-import net.openid.appauth.browser.BrowserAllowList
-import net.openid.appauth.browser.VersionedBrowserMatcher
-import org.json.JSONException
 
 
-class TasksViewModel(authState: AuthState, authorizationService : AuthorizationService): ViewModel() {
+//class TasksViewModel(authState: AuthState, authorizationService : AuthorizationService): ViewModel() {
+class TasksViewModel: ViewModel() {
     val TAG = "TasksViewModel"
-    private val _uiState = MutableStateFlow(TasksState(listOf(), listOf(), TaskList(), TaskDao()))
+    private val _uiState = MutableStateFlow(TasksState(
+        taskLists = dummyDataTaskLists(),
+        tasks = dummyDataTasks(),
+        currentSelectedTaskList = TaskList(),
+        currentSelectedTask = TaskDao())
+    )
     val uiState: StateFlow<TasksState> = _uiState.asStateFlow()
-    var tasksService: TasksService
+//    var tasksService: TasksService
 
-    init {
-        tasksService = TasksService(authState, authorizationService)
-    }
+//    init {
+//        tasksService = TasksService(authState, authorizationService)
+//    }
 
-    fun getTaskListsAndTasks() {
-        viewModelScope.launch {
-            val taskLists = tasksService.getTaskLists()
-            updateTaskLists(taskLists)
-            val tasks = mutableListOf<TaskDao>()
-            for (taskList in taskLists) {
-                val tasksInProject = tasksService.getTasks(taskList.id)
-                for(taskInProject in tasksInProject) {
-                    tasks.add(TaskDao(taskInProject, taskList.title))
-                }
-            }
-            updateTasks(tasks)
-        }
-    }
+//    fun getTaskListsAndTasks() {
+//        viewModelScope.launch {
+//            val taskLists = tasksService.getTaskLists()
+//            updateTaskLists(taskLists)
+//            val tasks = mutableListOf<TaskDao>()
+//            for (taskList in taskLists) {
+//                val tasksInProject = tasksService.getTasks(taskList.id)
+//                for(taskInProject in tasksInProject) {
+//                    tasks.add(TaskDao(taskInProject, taskList.title))
+//                }
+//            }
+//            updateTasks(tasks)
+//        }
+//    }
 
     private fun updateTaskLists(newLists: List<TaskList>) {
         _uiState.update {currentState ->
@@ -79,35 +68,57 @@ class TasksViewModel(authState: AuthState, authorizationService : AuthorizationS
 
     }
 
-    companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application = (this[APPLICATION_KEY] as TacApplication)
-
-                var authState = AuthState()
-                val jsonString = application
-                    .getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-                    .getString(Constants.AUTH_STATE, null)
-
-                if (jsonString != null && !TextUtils.isEmpty(jsonString)) {
-                    try { authState = AuthState.jsonDeserialize(jsonString) }
-                    catch (jsonException: JSONException) { }
-                }
-
-                val appAuthConfiguration = AppAuthConfiguration.Builder()
-                    .setBrowserMatcher(
-                        BrowserAllowList(
-                            VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
-                            VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB
-                        )
-                    ).build()
-
-                val authorizationService = AuthorizationService(
-                    application,
-                    appAuthConfiguration)
-
-                TasksViewModel(authState, authorizationService)
-            }
-        }
+    private fun dummyDataTaskLists(): List<TaskList> {
+        return listOf(
+            TaskList(id = "careerTaskListId", title = "Career"),
+            TaskList(id = "financeTaskListId", title = "Finance"),
+            TaskList(id = "fitnessTaskListId", title = "Fitness")
+        )
     }
+
+    private fun dummyDataTasks(): List<TaskDao> {
+        return listOf(
+            TaskDao(id = "1", title = "Apply", taskList = "Career", neededDuration = 120),
+            TaskDao(id = "2", title = "Make Tac Prototype", taskList = "Career", neededDuration = 45),
+            TaskDao(id = "3", title = "LeetCode", taskList = "Career", neededDuration = 45),
+            TaskDao(id = "4", title = "Get a job", taskList = "Finance", neededDuration = 45),
+            TaskDao(id = "5", title = "Revise budget", taskList = "Finance", neededDuration = 45),
+            TaskDao(id = "6", title = "Categorize expenses", taskList = "Finance", neededDuration = 45),
+            TaskDao(id = "7", title = "Gym", taskList = "Fitness", neededDuration = 45),
+            TaskDao(id = "8", title = "Stretch", taskList = "Fitness", neededDuration = 45),
+            TaskDao(id = "9", title = "Walk", taskList = "Fitness", neededDuration = 45)
+        )
+    }
+
+//    companion object {
+//        val Factory: ViewModelProvider.Factory = viewModelFactory {
+//            initializer {
+//                val application = (this[APPLICATION_KEY] as TacApplication)
+//
+//                var authState = AuthState()
+//                val jsonString = application
+//                    .getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+//                    .getString(Constants.AUTH_STATE, null)
+//
+//                if (jsonString != null && !TextUtils.isEmpty(jsonString)) {
+//                    try { authState = AuthState.jsonDeserialize(jsonString) }
+//                    catch (jsonException: JSONException) { }
+//                }
+//
+//                val appAuthConfiguration = AppAuthConfiguration.Builder()
+//                    .setBrowserMatcher(
+//                        BrowserAllowList(
+//                            VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
+//                            VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB
+//                        )
+//                    ).build()
+//
+//                val authorizationService = AuthorizationService(
+//                    application,
+//                    appAuthConfiguration)
+//
+//                TasksViewModel(authState, authorizationService)
+//            }
+//        }
+//    }
 }

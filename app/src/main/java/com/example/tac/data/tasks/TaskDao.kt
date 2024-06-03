@@ -21,7 +21,9 @@ data class TaskDao(
     var hidden: Boolean = false,
     var links: List<Link> = listOf(Link("", "", "")),
     var taskList: String = "",
-    var duration: Int = 15,
+    var scheduledDuration: Int = 0,
+    var workedDuration: Int = 0,
+    var neededDuration: Int = 15,
     var priority: Priority = Priority.Priority4
 ) {
     constructor(task: Task, taskList: String) : this() {
@@ -44,7 +46,6 @@ data class TaskDao(
         hidden = task.hidden
         links = task.links
         this.taskList = taskList
-        //TODO: make dynamic
-        duration = 15
+        neededDuration = 15
     }
 }

@@ -1,23 +1,23 @@
 package com.example.tac.data.calendar
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.graphics.Color
-import com.example.tac.ui.theme.onSurfaceGray
-import java.time.LocalDateTime
+import java.time.Duration
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 
-data class EventDao (
-    var name: String = "",
-    val color: Color = onSurfaceGray,
-    var start: ZonedDateTime = ZonedDateTime.now(),
-    var end: ZonedDateTime = ZonedDateTime.now(),
-    var description: String = ""
-) {
-    constructor(event: GoogleEvent): this() {
-        val inputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssz")
-        this.name = event.summary
-        if(event.start.dateTime.isNotEmpty()) this.start = ZonedDateTime.parse(event.start.dateTime, inputFormat)
-        if(event.end.dateTime.isNotEmpty()) this.end = ZonedDateTime.parse(event.end.dateTime, inputFormat)
-        this.description = event.description
-    }
-}
+data class EventDao(
+    override var id: Int,
+    override var name: String,
+    var busy: Boolean,
+    override var start: MutableState<ZonedDateTime>,
+    override var end: MutableState<ZonedDateTime>,
+    override var duration: Int = Duration.between(start.value, end.value).toMinutes().toInt(),
+    override var color: Color = Color.Gray
+): Plan(
+    id = id,
+    name = name,
+    start = start,
+    end = end,
+    duration = duration,
+    color = color
+)

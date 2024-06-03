@@ -7,10 +7,11 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import java.time.LocalDate
 import java.time.ZonedDateTime
 
 @Composable
-fun DayHeader(selectedDate: ZonedDateTime) {
+fun DayHeader(selectedDate: LocalDate) {
     Row() {
         Text(text = "${selectedDate.dayOfWeek}")
 

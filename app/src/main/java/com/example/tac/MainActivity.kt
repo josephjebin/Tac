@@ -1,49 +1,45 @@
 package com.example.tac
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.text.TextUtils
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.tac.data.constants.Constants
+import com.example.tac.data.calendar.EventDao
+import com.example.tac.data.calendar.ScheduledTask
+import com.example.tac.data.tasks.Task
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import com.example.tac.ui.calendar.Calendar
 import com.example.tac.ui.calendar.CalendarViewModel
+import com.example.tac.ui.calendar.DayHeader
+import com.example.tac.ui.dragAndDrop.RootDragInfoProvider
 import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksSheetState
+import com.example.tac.ui.task.TasksSheetState.*
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.ui.theme.TacTheme
 import com.example.tac.ui.theme.accent_gray
-import com.example.tac.ui.theme.primaryGray
-import kotlinx.coroutines.*
 import net.openid.appauth.*
-import net.openid.appauth.browser.BrowserAllowList
-import net.openid.appauth.browser.VersionedBrowserMatcher
-import org.json.JSONException
-import kotlin.math.roundToInt
+import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
     val TAG = "Tac"
@@ -53,11 +49,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initAuthServiceConfig()
-        initAuthService()
-        if (!restoreState()) {
-            attemptAuthorization()
-        }
+//        initAuthServiceConfig()
+//        initAuthService()
+//        if (!restoreState()) {
+//            attemptAuthorization()
+//        }
+
+
 
         setContent {
             TacTheme {
@@ -66,355 +64,257 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun persistState() {
-        application.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(Constants.AUTH_STATE, authState.jsonSerializeString())
-            .apply()
-    }
+//    fun persistState() {
+//        application.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+//            .edit()
+//            .putString(Constants.AUTH_STATE, authState.jsonSerializeString())
+//            .apply()
+//    }
 
-    fun restoreState(): Boolean {
-        val jsonString = application
-            .getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .getString(Constants.AUTH_STATE, null)
+//    fun restoreState(): Boolean {
+//        val jsonString = application
+//            .getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
+//            .getString(Constants.AUTH_STATE, null)
+//
+//        if (jsonString != null && !TextUtils.isEmpty(jsonString)) {
+//            try {
+//                authState = AuthState.jsonDeserialize(jsonString)
+//                return !authState.hasClientSecretExpired()
+//            } catch (jsonException: JSONException) {
+//            }
+//        }
+//
+//        return false
+//    }
 
-        if (jsonString != null && !TextUtils.isEmpty(jsonString)) {
-            try {
-                authState = AuthState.jsonDeserialize(jsonString)
-                return !authState.hasClientSecretExpired()
-            } catch (jsonException: JSONException) {
-            }
-        }
+//    private fun initAuthServiceConfig() {
+//        authServiceConfig = AuthorizationServiceConfiguration(
+//            Uri.parse(Constants.URL_AUTHORIZATION),
+//            Uri.parse(Constants.URL_TOKEN_EXCHANGE),
+//            null,
+//            Uri.parse(Constants.URL_LOGOUT)
+//        )
+//    }
 
-        return false
-    }
+//    private fun initAuthService() {
+//        val appAuthConfiguration = AppAuthConfiguration.Builder()
+//            .setBrowserMatcher(
+//                BrowserAllowList(
+//                    VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
+//                    VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB
+//                )
+//            ).build()
+//
+//        authorizationService = AuthorizationService(
+//            application,
+//            appAuthConfiguration
+//        )
+//    }
 
-    private fun initAuthServiceConfig() {
-        authServiceConfig = AuthorizationServiceConfiguration(
-            Uri.parse(Constants.URL_AUTHORIZATION),
-            Uri.parse(Constants.URL_TOKEN_EXCHANGE),
-            null,
-            Uri.parse(Constants.URL_LOGOUT)
-        )
-    }
+//    fun attemptAuthorization() {
+//        val request = AuthorizationRequest.Builder(
+//            authServiceConfig,
+//            Constants.CLIENT_ID,
+//            ResponseTypeValues.CODE,
+//            Uri.parse(Constants.URL_AUTH_REDIRECT))
+//            .setScopes(Constants.SCOPE_CALENDAR, Constants.SCOPE_TASKS).build()
+//
+//        val authIntent = authorizationService.getAuthorizationRequestIntent(request)
+//
+//        Log.i(TAG, "Trying to get auth code")
+//
+//        val authorizationLauncher =
+//            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//                run {
+//                    Log.i(TAG, "Result code from activity result: ${result.resultCode}")
+//                    if (result.resultCode == Activity.RESULT_OK) {
+//                        Log.i(TAG, "Trying to handle auth response: ${result.data}")
+//                        handleAuthorizationResponse(result.data!!)
+//                    }
+//                }
+//            }
+//
+//        authorizationLauncher.launch(authIntent)
+//    }
 
-    private fun initAuthService() {
-        val appAuthConfiguration = AppAuthConfiguration.Builder()
-            .setBrowserMatcher(
-                BrowserAllowList(
-                    VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
-                    VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB
-                )
-            ).build()
-
-        authorizationService = AuthorizationService(
-            application,
-            appAuthConfiguration
-        )
-    }
-
-    fun attemptAuthorization() {
-        val request = AuthorizationRequest.Builder(
-            authServiceConfig,
-            Constants.CLIENT_ID,
-            ResponseTypeValues.CODE,
-            Uri.parse(Constants.URL_AUTH_REDIRECT))
-            .setScopes(Constants.SCOPE_CALENDAR, Constants.SCOPE_TASKS).build()
-
-        val authIntent = authorizationService.getAuthorizationRequestIntent(request)
-
-        Log.i(TAG, "Trying to get auth code")
-
-        val authorizationLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                run {
-                    Log.i(TAG, "Result code from activity result: ${result.resultCode}")
-                    if (result.resultCode == Activity.RESULT_OK) {
-                        Log.i(TAG, "Trying to handle auth response: ${result.data}")
-                        handleAuthorizationResponse(result.data!!)
-                    }
-                }
-            }
-
-        authorizationLauncher.launch(authIntent)
-    }
-
-    private fun handleAuthorizationResponse(intent: Intent) {
-        val authorizationResponse: AuthorizationResponse? = AuthorizationResponse.fromIntent(intent)
-        val error = AuthorizationException.fromIntent(intent)
-
-        authState = AuthState(authorizationResponse, error)
-
-        val tokenExchangeRequest = authorizationResponse?.createTokenExchangeRequest()
-        if (tokenExchangeRequest != null) {
-            authorizationService.performTokenRequest(tokenExchangeRequest) { response, exception ->
-                if (exception != null) {
-                    authState = AuthState()
-                } else {
-                    if (response != null) {
-                        authState.update(response, exception)
-                    }
-                }
-                persistState()
-            }
-        }
-    }
+//    private fun handleAuthorizationResponse(intent: Intent) {
+//        val authorizationResponse: AuthorizationResponse? = AuthorizationResponse.fromIntent(intent)
+//        val error = AuthorizationException.fromIntent(intent)
+//
+//        authState = AuthState(authorizationResponse, error)
+//
+//        val tokenExchangeRequest = authorizationResponse?.createTokenExchangeRequest()
+//        if (tokenExchangeRequest != null) {
+//            authorizationService.performTokenRequest(tokenExchangeRequest) { response, exception ->
+//                if (exception != null) {
+//                    authState = AuthState()
+//                } else {
+//                    if (response != null) {
+//                        authState.update(response, exception)
+//                    }
+//                }
+//                persistState()
+//            }
+//        }
+//    }
 }
 
 @Composable
-fun Tac() {
+fun Tac(calendarViewModel: CalendarViewModel = viewModel(),
+        tasksViewModel: TasksViewModel = viewModel()
+) {
     Surface(color = MaterialTheme.colors.background) {
-        TasksAndCalendarScreen()
+        val uiCalendarState by calendarViewModel.uiState.collectAsState()
+        val uiTasksState by tasksViewModel.uiState.collectAsState()
+        TasksAndCalendarScreen(
+            selectedDate = uiCalendarState.selectedDate,
+            events = uiCalendarState.events.value,
+            scheduledTasks = uiCalendarState.scheduledTasks.value,
+            addScheduledTask = { scheduledTask: ScheduledTask -> calendarViewModel.addScheduledTask(scheduledTask) },
+            removeScheduledTask = { scheduledTask: ScheduledTask -> calendarViewModel.removeScheduledTask(scheduledTask) },
+            addEventDao = { eventDao: EventDao -> calendarViewModel.addEventDao(eventDao) },
+            removeEventDao = { eventDao: EventDao -> calendarViewModel.removeEventDao(eventDao) },
+            taskLists = uiTasksState.taskLists,
+            tasks = uiTasksState.tasks,
+            currentSelectedTaskList = uiTasksState.currentSelectedTaskList,
+            onTaskListSelected = { taskList: TaskList ->
+                tasksViewModel.updateCurrentSelectedTaskList(taskList)
+            },
+            onTaskSelected = { taskDao: TaskDao ->
+                tasksViewModel.updateCurrentSelectedTask(taskDao)
+            }
+        )
     }
 }
 
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TasksAndCalendarScreen(
-    tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory),
-    calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
+    selectedDate: LocalDate,
+    events: List<EventDao>,
+    scheduledTasks: List<ScheduledTask>,
+    addScheduledTask: (ScheduledTask) -> Unit,
+    removeScheduledTask: (ScheduledTask) -> Unit,
+    addEventDao: (EventDao) -> Unit,
+    removeEventDao: (EventDao) -> Unit,
+    taskLists: List<TaskList>,
+    tasks: List<TaskDao>,
+    currentSelectedTaskList: TaskList,
+    onTaskListSelected:  (TaskList) -> Unit,
+    onTaskSelected: (TaskDao) -> Unit
 ) {
-    val uiTasksState by tasksViewModel.uiState.collectAsState()
-    val uiCalendarState by calendarViewModel.uiState.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
-    val swipeableState = rememberSwipeableState(initialValue = TasksSheetState.PARTIALLY_EXPANDED)
-
-    Box {
-        //calendar padding is used to offset the bottom of the calendar dependent on the tasks sheet
-        val calendarPadding = when(swipeableState.currentValue) {
-            TasksSheetState.COLLAPSED -> 64.dp
-            else -> 296.dp
-        }
-        Calendar(Modifier.padding(PaddingValues(bottom = calendarPadding)), uiCalendarState)
-        MyBottomSheet(swipeableState = swipeableState, body = {
-            TaskSheet(
-                uiTasksState.taskLists,
-                uiTasksState.tasks,
-                uiTasksState.currentSelectedTaskList,
-                onTaskListSelected = { taskList: TaskList ->
-                    tasksViewModel.updateCurrentSelectedTaskList(taskList)
-                },
-                onTaskSelected = { taskDao: TaskDao ->
-                    tasksViewModel.updateCurrentSelectedTask(taskDao)
-                },
-                onTaskCompleted = { taskDao: TaskDao ->
-                }
-            )
-        })
-
-        MyBottomBar(
-            tasksSheetState = swipeableState.currentValue,
-            updateTasksSheetState = { newTasksSheetState: TasksSheetState ->
-                coroutineScope.launch {
-                    swipeableState.animateTo(newTasksSheetState)
-                }
-            }
-        )
-
-        MyFAB(modifier = Modifier
-            .align(Alignment.TopEnd)
-            .padding(top = 40.dp, end = 16.dp),
-            onClick = {
-                tasksViewModel.getTaskListsAndTasks()
-                calendarViewModel.initCalendarsAndEvents()
-            }
-        )
-    }
-}
-
-@Composable
-fun MyFAB(modifier: Modifier, onClick: () -> Unit) {
-    FloatingActionButton(
-        modifier = modifier,
-        onClick = onClick,
-        content = {
-            Icon(
-                painter = painterResource(id = R.drawable.round_refresh_24),
-                contentDescription = "Refresh"
-            )
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-fun MyBottomSheet(
-    body: @Composable () -> Unit,
-    swipeableState: SwipeableState<TasksSheetState>
-) {
-    BoxWithConstraints  {
-        //logic to obtain screen size
-        val constraintsScope = this
-        val maxHeight = with(LocalDensity.current) {
-            constraintsScope.maxHeight.toPx()
-        }
-
-        val columnModifier = when (swipeableState.currentValue) {
-            TasksSheetState.EXPANDED -> Modifier
-                .fillMaxHeight()
-                .padding(PaddingValues(bottom = 56.dp))
-            TasksSheetState.PARTIALLY_EXPANDED -> Modifier
-                .height(320.dp)
-                .padding(PaddingValues(bottom = 70.dp))
-            else -> Modifier.height(0.dp)
-        }
-
-        Column(columnModifier) {
-            Box(
-                Modifier
-                    .offset {
-                        IntOffset(
-                            x = 0,
-                            y = swipeableState.offset.value.roundToInt()
-                        )
-                    }
-                    .swipeable(
-                        state = swipeableState,
-                        orientation = Orientation.Vertical,
-                        anchors = mapOf(
-                            0f to TasksSheetState.EXPANDED,
-                            1300f to TasksSheetState.PARTIALLY_EXPANDED,
-                            maxHeight to TasksSheetState.COLLAPSED,
-                        )
-                    )
+    val tasksSheetState = rememberSaveable { mutableStateOf(COLLAPSED) }
+    Scaffold(
+        topBar = { DayHeader(selectedDate) },
+        bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
+    ) {
+        RootDragInfoProvider {
+            Column(
+                modifier = Modifier.padding(it),
+                verticalArrangement = Arrangement.Bottom
             ) {
-                body()
+                //CALENDAR
+                val verticalScrollState = rememberScrollState()
+                if (tasksSheetState.value != EXPANDED) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1.0f)
+                            .fillMaxWidth()
+                    ) {
+
+                        Calendar(
+                            verticalScrollState = verticalScrollState,
+                            selectedDate = selectedDate,
+                            events = events.filter { eventDao ->
+                                eventDao.start.value.toLocalDate()
+                                    .equals(selectedDate)
+                            },
+                            scheduledTasks = scheduledTasks.filter { scheduledTask ->
+                                scheduledTask.start.value.toLocalDate()
+                                    .equals(selectedDate)
+                            },
+                            tasksSheetState = tasksSheetState.value,
+                            addScheduledTask = addScheduledTask,
+                            removeScheduledTask = removeScheduledTask,
+                            addEventDao = addEventDao,
+                            removeEventDao = removeEventDao
+                        )
+
+
+                    }
+                }
+
+                //TASKS SHEET
+                TaskSheet(
+                    tasksSheetState = tasksSheetState,
+                    taskLists = taskLists,
+                    tasks = tasks,
+                    currentSelectedTaskList = currentSelectedTaskList,
+                    onTaskListSelected = onTaskListSelected,
+                    onTaskSelected = onTaskSelected,
+                    onTaskCompleted = { taskDao: TaskDao ->
+                    },
+                    onTaskDrag = { tasksSheetState.value = COLLAPSED },
+                )
             }
         }
+
     }
 }
 
 @Composable
 fun MyBottomBar(
-    tasksSheetState: TasksSheetState,
-    updateTasksSheetState: (TasksSheetState) -> Unit
+    tasksSheetState: MutableState<TasksSheetState>
 ) {
-    Box(modifier = Modifier.fillMaxHeight()) {
-        BottomAppBar(
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .background(accent_gray)
+    ) {
+        //CALENDAR BUTTON
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .background(accent_gray)
+                .weight(1.0f)
+                .height(48.dp)
+                .border(1.dp, Color.Black)
+                .clickable {
+                    tasksSheetState.value = COLLAPSED
+                }
         ) {
-            //calendar button
-            IconButton(
-                modifier = Modifier.weight(1f),
-                onClick = {
-                    updateTasksSheetState(TasksSheetState.COLLAPSED)
-                }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.round_calendar_today_24),
-                    contentDescription = "Calendar button"
-                )
-            }
+            Icon(
+                painter = painterResource(id = R.drawable.round_calendar_today_24),
+                contentDescription = "Calendar button"
+            )
+        }
 
-            val tasksButtonModifier: Modifier = when (tasksSheetState) {
-                TasksSheetState.COLLAPSED -> {
-                    Modifier
-                        .weight(1f)
-                        .background(primaryGray)
+        //TO-DO LIST BUTTON
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .weight(1.0f)
+                .height(48.dp)
+                .border(1.dp, Color.Black)
+                .clickable {
+                    if (tasksSheetState.value == COLLAPSED || tasksSheetState.value == PARTIALLY_EXPANDED)
+                        tasksSheetState.value = EXPANDED
+                    else
+                        tasksSheetState.value = PARTIALLY_EXPANDED
                 }
-                TasksSheetState.PARTIALLY_EXPANDED -> {
-                    Modifier
-                        .weight(1f)
-                        .background(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    primaryGray,
-                                    accent_gray
-                                )
-                            )
-                        )
-                }
-                else -> {
-                    Modifier
-                        .weight(1f)
-                        .background(accent_gray)
-                }
-            }
-
-            //tasks button
-            IconButton(modifier = tasksButtonModifier,
-                onClick = {
-                    when (tasksSheetState) {
-                        TasksSheetState.COLLAPSED -> updateTasksSheetState(TasksSheetState.PARTIALLY_EXPANDED)
-                        TasksSheetState.PARTIALLY_EXPANDED -> updateTasksSheetState(TasksSheetState.EXPANDED)
-                        else -> updateTasksSheetState(TasksSheetState.PARTIALLY_EXPANDED)
-                    }
-                }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.round_task_24),
-                    contentDescription = "Tasks button"
-                )
-            }
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.round_task_24),
+                contentDescription = "Tasks button"
+            )
         }
     }
-
 }
-
-
-//@OptIn(ExperimentalMaterialApi::class)
-//@Composable
-//fun TasksAndCalendarScreen(
-//    tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModel.Factory),
-//    calendarViewModel: CalendarViewModel = viewModel(factory = CalendarViewModel.Factory)
-//) {
-//    val uiTasksState by tasksViewModel.uiState.collectAsState()
-//    val uiCalendarState by calendarViewModel.uiState.collectAsState()
-//
-//    Box {
-//        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-//            bottomSheetState = rememberBottomSheetState(initialValue = BottomSheetValue.Collapsed)
-//        )
-//        val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-//        var sheetPeekHeight by remember { mutableStateOf(0.dp) }
-//
-//
-//        val taskSheetModifier = when (tasksButtonState) {
-//            0 -> Modifier.height(0.dp)
-//            else -> Modifier.wrapContentHeight()
-//        }
-//        BottomSheetScaffold(
-//            modifier = Modifier.requiredHeightIn(max = screenHeight),
-//            sheetContent = {
-//                TaskSheet(
-//                    taskSheetModifier = taskSheetModifier,
-//                    uiTasksState.taskLists,
-//                    uiTasksState.tasks,
-//                    uiTasksState.currentSelectedTaskList,
-//                    onTaskListSelected = { taskList: TaskList ->
-//                        tasksViewModel.updateCurrentSelectedTaskList(taskList)
-//                    },
-//                    onTaskSelected = { taskDao: TaskDao ->
-//                        tasksViewModel.updateCurrentSelectedTask(taskDao)
-//                    },
-//                    onTaskCompleted = { taskDao: TaskDao ->
-//                    }
-//                )
-//            },
-//            scaffoldState = bottomSheetScaffoldState,
-//            sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-//            sheetPeekHeight = sheetPeekHeight
-//        ) {
-//            Box(
-//                modifier = Modifier
-//                    .padding()
-//                    .requiredHeightIn(max = LocalConfiguration.current.screenHeightDp.dp)
-//            ) {
-//                Calendar(
-//                    tasksViewModel,
-//                    calendarViewModel
-//                )
-//            }
-//        }
-//    }
-//}
 
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     TacTheme() {
+        Tac()
     }
 }

@@ -4,7 +4,6 @@ class Constants {
     companion object {
         val SHARED_PREFERENCES_NAME = "AUTH_STATE_PREFERENCE"
         val AUTH_STATE = "AUTH_STATE"
-        val CLIENT_ID = "518856815930-2n9oqh8e6j7f20pt79ckcsmuasldqbqr.apps.googleusercontent.com"
 
         val URL_AUTHORIZATION = "https://accounts.google.com/o/oauth2/auth"
         val URL_TOKEN_EXCHANGE = "https://oauth2.googleapis.com/token"
