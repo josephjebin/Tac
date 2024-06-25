@@ -80,7 +80,7 @@ public fun dummyScheduledTasks(): List<ScheduledTask> {
             ),
             end = mutableStateOf(
                 ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0)),
+                    LocalDateTime.of(LocalDate.now(), LocalTime.of(5, 0)),
                     ZoneId.systemDefault()
                 )
             ),
