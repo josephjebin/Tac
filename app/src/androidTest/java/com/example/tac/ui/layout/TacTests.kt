@@ -6,8 +6,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
-import com.example.tac.ui.calendar.CalendarViewModel
-import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
@@ -15,19 +13,17 @@ class TacTests {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val calendarViewModel: CalendarViewModel = CalendarViewModel()
-
     @Test
     fun sanity() {
         composeTestRule.setContent {
-            Tac(calendarViewModel = calendarViewModel)
+            Tac()
         }
 
         composeTestRule.onNodeWithText("Work").assertExists()
     }
 
     @Test
-    fun schedule_draggingScheduledTask_updatesScheduledTask() = runTest {
+    fun schedule_draggingScheduledTask_updatesScheduledTask() {
         composeTestRule.setContent {
             Tac()
         }
