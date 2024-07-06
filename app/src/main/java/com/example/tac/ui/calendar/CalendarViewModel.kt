@@ -9,6 +9,8 @@ import com.example.tac.data.calendar.ScheduledTask
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.example.tac.data.dummyData.dummyEvents
+import com.example.tac.data.dummyData.dummyScheduledTasks
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -30,86 +32,6 @@ class CalendarViewModel : ViewModel() {
         _uiState.value = CalendarState(
             events = mutableStateOf(dummyEvents()),
             scheduledTasks = mutableStateOf(dummyScheduledTasks())
-        )
-    }
-
-    private fun dummyEvents(): List<EventDao> {
-        return listOf(
-            EventDao(
-                id = 0,
-                busy = true,
-                name = "Breakfast",
-                start = mutableStateOf(
-                    ZonedDateTime.of(
-                        LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0)),
-                        ZoneId.systemDefault()
-                    )
-                ),
-                end = mutableStateOf(
-                    ZonedDateTime.of(
-                        LocalDateTime.of(LocalDate.now(), LocalTime.of(11, 0)),
-                        ZoneId.systemDefault()
-                    )
-                )
-            ),
-            EventDao(
-                id = 1,
-                busy = true,
-                name = "Lunch",
-                start = mutableStateOf(
-                    ZonedDateTime.of(
-                        LocalDateTime.of(LocalDate.now(), LocalTime.NOON),
-                        ZoneId.systemDefault()
-                    )
-                ),
-                end = mutableStateOf(
-                    ZonedDateTime.of(
-                        LocalDateTime.of(LocalDate.now(), LocalTime.of(14, 0)),
-                        ZoneId.systemDefault()
-                    )
-                )
-            ),
-            EventDao(
-                id = 2,
-                busy = true,
-                name = "Dinner",
-                start = mutableStateOf(
-                    ZonedDateTime.of(
-                        LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0)),
-                        ZoneId.systemDefault()
-                    )
-                ),
-                end = mutableStateOf(
-                    ZonedDateTime.of(
-                        LocalDateTime.of(LocalDate.now(), LocalTime.of(21, 0)),
-                        ZoneId.systemDefault()
-                    )
-                )
-            )
-        )
-    }
-
-    private fun dummyScheduledTasks(): List<ScheduledTask> {
-        return listOf(
-            ScheduledTask(
-                id = 0,
-                name = "Apply",
-                parentTaskId = "1",
-                start = mutableStateOf(
-                    ZonedDateTime.of(
-                        LocalDateTime.of(LocalDate.now(), LocalTime.of(7, 0)),
-                        ZoneId.systemDefault()
-                    )
-                ),
-                end = mutableStateOf(
-                    ZonedDateTime.of(
-                        LocalDateTime.of(LocalDate.now(), LocalTime.of(8, 0)),
-                        ZoneId.systemDefault()
-                    )
-                ),
-                workedDuration = 0,
-                color = Color.Gray
-            )
         )
     }
 

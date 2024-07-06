@@ -18,6 +18,18 @@
           <timeTargetWasSelectedWithDropDown value="2024-05-16T03:32:02.477820800Z" />
         </State>
       </entry>
+      <entry key="sanity()">
+        <State />
+      </entry>
+      <entry key="sanity() (1)">
+        <State />
+      </entry>
+      <entry key="schedule_draggingScheduledTask_updatesScheduledTask()">
+        <State />
+      </entry>
+      <entry key="schedule_draggingScheduledTask_updatesScheduledTask() (1)">
+        <State />
+      </entry>
     </value>
   </component>
 </project>

@@ -15,7 +15,7 @@ class TasksViewModel: ViewModel() {
     private val _uiState = MutableStateFlow(TasksState(
         taskLists = dummyDataTaskLists(),
         tasks = dummyDataTasks(),
-        currentSelectedTaskList = TaskList(),
+        currentSelectedTaskList = dummyDataTaskLists()[0],
         currentSelectedTask = TaskDao())
     )
     val uiState: StateFlow<TasksState> = _uiState.asStateFlow()
