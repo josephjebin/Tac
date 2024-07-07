@@ -39,14 +39,14 @@ import com.example.tac.ui.task.TasksSheetState.*
 import com.example.tac.ui.task.TasksViewModel
 import com.example.tac.ui.theme.TacTheme
 import com.example.tac.ui.theme.accent_gray
-import net.openid.appauth.*
+//import net.openid.appauth.*
 import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
     val TAG = "Tac"
-    private var authState: AuthState = AuthState()
-    private lateinit var authorizationService: AuthorizationService
-    lateinit var authServiceConfig: AuthorizationServiceConfiguration
+//    private var authState: AuthState = AuthState()
+//    private lateinit var authorizationService: AuthorizationService
+//    lateinit var authServiceConfig: AuthorizationServiceConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,8 +55,6 @@ class MainActivity : ComponentActivity() {
 //        if (!restoreState()) {
 //            attemptAuthorization()
 //        }
-
-
 
         setContent {
             TacTheme {

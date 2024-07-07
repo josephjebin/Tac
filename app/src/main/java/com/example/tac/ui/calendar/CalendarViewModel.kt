@@ -1,7 +1,10 @@
 package com.example.tac.ui.calendar
 
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.GoogleCalendar
@@ -11,6 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.example.tac.data.dummyData.dummyEvents
 import com.example.tac.data.dummyData.dummyScheduledTasks
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -18,18 +23,28 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-//class CalendarViewModel(authState: AuthState, authorizationService : AuthorizationService):
-class CalendarViewModel : ViewModel() {
+sealed interface CalendarState {
+    data class Success(
+        val calendars: List<GoogleCalendar> = listOf(),
+        val events: MutableState<List<EventDao>> = mutableStateOf(listOf()),
+        val scheduledTasks: MutableState<List<ScheduledTask>> = mutableStateOf(listOf()),
+        var selectedDate: LocalDate = LocalDate.now(),
+        var dateRangeEnd: LocalDate = selectedDate.plusWeeks(1),
+        var scheduleWidth: Dp = 0.dp
+    ) : CalendarState
+
+    data class Error(val exception: Exception) : CalendarState
+}
+
+class CalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
     val TAG = "CalendarViewModel"
-    private val _uiState = MutableStateFlow(
-        CalendarState()
-    )
+    private val _uiState = MutableStateFlow(CalendarState.Success())
     val uiState: StateFlow<CalendarState> = _uiState.asStateFlow()
 //    var calendarService: CalendarService
 
     init {
 //        calendarService = CalendarService(authState, authorizationService)
-        _uiState.value = CalendarState(
+        _uiState.value = CalendarState.Success(
             events = mutableStateOf(dummyEvents()),
             scheduledTasks = mutableStateOf(dummyScheduledTasks())
         )

@@ -14,11 +14,11 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-data class CalendarState(
-    val calendars: List<GoogleCalendar> = listOf(),
-    val events: MutableState<List<EventDao>> = mutableStateOf(listOf()),
-    val scheduledTasks: MutableState<List<ScheduledTask>> = mutableStateOf(listOf()),
-    var selectedDate: LocalDate = LocalDate.now(),
-    var dateRangeEnd: LocalDate = selectedDate.plusWeeks(1),
-    var scheduleWidth: Dp = 0.dp
-)
+//data class CalendarState(
+//    val calendars: List<GoogleCalendar> = listOf(),
+//    val events: MutableState<List<EventDao>> = mutableStateOf(listOf()),
+//    val scheduledTasks: MutableState<List<ScheduledTask>> = mutableStateOf(listOf()),
+//    var selectedDate: LocalDate = LocalDate.now(),
+//    var dateRangeEnd: LocalDate = selectedDate.plusWeeks(1),
+//    var scheduleWidth: Dp = 0.dp
+//)

@@ -3,7 +3,7 @@ package com.example.tac.data.calendar
 data class GoogleEvent (
     val summary: String = "",
     val description: String = "",
-    val start: Time = Time(),
+    val start: String,
     val end: Time = Time(),
     val id: String = "",
     val recurrence: Array<String> = arrayOf("")
