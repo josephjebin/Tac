@@ -8,7 +8,7 @@ import java.time.Duration
 import java.time.ZonedDateTime
 
 abstract class Plan(
-    open var id: Int,
+    open val id: String,
     open var name: String = "",
     open var start: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now()),
     open var end: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now().plusMinutes(30)),

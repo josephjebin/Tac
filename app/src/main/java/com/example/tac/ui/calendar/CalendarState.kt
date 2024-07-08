@@ -3,6 +3,7 @@ package com.example.tac.ui.calendar
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -32,10 +33,9 @@ data class CalendarState(
 
 sealed interface GoogleCalendarState {
     data class Success(
-        val experiment = mutableStateListOf<EventDao>()
-        val calendars: MutableState<List<GoogleCalendar>> = mutableStateOf(listOf()),
-        var events: MutableState<List<EventDao>> = mutableStateOf(listOf()),
-        val scheduledTasks: MutableState<List<ScheduledTask>> = mutableStateOf(listOf()),
+        val calendars: SnapshotStateList<EventDao> = mutableStateListOf(),
+        var events: SnapshotStateList<EventDao> = mutableStateListOf(),
+        val scheduledTasks: SnapshotStateList<EventDao> = mutableStateListOf()
     ) : GoogleCalendarState
 
     data class Error(val exception: Exception) : GoogleCalendarState

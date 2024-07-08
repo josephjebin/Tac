@@ -40,11 +40,12 @@ class CalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
                 //these events are a mixed bag of EventDaos and ScheduledTasks.
                 //we will separate them and update our viewmodel accordingly
                 val events = googleCalendarService.getEventsFromCalendar()
-                val eventDaos =
+                val eventDaos = mutableListOf<EventDao>()
+                val scheduledTasks = mutableListOf<ScheduledTask>()
                 events.forEach { googleEvent ->
                     //if scheduled task
                     if(googleEvent.description.contains("parentTaskId:")) {
-
+                        scheduledTasks.add
                     }
                 }
                 if(_uiState.value.googleCalendarState.value is GoogleCalendarState.Success) {
