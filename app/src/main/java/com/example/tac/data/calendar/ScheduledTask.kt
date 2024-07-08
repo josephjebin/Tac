@@ -1,8 +1,11 @@
 package com.example.tac.data.calendar
 
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
+import com.example.tac.ui.theme.onSurfaceGray
 import com.google.api.services.calendar.model.Event
 import java.time.Duration
 import java.time.ZonedDateTime
@@ -10,32 +13,50 @@ import java.time.ZonedDateTime
 
 data class ScheduledTask(
     override val id: String,
-    override var title: String,
-    val parentTaskId: String,
-    override var start: MutableState<ZonedDateTime>,
-    override var end: MutableState<ZonedDateTime>,
-    var scheduledDuration: Int = Duration.between(start.value, end.value).toMinutes().toInt(),
-    var workedDuration: Int = 0,
-    override var color: Color = Color.Gray
-): Plan(
+    override val title: MutableState<String>,
+    val parentTaskId: String? = null,
+    override val description: MutableState<String>,
+    override val start: MutableState<ZonedDateTime>,
+    override val end: MutableState<ZonedDateTime>,
+    override val duration: MutableIntState,
+    override val color: MutableState<Color>
+) : Plan(
     id = id,
     title = title,
+    description = description,
     start = start,
     end = end,
-    duration = scheduledDuration,
+    duration = duration,
     color = color
 ) {
-    constructor(id: String): this(
-        id,
-        "nice",
-        "nice",
-        start = mutableStateOf(ZonedDateTime.now()),
-        end = mutableStateOf(ZonedDateTime.now()),
-        0
-    )
-
     constructor(googleEvent: Event) : this(
         id = googleEvent.id,
-
-    )
+        title = mutableStateOf(googleEvent.summary),
+        parentTaskId =
+        try {
+            val lengthStartIndex = googleEvent.description.indexOf("parentTaskId").plus("parentTaskId".length)
+            val lengthEndIndex = googleEvent.description.indexOf(":", lengthStartIndex)
+            val length = Integer.parseInt(googleEvent.description.substring(lengthStartIndex, lengthEndIndex))
+            googleEvent.description.substring(lengthEndIndex + 1, lengthEndIndex + 1 + length)
+        } catch (e: Exception) {
+            null
+        },
+        description = mutableStateOf(googleEvent.description),
+        start = mutableStateOf(
+            ZonedDateTime.parse(
+                googleEvent.start.dateTime.toString(),
+                dateTimeFormat
+            )
+        ),
+        end = mutableStateOf(
+            ZonedDateTime.parse(
+                googleEvent.end.dateTime.toString(),
+                dateTimeFormat
+            )
+        ),
+        duration = mutableIntStateOf(30),
+        color = mutableStateOf(onSurfaceGray)
+    ) {
+        duration.intValue = Duration.between(start.value, end.value).toMinutes().toInt()
+    }
 }

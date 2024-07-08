@@ -9,6 +9,9 @@ import com.example.tac.ui.theme.onSurfaceGray
 import com.google.api.services.calendar.model.Event
 import java.time.Duration
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+
+val dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssz")
 
 abstract class Plan(
     open val id: String,

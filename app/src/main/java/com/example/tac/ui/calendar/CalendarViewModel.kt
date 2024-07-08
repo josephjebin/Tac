@@ -44,7 +44,7 @@ class CalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
                 val scheduledTasks = mutableListOf<ScheduledTask>()
                 events.forEach { googleEvent ->
                     //if scheduled task
-                    if(googleEvent.description.contains("parentTaskId:")) {
+                    if(googleEvent.description.contains("parentTaskId")) {
                         scheduledTasks.add
                     }
                 }

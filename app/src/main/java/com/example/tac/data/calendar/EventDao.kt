@@ -2,12 +2,14 @@ package com.example.tac.data.calendar
 
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
+import com.example.tac.ui.theme.onSurfaceGray
 import com.google.api.services.calendar.model.Event
 import java.time.Duration
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+
 
 data class EventDao(
     override val id: String,
@@ -27,15 +29,16 @@ data class EventDao(
     duration = duration,
     color = color
 ) {
-    val inputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssz")
-
     constructor(googleEvent: Event): this(
         id = googleEvent.id,
-        title = mutableStateOf(googleEvent.summary) ,
+        title = mutableStateOf(googleEvent.summary),
         busy = mutableStateOf(googleEvent.transparency == "opaque"),
         description = mutableStateOf(googleEvent.description),
-        start =  googleEvent.start.dateTime,
-
-    )
-
+        start =  mutableStateOf(ZonedDateTime.parse(googleEvent.start.dateTime.toString(), dateTimeFormat)),
+        end =  mutableStateOf(ZonedDateTime.parse(googleEvent.end.dateTime.toString(), dateTimeFormat)),
+        duration = mutableIntStateOf(30),
+        color = mutableStateOf(onSurfaceGray)
+    ) {
+        duration.intValue = Duration.between(start.value, end.value).toMinutes().toInt()
+    }
 }
