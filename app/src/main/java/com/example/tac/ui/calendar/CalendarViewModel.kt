@@ -2,12 +2,12 @@ package com.example.tac.ui.calendar
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.tac.data.calendar.EventDao
-import com.example.tac.data.calendar.GoogleCalendar
+import com.example.tac.data.calendar.GoogleCalendarService
 import com.example.tac.data.calendar.ScheduledTask
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,39 +15,48 @@ import kotlinx.coroutines.flow.asStateFlow
 import com.example.tac.data.dummyData.dummyEvents
 import com.example.tac.data.dummyData.dummyScheduledTasks
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
-
 import kotlinx.coroutines.flow.update
+
+import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
-sealed interface CalendarState {
-    data class Success(
-        val calendars: List<GoogleCalendar> = listOf(),
-        val events: MutableState<List<EventDao>> = mutableStateOf(listOf()),
-        val scheduledTasks: MutableState<List<ScheduledTask>> = mutableStateOf(listOf()),
-        var selectedDate: LocalDate = LocalDate.now(),
-        var dateRangeEnd: LocalDate = selectedDate.plusWeeks(1),
-        var scheduleWidth: Dp = 0.dp
-    ) : CalendarState
 
-    data class Error(val exception: Exception) : CalendarState
-}
 
 class CalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
     val TAG = "CalendarViewModel"
-    private val _uiState = MutableStateFlow(CalendarState.Success())
+    private val _uiState = MutableStateFlow(CalendarState())
     val uiState: StateFlow<CalendarState> = _uiState.asStateFlow()
-//    var calendarService: CalendarService
+
+    private val googleCalendarService: GoogleCalendarService
 
     init {
-//        calendarService = CalendarService(authState, authorizationService)
-        _uiState.value = CalendarState.Success(
-            events = mutableStateOf(dummyEvents()),
-            scheduledTasks = mutableStateOf(dummyScheduledTasks())
-        )
+        googleCalendarService = GoogleCalendarService(credential)
+        refreshEvents()
+    }
+
+    fun refreshEvents() {
+        viewModelScope.launch {
+            try {
+                //these events are a mixed bag of EventDaos and ScheduledTasks.
+                //we will separate them and update our viewmodel accordingly
+                val events = googleCalendarService.getEventsFromCalendar()
+                val eventDaos =
+                events.forEach { googleEvent ->
+                    //if scheduled task
+                    if(googleEvent.description.contains("parentTaskId:")) {
+
+                    }
+                }
+                if(_uiState.value.googleCalendarState.value is GoogleCalendarState.Success) {
+                    (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).events = events
+
+                } else {
+
+                }
+            } catch (e: Exception) {
+                _uiState.value.googleCalendarState.value = GoogleCalendarState.Error(e)
+            }
+        }
     }
 
 //    fun initCalendarsAndEvents() {

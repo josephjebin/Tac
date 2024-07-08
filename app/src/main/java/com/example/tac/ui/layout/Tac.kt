@@ -22,7 +22,7 @@ import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import com.example.tac.ui.calendar.Calendar
-import com.example.tac.ui.calendar.CalendarState
+import com.example.tac.ui.calendar.GoogleCalendarState
 import com.example.tac.ui.calendar.CalendarViewModel
 import com.example.tac.ui.calendar.DayHeader
 import com.example.tac.ui.dragAndDrop.RootDragInfoProvider
@@ -39,9 +39,9 @@ fun Tac(calendarViewModel: CalendarViewModel = viewModel(),
         val uiCalendarState by calendarViewModel.uiState.collectAsState()
         val uiTasksState by tasksViewModel.uiState.collectAsState()
         TasksAndCalendarScreen(
-            selectedDate = (uiCalendarState as CalendarState.Success).selectedDate,
-            events = (uiCalendarState as CalendarState.Success).events.value,
-            scheduledTasks = (uiCalendarState as CalendarState.Success).scheduledTasks.value,
+            selectedDate = (uiCalendarState as GoogleCalendarState.Success).selectedDate,
+            events = (uiCalendarState as GoogleCalendarState.Success).events.value,
+            scheduledTasks = (uiCalendarState as GoogleCalendarState.Success).scheduledTasks.value,
             addScheduledTask = { scheduledTask: ScheduledTask -> calendarViewModel.addScheduledTask(scheduledTask) },
             removeScheduledTask = { scheduledTask: ScheduledTask -> calendarViewModel.removeScheduledTask(scheduledTask) },
             addEventDao = { eventDao: EventDao -> calendarViewModel.addEventDao(eventDao) },

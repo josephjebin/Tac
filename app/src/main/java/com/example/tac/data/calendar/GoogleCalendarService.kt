@@ -24,6 +24,7 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.Calendar
+import com.google.api.services.calendar.model.Event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -54,9 +55,9 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
     }
 
 
-    suspend fun getEventsFromCalendar(): List<GoogleEvent> {
+    suspend fun getEventsFromCalendar(): MutableList<Event> {
         val now = DateTime(System.currentTimeMillis())
-        val eventStrings = ArrayList<GoogleEvent>()
+        val result = ArrayList<Event>()
         try {
             withContext(Dispatchers.IO) {
                 val events = calendar.events().list("primary")
@@ -65,27 +66,29 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute()
+
                 val items = events.items
-
-                for (event in items) {
-                    var start = event.start.dateTime
-                    if (start == null) {
-                        start = event.start.date
-                    }
-
-                    eventStrings.add(
-                        GoogleEvent(
-                            summary = event.summary,
-                            start = start.toString()
-                        )
-                    )
-                }
+                result.addAll(items)
+//                for (event in items) {
+//                    var start = event.start.dateTime
+//                    if (start == null) {
+//                        start = event.start.date
+//                    }
+//
+//                    eventStrings.add(
+//                        GoogleEvent(
+//                            summary = event.summary,
+//                            start = start.toString()
+//                        )
+//                    )
+//                }
             }
         } catch (e: IOException) {
             Log.d("Google", e.message.toString())
             throw e
         }
-        return eventStrings
+
+        return result
     }
 }
 

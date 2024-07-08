@@ -8,6 +8,7 @@ import java.time.ZonedDateTime
 data class EventDao(
     override var id: Int,
     override var name: String,
+    val parentTaskId: String,
     var busy: Boolean,
     override var start: MutableState<ZonedDateTime>,
     override var end: MutableState<ZonedDateTime>,

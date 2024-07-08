@@ -12,11 +12,13 @@ import kotlinx.coroutines.flow.update
 //class TasksViewModel(authState: AuthState, authorizationService : AuthorizationService): ViewModel() {
 class TasksViewModel: ViewModel() {
     val TAG = "TasksViewModel"
-    private val _uiState = MutableStateFlow(TasksState(
-        taskLists = dummyDataTaskLists(),
-        tasks = dummyDataTasks(),
-        currentSelectedTaskList = dummyDataTaskLists()[0],
-        currentSelectedTask = TaskDao())
+    private val _uiState = MutableStateFlow(
+        TasksState(
+            taskLists = dummyDataTaskLists(),
+            tasks = dummyDataTasks(),
+            currentSelectedTaskList = dummyDataTaskLists()[0],
+            currentSelectedTask = TaskDao()
+        )
     )
     val uiState: StateFlow<TasksState> = _uiState.asStateFlow()
 //    var tasksService: TasksService
