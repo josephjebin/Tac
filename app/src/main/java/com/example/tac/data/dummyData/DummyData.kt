@@ -15,7 +15,7 @@ fun dummyEvents(): List<EventDao> {
         EventDao(
             id = 0,
             busy = true,
-            name = "Breakfast",
+            title = "Breakfast",
             start = mutableStateOf(
                 ZonedDateTime.of(
                     LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0)),
@@ -32,7 +32,7 @@ fun dummyEvents(): List<EventDao> {
         EventDao(
             id = 1,
             busy = true,
-            name = "Lunch",
+            title = "Lunch",
             start = mutableStateOf(
                 ZonedDateTime.of(
                     LocalDateTime.of(LocalDate.now(), LocalTime.NOON),
@@ -49,7 +49,7 @@ fun dummyEvents(): List<EventDao> {
         EventDao(
             id = 2,
             busy = true,
-            name = "Dinner",
+            title = "Dinner",
             start = mutableStateOf(
                 ZonedDateTime.of(
                     LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0)),

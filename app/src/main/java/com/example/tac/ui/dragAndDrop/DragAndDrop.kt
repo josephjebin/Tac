@@ -99,7 +99,7 @@ fun ScheduleDraggable() {
                 }
             ) {
                 PlanComposable(
-                    name = state.dataToDrop.name,
+                    name = state.dataToDrop.title,
                     description = state.dataToDrop.description,
                     color = state.dataToDrop.color,
                     start = state.currentDropTargetTime,

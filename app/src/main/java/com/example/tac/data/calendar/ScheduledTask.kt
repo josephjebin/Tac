@@ -10,7 +10,7 @@ import java.time.ZonedDateTime
 
 data class ScheduledTask(
     override val id: String,
-    override var name: String,
+    override var title: String,
     val parentTaskId: String,
     override var start: MutableState<ZonedDateTime>,
     override var end: MutableState<ZonedDateTime>,
@@ -19,7 +19,7 @@ data class ScheduledTask(
     override var color: Color = Color.Gray
 ): Plan(
     id = id,
-    name = name,
+    title = title,
     start = start,
     end = end,
     duration = scheduledDuration,

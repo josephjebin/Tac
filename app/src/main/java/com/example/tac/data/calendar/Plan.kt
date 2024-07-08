@@ -1,21 +1,25 @@
 package com.example.tac.data.calendar
 
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import com.example.tac.ui.theme.onSurfaceGray
+import com.google.api.services.calendar.model.Event
 import java.time.Duration
 import java.time.ZonedDateTime
 
 abstract class Plan(
     open val id: String,
-    open var name: String = "",
-    open var start: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now()),
-    open var end: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now().plusMinutes(30)),
-    open var duration: Int = Duration.between(start.value, end.value).toMinutes().toInt(),
-    open var color: Color = onSurfaceGray,
-    open var description: String = ""
+    open val title: MutableState<String> = mutableStateOf(""),
+    open val description: MutableState<String> = mutableStateOf(""),
+    open val start: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now()),
+    open val end: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now().plusMinutes(30)),
+    open val duration: MutableIntState = mutableIntStateOf(30),
+    open val color: MutableState<Color> = mutableStateOf(onSurfaceGray)
 ) {
+
 //    constructor(event: GoogleEvent): this() {
 //        val inputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssz")
 //        this.name = event.summary

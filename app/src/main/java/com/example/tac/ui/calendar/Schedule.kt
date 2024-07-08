@@ -57,7 +57,7 @@ fun Schedule(
                     isRescheduling = true
                 ) {
                     PlanComposable(
-                        name = event.name,
+                        name = event.title,
                         description = event.description,
                         color = event.color,
                         start = event.start.value.toLocalTime(),
@@ -82,7 +82,7 @@ fun Schedule(
                     isRescheduling = true
                 ) {
                     PlanComposable(
-                        name = scheduledTask.name,
+                        name = scheduledTask.title,
                         description = scheduledTask.description,
                         color = scheduledTask.color,
                         start = scheduledTask.start.value.toLocalTime(),
