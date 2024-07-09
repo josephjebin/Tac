@@ -8,4 +8,4 @@
 .externalNativeBuild
 .cxx
 local.properties
-/app/src/main/java/com/example/tac/data/Constants.kt
+/app/src/main/java/com/jebkit/tac/data/Constants.kt

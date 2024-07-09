@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.tac'
+    namespace 'com.jebkit.tac'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.tac"
+        applicationId "com.jebkit.tac"
         minSdk 24
         targetSdk 34
         versionCode 1
@@ -19,9 +19,9 @@ android {
             useSupportLibrary true
         }
 
-        manifestPlaceholders = [
-                appAuthRedirectScheme: 'com.example.tac'
-        ]
+//        manifestPlaceholders = [
+//                appAuthRedirectScheme: 'com.example.tac'
+//        ]
     }
 
     buildTypes {
