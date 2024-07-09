@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tac.MyBottomBar
@@ -30,6 +31,9 @@ import com.example.tac.ui.task.TaskSheet
 import com.example.tac.ui.task.TasksSheetState
 import com.example.tac.ui.task.TasksViewModel
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+val outputFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy")
 
 @Composable
 fun Tac(calendarViewModel: CalendarViewModel = viewModel(),
@@ -39,9 +43,9 @@ fun Tac(calendarViewModel: CalendarViewModel = viewModel(),
         val uiCalendarState by calendarViewModel.uiState.collectAsState()
         val uiTasksState by tasksViewModel.uiState.collectAsState()
         TasksAndCalendarScreen(
-            selectedDate = (uiCalendarState as GoogleCalendarState.Success).selectedDate,
-            events = (uiCalendarState as GoogleCalendarState.Success).events.value,
-            scheduledTasks = (uiCalendarState as GoogleCalendarState.Success).scheduledTasks.value,
+            selectedDate = uiCalendarState.selectedDate.value,
+            events = (uiCalendarState.googleCalendarState.value as GoogleCalendarState.Success).events,
+            scheduledTasks = (uiCalendarState.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks,
             addScheduledTask = { scheduledTask: ScheduledTask -> calendarViewModel.addScheduledTask(scheduledTask) },
             removeScheduledTask = { scheduledTask: ScheduledTask -> calendarViewModel.removeScheduledTask(scheduledTask) },
             addEventDao = { eventDao: EventDao -> calendarViewModel.addEventDao(eventDao) },
@@ -51,11 +55,10 @@ fun Tac(calendarViewModel: CalendarViewModel = viewModel(),
             currentSelectedTaskList = uiTasksState.currentSelectedTaskList,
             onTaskListSelected = { taskList: TaskList ->
                 tasksViewModel.updateCurrentSelectedTaskList(taskList)
-            },
-            onTaskSelected = { taskDao: TaskDao ->
-                tasksViewModel.updateCurrentSelectedTask(taskDao)
             }
-        )
+        ) { taskDao: TaskDao ->
+            tasksViewModel.updateCurrentSelectedTask(taskDao)
+        }
     }
 }
 
@@ -64,7 +67,7 @@ fun Tac(calendarViewModel: CalendarViewModel = viewModel(),
 fun TasksAndCalendarScreen(
     selectedDate: LocalDate,
     events: List<EventDao>,
-    scheduledTasks: List<ScheduledTask>,
+    scheduledTasks: SnapshotStateList<ScheduledTask>,
     addScheduledTask: (ScheduledTask) -> Unit,
     removeScheduledTask: (ScheduledTask) -> Unit,
     addEventDao: (EventDao) -> Unit,

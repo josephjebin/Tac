@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +24,9 @@ import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import com.example.tac.ui.dragAndDrop.DragTarget
+import com.example.tac.ui.layout.outputFormat
 import com.example.tac.ui.theme.accent_gray
+import com.example.tac.ui.theme.onSurfaceGray
 import java.time.ZonedDateTime
 
 @Composable
@@ -107,29 +110,35 @@ fun TaskSheet(
 
         //tasks
         val filteredTasks =
-            tasks.filter { taskDao -> taskDao.taskList == currentSelectedTaskList.title }
+            tasks.filter { taskDao -> taskDao.taskList.value == currentSelectedTaskList.title }
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            filteredTasks.forEachIndexed { index, task ->
-                val eventDurationMinutes = task.neededDuration
+            filteredTasks.forEachIndexed { index, taskDao ->
+                val eventDurationMinutes = taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
 
                 DragTarget(
                     dataToDrop = ScheduledTask(
-                        id = 10,
-                        name = task.title,
-                        parentTaskId = task.id,
-                        //stub
-                        start = mutableStateOf(ZonedDateTime.now()),
-                        //stub
-                        end = mutableStateOf(ZonedDateTime.now().plusMinutes(30)),
-                        scheduledDuration = task.neededDuration
+                        //STUB
+                        //dropping this on the calendar will trigger a call to calendar api
+                        //response from calendar api will contain the actual id, and this is what
+                        //will be saved in the view model
+                        id = "STUB",
+                        title = taskDao.title,
+                        parentTaskId = taskDao.id,
+                        description = taskDao.notes,
+                        //STUB
+                        start = taskDao.start,
+                        //STUB
+                        end = taskDao.end,
+                        duration = mutableIntStateOf(eventDurationMinutes),
+                        color = taskDao.color
                     ),
                     isRescheduling = false,
                     onTaskDrag = onTaskDrag,
                     draggableHeight = eventHeight
                 ) {
                     TaskRow(
-                        taskDao = task,
+                        taskDao = taskDao,
                         onTaskSelected = onTaskSelected,
                         onTaskCompleted = onTaskCompleted
                     )
@@ -164,7 +173,7 @@ fun TaskRow(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .widthIn(max = 160.dp),
-            text = taskDao.title,
+            text = taskDao.title.value,
             overflow = TextOverflow.Ellipsis
         )
 
@@ -179,7 +188,7 @@ fun TaskRow(
                     contentDescription = "Due date"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = taskDao.due)
+                Text(text = taskDao.end.value.format(outputFormat))
             }
             //duration
             Row() {

@@ -33,9 +33,10 @@ data class CalendarState(
 
 sealed interface GoogleCalendarState {
     data class Success(
+        //need to add Calendar data type. stub with event dao for now
         val calendars: SnapshotStateList<EventDao> = mutableStateListOf(),
-        var events: SnapshotStateList<EventDao> = mutableStateListOf(),
-        val scheduledTasks: SnapshotStateList<EventDao> = mutableStateListOf()
+        val events: SnapshotStateList<EventDao> = mutableStateListOf(),
+        val scheduledTasks: SnapshotStateList<ScheduledTask> = mutableStateListOf()
     ) : GoogleCalendarState
 
     data class Error(val exception: Exception) : GoogleCalendarState

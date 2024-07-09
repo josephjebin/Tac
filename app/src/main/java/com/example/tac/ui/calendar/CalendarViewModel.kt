@@ -1,6 +1,7 @@
 package com.example.tac.ui.calendar
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -12,8 +13,8 @@ import com.example.tac.data.calendar.ScheduledTask
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.example.tac.data.dummyData.dummyEvents
-import com.example.tac.data.dummyData.dummyScheduledTasks
+//import com.example.tac.data.dummyData.dummyEvents
+//import com.example.tac.data.dummyData.dummyScheduledTasks
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import kotlinx.coroutines.flow.update
 
@@ -37,22 +38,16 @@ class CalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
     fun refreshEvents() {
         viewModelScope.launch {
             try {
+                _uiState.value.googleCalendarState.value = GoogleCalendarState.Success()
+                //update calendarS
+
+
+                googleCalendarService.getEventsFromCalendar().forEach {googleEvent ->
                 //these events are a mixed bag of EventDaos and ScheduledTasks.
                 //we will separate them and update our viewmodel accordingly
-                val events = googleCalendarService.getEventsFromCalendar()
-                val eventDaos = mutableListOf<EventDao>()
-                val scheduledTasks = mutableListOf<ScheduledTask>()
-                events.forEach { googleEvent ->
-                    //if scheduled task
-                    if(googleEvent.description.contains("parentTaskId")) {
-                        scheduledTasks.add
-                    }
-                }
-                if(_uiState.value.googleCalendarState.value is GoogleCalendarState.Success) {
-                    (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).events = events
-
-                } else {
-
+                    if(googleEvent.description.contains("parentTaskId"))
+                            (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.add(ScheduledTask(googleEvent))
+                     else (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).events.add(EventDao(googleEvent))
                 }
             } catch (e: Exception) {
                 _uiState.value.googleCalendarState.value = GoogleCalendarState.Error(e)
@@ -85,19 +80,21 @@ class CalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
 //    }
 
     fun addScheduledTask(newTask: ScheduledTask) {
-        _uiState.value.scheduledTasks.value += newTask
+        //call calendar api to add scheduled task event
+        //add response to view model because response contains proper id
+//        _uiState.value.googleCalendarState.value  += newTask
     }
 
     fun removeScheduledTask(scheduledTask: ScheduledTask) {
-        _uiState.value.scheduledTasks.value -= scheduledTask
+//        _uiState.value.scheduledTasks.value -= scheduledTask
     }
 
     fun addEventDao(newEventDao: EventDao) {
-        _uiState.value.events.value += newEventDao
+//        _uiState.value.events.value += newEventDao
     }
 
     fun removeEventDao(eventDao: EventDao) {
-        _uiState.value.events.value -= eventDao
+//        _uiState.value.events.value -= eventDao
     }
 
 //    companion object {

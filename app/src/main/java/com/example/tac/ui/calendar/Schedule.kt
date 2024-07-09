@@ -44,7 +44,7 @@ fun Schedule(
     Layout(
         content = {
             events.sortedBy { eventDao -> eventDao.start.value }.forEach { event ->
-                val eventHeight = ((event.duration / 60f) * hourHeight)
+                val eventHeight = ((event.duration.value / 60f) * hourHeight)
                 val planComposableModifier = Modifier
                     .startData(event.start.value.toLocalTime())
                     .height(eventHeight)
@@ -57,9 +57,9 @@ fun Schedule(
                     isRescheduling = true
                 ) {
                     PlanComposable(
-                        name = event.title,
-                        description = event.description,
-                        color = event.color,
+                        name = event.title.value,
+                        description = event.description.value,
+                        color = event.color.value,
                         start = event.start.value.toLocalTime(),
                         end = event.end.value.toLocalTime()
                     )
@@ -82,9 +82,9 @@ fun Schedule(
                     isRescheduling = true
                 ) {
                     PlanComposable(
-                        name = scheduledTask.title,
-                        description = scheduledTask.description,
-                        color = scheduledTask.color,
+                        name = scheduledTask.title.value,
+                        description = scheduledTask.description.value,
+                        color = scheduledTask.color.value,
                         start = scheduledTask.start.value.toLocalTime(),
                         end = scheduledTask.end.value.toLocalTime()
                     )

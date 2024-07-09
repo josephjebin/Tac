@@ -1,51 +1,75 @@
 package com.example.tac.data.tasks
 
+import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
+import com.example.tac.ui.theme.onSurfaceGray
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import com.google.api.services.tasks.model.Task
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
+val inputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
 
 data class TaskDao(
-    var kind: String = "",
-    var id: String = "",
-    var etag: String = "",
-    var title: String = "",
-    var updated: String = "",
-    var selfLink: String = "",
-    var parent: String = "",
-    var position: String = "",
-    var notes: String = "",
-    var status: String = "",
-    var due: String = "",
-    var completed: String = "",
-    var deleted: Boolean = false,
-    var hidden: Boolean = false,
-    var links: List<Link> = listOf(Link("", "", "")),
-    var taskList: String = "",
-    var scheduledDuration: Int = 0,
-    var workedDuration: Int = 0,
-    var neededDuration: Int = 15,
-    var priority: Priority = Priority.Priority4
+    val id: String,
+    val title: MutableState<String>,
+    val notes: MutableState<String>,
+    val completed: MutableState<Boolean> = mutableStateOf(false),
+    val start: MutableState<ZonedDateTime> = mutableStateOf(
+        ZonedDateTime.of(
+            LocalDateTime.MIN,
+            ZoneId.systemDefault()
+        )
+    ),
+    val end: MutableState<ZonedDateTime> = mutableStateOf(
+        ZonedDateTime.of(
+            LocalDateTime.MIN,
+            ZoneId.systemDefault()
+        )
+    ),
+    val deleted: MutableState<Boolean> = mutableStateOf(false),
+    val taskList: MutableState<String>,
+    val scheduledDuration: MutableIntState = mutableIntStateOf(0),
+    val workedDuration: MutableIntState = mutableIntStateOf(0),
+    val neededDuration: MutableIntState,
+    val priority: Priority = Priority.Priority4,
+    val color: MutableState<Color> = mutableStateOf(onSurfaceGray)
 ) {
-    constructor(task: Task, taskList: String) : this() {
-        val inputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
-        val outputFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy")
-        kind = task.kind
-        id = task.id
-        etag = task.etag
-        title = task.title
-        updated = task.updated
-        selfLink = task.selfLink
-        parent = task.parent
-        position = task.position
-        notes = task.notes
-        status = task.status
-        due = if (task.due.isEmpty()) "No date"
-        else LocalDate.parse(task.due.dropLast(1), inputFormat).format(outputFormat)
-        completed = task.completed
-        deleted = task.deleted
-        hidden = task.hidden
-        links = task.links
-        this.taskList = taskList
-        neededDuration = 15
+    constructor(googleTask: Task, taskList: String) : this(
+        id = googleTask.id,
+        title = mutableStateOf(googleTask.title),
+        notes = mutableStateOf(googleTask.notes),
+        completed = mutableStateOf(googleTask.status.equals("completed")),
+        //need to implement notes parsing to find actual start date time
+        //ZonedDateTime.parse(task.notes.dateTime.toString(), dateTimeFormat)
+        start = mutableStateOf(
+            ZonedDateTime.of(
+                LocalDateTime.of(LocalDate.now(), LocalTime.MIN),
+                ZoneId.systemDefault()
+            )
+        ),
+        //need to implement notes parsing to find actual end time and durations
+        end = mutableStateOf(ZonedDateTime.now()),
+        deleted = mutableStateOf(googleTask.deleted),
+        taskList = mutableStateOf(taskList),
+        scheduledDuration = mutableIntStateOf(0),
+        workedDuration = mutableIntStateOf(0),
+        neededDuration = mutableIntStateOf(60)
+        ) {
+        if (googleTask.due != null) ZonedDateTime.parse(googleTask.due.toStringRfc3339(), inputFormat)
     }
+
+    constructor() : this(
+        id = "STUB",
+        title = mutableStateOf("STUB"),
+        notes = mutableStateOf("STUB"),
+        taskList = mutableStateOf("STUB"),
+        neededDuration = mutableIntStateOf(0)
+    )
 }

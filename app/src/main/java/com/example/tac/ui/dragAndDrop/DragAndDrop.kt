@@ -29,6 +29,7 @@ import com.example.tac.data.calendar.EventDao
 import com.example.tac.data.calendar.Plan
 import com.example.tac.data.calendar.ScheduledTask
 import com.example.tac.ui.calendar.PlanComposable
+import com.example.tac.ui.theme.onSurfaceGray
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -46,9 +47,10 @@ internal class DragTargetInfo {
     var currentDropTargetTime: LocalTime by mutableStateOf(LocalTime.MIN)
     var dataToDrop by mutableStateOf<Plan>(
         ScheduledTask(
-            id = 0,
-            name = "default",
-            parentTaskId = "0",
+            id = "defaultId",
+            title = mutableStateOf("defaultTitle"),
+            parentTaskId = null,
+            description = mutableStateOf("defaultDescription"),
             start = mutableStateOf(
                 ZonedDateTime.of(
                     LocalDateTime.MIN,
@@ -60,7 +62,9 @@ internal class DragTargetInfo {
                     LocalDateTime.MIN,
                     ZoneId.systemDefault()
                 )
-            )
+            ),
+            duration = mutableIntStateOf(30),
+            color = mutableStateOf(onSurfaceGray)
         )
     )
     var draggableModifier: Modifier by mutableStateOf(Modifier)
@@ -99,11 +103,11 @@ fun ScheduleDraggable() {
                 }
             ) {
                 PlanComposable(
-                    name = state.dataToDrop.title,
-                    description = state.dataToDrop.description,
-                    color = state.dataToDrop.color,
+                    name = state.dataToDrop.title.value,
+                    description = state.dataToDrop.description.value,
+                    color = state.dataToDrop.color.value,
                     start = state.currentDropTargetTime,
-                    end = state.currentDropTargetTime.plusMinutes(state.dataToDrop.duration.toLong()),
+                    end = state.currentDropTargetTime.plusMinutes(state.dataToDrop.duration.value.toLong()),
                     modifier = state.draggableModifier
                 )
             }
@@ -210,7 +214,7 @@ fun DropTarget(
             )
             dragInfo.dataToDrop.end.value = ZonedDateTime.of(
                 LocalDateTime.of(selectedDate, timeSlot)
-                    .plusMinutes(dragInfo.dataToDrop.duration.toLong()),
+                    .plusMinutes(dragInfo.dataToDrop.duration.value.toLong()),
                 ZoneId.systemDefault()
             )
 

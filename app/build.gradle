@@ -78,6 +78,9 @@ dependencies {
     //google calendar service
     implementation("com.google.apis:google-api-services-calendar:v3-rev305-1.23.0")
 
+    // https://mvnrepository.com/artifact/com.google.apis/google-api-services-tasks
+    implementation("com.google.apis:google-api-services-tasks:v1-rev71-1.25.0")
+
     //make AndroidHTTP transport
     implementation("com.google.api-client:google-api-client-android:1.23.0") {
         exclude group: "org.apache.httpcomponents"

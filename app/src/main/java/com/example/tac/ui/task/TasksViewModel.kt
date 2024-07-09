@@ -1,6 +1,8 @@
 package com.example.tac.ui.task
 
 import androidx.lifecycle.ViewModel
+import com.example.tac.data.dummyData.dummyDataTaskLists
+import com.example.tac.data.dummyData.dummyDataTasks
 import com.example.tac.data.tasks.TaskDao
 import com.example.tac.data.tasks.TaskList
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,28 +70,6 @@ class TasksViewModel: ViewModel() {
 
     fun modifyCurrentSelectedTask(currentSelectedTask: TaskDao) {
 
-    }
-
-    private fun dummyDataTaskLists(): List<TaskList> {
-        return listOf(
-            TaskList(id = "careerTaskListId", title = "Career"),
-            TaskList(id = "financeTaskListId", title = "Finance"),
-            TaskList(id = "fitnessTaskListId", title = "Fitness")
-        )
-    }
-
-    private fun dummyDataTasks(): List<TaskDao> {
-        return listOf(
-            TaskDao(id = "1", title = "Apply", taskList = "Career", neededDuration = 120),
-            TaskDao(id = "2", title = "Make Tac Prototype", taskList = "Career", neededDuration = 45),
-            TaskDao(id = "3", title = "LeetCode", taskList = "Career", neededDuration = 45),
-            TaskDao(id = "4", title = "Get a job", taskList = "Finance", neededDuration = 45),
-            TaskDao(id = "5", title = "Revise budget", taskList = "Finance", neededDuration = 45),
-            TaskDao(id = "6", title = "Categorize expenses", taskList = "Finance", neededDuration = 45),
-            TaskDao(id = "7", title = "Gym", taskList = "Fitness", neededDuration = 45),
-            TaskDao(id = "8", title = "Stretch", taskList = "Fitness", neededDuration = 45),
-            TaskDao(id = "9", title = "Walk", taskList = "Fitness", neededDuration = 45)
-        )
     }
 
 //    companion object {
