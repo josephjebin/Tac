@@ -34,8 +34,8 @@ data class EventDao(
         title = mutableStateOf(googleEvent.summary),
         busy = mutableStateOf(googleEvent.transparency == "opaque"),
         description = mutableStateOf(googleEvent.description),
-        start = mutableStateOf(ZonedDateTime.parse(googleEvent.start.dateTime.toStringRfc3339(), dateTimeFormat)),
-        end =  mutableStateOf(ZonedDateTime.parse(googleEvent.end.dateTime.toStringRfc3339(), dateTimeFormat)),
+        start = mutableStateOf(ZonedDateTime.parse(googleEvent.start.dateTime.toString(), googleCalendarDateTimeFormat)),
+        end =  mutableStateOf(ZonedDateTime.parse(googleEvent.end.dateTime.toString(), googleCalendarDateTimeFormat)),
         duration = mutableIntStateOf(30),
         color = mutableStateOf(onSurfaceGray)
     ) {

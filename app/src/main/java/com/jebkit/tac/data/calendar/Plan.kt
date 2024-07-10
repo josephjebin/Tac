@@ -9,7 +9,8 @@ import com.jebkit.tac.ui.theme.onSurfaceGray
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-val dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssz")
+val googleCalendarDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXXXX")
+
 
 abstract class Plan(
     open val id: String,

@@ -9,6 +9,7 @@ import com.jebkit.tac.ui.theme.onSurfaceGray
 import com.google.api.services.calendar.model.Event
 import java.time.Duration
 import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 
 data class ScheduledTask(
@@ -45,13 +46,13 @@ data class ScheduledTask(
         start = mutableStateOf(
             ZonedDateTime.parse(
                 googleEvent.start.dateTime.toString(),
-                dateTimeFormat
+                googleCalendarDateTimeFormat
             )
         ),
         end = mutableStateOf(
             ZonedDateTime.parse(
                 googleEvent.end.dateTime.toString(),
-                dateTimeFormat
+                googleCalendarDateTimeFormat
             )
         ),
         duration = mutableIntStateOf(30),

@@ -1,5 +1,6 @@
 package com.jebkit.tac.ui.calendar
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jebkit.tac.data.calendar.EventDao
@@ -24,23 +25,38 @@ class CalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
 
     init {
         googleCalendarService = GoogleCalendarService(credential)
-        refreshEvents()
+        readGoogleCalendarForYearAndMonth(year = _uiState.value.selectedDate.value.year,
+            month =  _uiState.value.selectedDate.value.monthValue
+        )
     }
 
-    fun refreshEvents() {
+    fun readGoogleCalendarForYearAndMonth(year: Int, month: Int) {
+        Log.i("CalendarViewModel", "getting events for YYYY/MM: $year/$month")
         viewModelScope.launch {
             try {
-                _uiState.value.googleCalendarState.value = GoogleCalendarState.Success()
+//              need to make call to find all calendars
+
+                if(_uiState.value.googleCalendarState.value is GoogleCalendarState.Success) {
+
+                }
+                else {
+                    _uiState.value.googleCalendarState.value = GoogleCalendarState.Success()
+                }
                 //update calendarS
 
 
-                googleCalendarService.getEventsFromCalendar().forEach {googleEvent ->
+                googleCalendarService
+                    .getEventsFromCalendar(year = year, month = month)
+                    .forEach {
+                        googleEvent ->
                 //these events are a mixed bag of EventDaos and ScheduledTasks.
                 //we will separate them and update our viewmodel accordingly
+                    Log.i("CalendarViewModel", "got results from Calendar: ${googleEvent.summary}")
                     if(googleEvent.description.contains("parentTaskId"))
                             (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.add(ScheduledTask(googleEvent))
                      else (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).events.add(EventDao(googleEvent))
                 }
+                Log.i("CalendarViewModel", "finished refreshing")
             } catch (e: Exception) {
                 _uiState.value.googleCalendarState.value = GoogleCalendarState.Error(e)
             }

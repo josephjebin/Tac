@@ -28,6 +28,8 @@ import com.google.api.services.calendar.model.Event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.time.LocalDate
+import java.util.Date
 
 
 class GoogleCalendarService(private var credential: GoogleAccountCredential) {
@@ -55,8 +57,11 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
     }
 
 
-    suspend fun getEventsFromCalendar(): MutableList<Event> {
-        val now = DateTime(System.currentTimeMillis())
+    suspend fun getEventsFromCalendar(year: Int, month: Int): ArrayList<Event> {
+        //have to use Calendar to work with Google's Date
+
+        val todaysDate = java.util.Calendar.getInstance().set()
+        val now = DateTime(Date())
         val result = ArrayList<Event>()
         try {
             withContext(Dispatchers.IO) {
@@ -66,9 +71,11 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute()
+                    .items
 
-                val items = events.items
-                result.addAll(items)
+                result.addAll(events)
+//                val items = events.items
+//                result.addAll(items)
 //                for (event in items) {
 //                    var start = event.start.dateTime
 //                    if (start == null) {
@@ -83,7 +90,7 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
 //                    )
 //                }
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             Log.d("Google", e.message.toString())
             throw e
         }

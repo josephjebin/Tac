@@ -62,7 +62,7 @@ data class TaskDao(
         workedDuration = mutableIntStateOf(0),
         neededDuration = mutableIntStateOf(60)
         ) {
-        if (googleTask.due != null) ZonedDateTime.parse(googleTask.due.toStringRfc3339(), inputFormat)
+        if (googleTask.due != null) ZonedDateTime.parse(googleTask.due.toString(), inputFormat)
     }
 
     constructor() : this(

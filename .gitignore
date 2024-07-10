@@ -9,3 +9,4 @@
 .cxx
 local.properties
 /app/src/main/java/com/jebkit/tac/data/Constants.kt
+/app/credentials.json

@@ -18,7 +18,6 @@ import java.time.LocalDate
 
 data class CalendarState(
     var selectedDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now()),
-    val dateRangeEnd: MutableState<LocalDate> = mutableStateOf(LocalDate.now().plusWeeks(1)),
 
     val googleCalendarState: MutableState<GoogleCalendarState> = mutableStateOf(GoogleCalendarState.Success())
 )
