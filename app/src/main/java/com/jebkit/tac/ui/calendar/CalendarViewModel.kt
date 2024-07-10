@@ -25,28 +25,22 @@ class CalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
 
     init {
         googleCalendarService = GoogleCalendarService(credential)
-        readGoogleCalendarForYearAndMonth(year = _uiState.value.selectedDate.value.year,
+        readGoogleCalendarForSpecificYearAndMonth(year = _uiState.value.selectedDate.value.year,
             month =  _uiState.value.selectedDate.value.monthValue
         )
     }
 
-    fun readGoogleCalendarForYearAndMonth(year: Int, month: Int) {
+    fun readGoogleCalendarForSpecificYearAndMonth(year: Int, month: Int) {
         Log.i("CalendarViewModel", "getting events for YYYY/MM: $year/$month")
         viewModelScope.launch {
             try {
-//              need to make call to find all calendars
-
-                if(_uiState.value.googleCalendarState.value is GoogleCalendarState.Success) {
-
-                }
-                else {
-                    _uiState.value.googleCalendarState.value = GoogleCalendarState.Success()
-                }
                 //update calendarS
+
+                _uiState.value.googleCalendarState.value = GoogleCalendarState.Success()
 
 
                 googleCalendarService
-                    .getEventsFromCalendar(year = year, month = month)
+                    .getEventsFromCalendarForSpecificYearAndMonth(year = year, month = month)
                     .forEach {
                         googleEvent ->
                 //these events are a mixed bag of EventDaos and ScheduledTasks.

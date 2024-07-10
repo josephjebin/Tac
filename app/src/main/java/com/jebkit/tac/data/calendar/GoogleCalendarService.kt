@@ -27,9 +27,7 @@ import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.IOException
 import java.time.LocalDate
-import java.util.Date
 
 
 class GoogleCalendarService(private var credential: GoogleAccountCredential) {
@@ -40,7 +38,7 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
     }
 
     fun updateCalendarServiceCredentials(newCredential: GoogleAccountCredential) {
-        if(credential != newCredential) {
+        if (credential != newCredential) {
             credential = newCredential
             calendar = initCalendarBuild()
         }
@@ -57,23 +55,30 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
     }
 
 
-    suspend fun getEventsFromCalendar(year: Int, month: Int): ArrayList<Event> {
+    suspend fun getEventsFromCalendarForSpecificYearAndMonth(year: Int, month: Int): ArrayList<Event> {
         //have to use Calendar to work with Google's Date
+        val calendarFirstDateOfSpecifiedYearAndMonth = java.util.Calendar.getInstance()
+        calendarFirstDateOfSpecifiedYearAndMonth.set(year, month, 1, 0, 0, 0)
+        val dateTimeFirstDateOfMonth = DateTime(calendarFirstDateOfSpecifiedYearAndMonth.time)
 
-        val todaysDate = java.util.Calendar.getInstance().set()
-        val now = DateTime(Date())
-        val result = ArrayList<Event>()
+        var localDateLastDateOfMonth = LocalDate.of(year, month, 1)
+        localDateLastDateOfMonth = localDateLastDateOfMonth.withDayOfMonth(localDateLastDateOfMonth.month.length(localDateLastDateOfMonth.isLeapYear))
+        val calendarLastDateOfSpecifiedYearAndMonth = java.util.Calendar.getInstance()
+        calendarLastDateOfSpecifiedYearAndMonth.set(year, month, localDateLastDateOfMonth.dayOfMonth, 23, 59, 59)
+        val dateTimeLastDateOfMonth = DateTime(calendarLastDateOfSpecifiedYearAndMonth.time)
+        val apiResponse = ArrayList<Event>()
         try {
             withContext(Dispatchers.IO) {
                 val events = calendar.events().list("primary")
                     .setMaxResults(10)
-                    .setTimeMin(now)
+                    .setTimeMin(dateTimeFirstDateOfMonth)
+                    .setTimeMax(dateTimeLastDateOfMonth)
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute()
                     .items
 
-                result.addAll(events)
+                apiResponse.addAll(events)
 //                val items = events.items
 //                result.addAll(items)
 //                for (event in items) {
@@ -95,10 +100,9 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
             throw e
         }
 
-        return result
+        return apiResponse
     }
 }
-
 
 
 //class CalendarService(val authState: AuthState, val authorizationService: AuthorizationService) {
