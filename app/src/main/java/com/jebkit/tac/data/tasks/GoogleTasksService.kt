@@ -72,7 +72,7 @@ class GoogleTasksService(private var credential: GoogleAccountCredential) {
     }
 
 
-    //returns all tasks that can be done during the specified year and month
+    //returns all tasks that are overdue or can be done during the specified year and month
     suspend fun getTasksFromGoogleForSpecificYearAndMonth(year: Int, month: Int): ArrayList<Task> {
         //have to use Calendar to work with Google's Date
         val calendarFirstDateOfSpecifiedYearAndMonth = java.util.Calendar.getInstance()
