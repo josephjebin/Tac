@@ -34,23 +34,23 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
     private var calendar: Calendar
 
     init {
-        calendar = initCalendarBuild()
+        calendar = initCalendar()
     }
 
     fun updateCalendarServiceCredentials(newCredential: GoogleAccountCredential) {
         if (credential != newCredential) {
             credential = newCredential
-            calendar = initCalendarBuild()
+            calendar = initCalendar()
         }
     }
 
-    private fun initCalendarBuild(): Calendar {
+    private fun initCalendar(): Calendar {
         val transport = AndroidHttp.newCompatibleTransport()
         val jsonFactory = JacksonFactory.getDefaultInstance()
         return Calendar.Builder(
             transport, jsonFactory, credential
         )
-            .setApplicationName("GetEventCalendar")
+            .setApplicationName("Tac")
             .build()
     }
 
@@ -69,7 +69,9 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
         val apiResponse = ArrayList<Event>()
         try {
             withContext(Dispatchers.IO) {
-                val events = calendar.events().list("primary")
+                val events = calendar
+                    .events()
+                    .list("primary")
                     .setMaxResults(10)
                     .setTimeMin(dateTimeFirstDateOfMonth)
                     .setTimeMax(dateTimeLastDateOfMonth)
@@ -79,24 +81,9 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
                     .items
 
                 apiResponse.addAll(events)
-//                val items = events.items
-//                result.addAll(items)
-//                for (event in items) {
-//                    var start = event.start.dateTime
-//                    if (start == null) {
-//                        start = event.start.date
-//                    }
-//
-//                    eventStrings.add(
-//                        GoogleEvent(
-//                            summary = event.summary,
-//                            start = start.toString()
-//                        )
-//                    )
-//                }
             }
         } catch (e: Exception) {
-            Log.d("Google", e.message.toString())
+            Log.d("GoogleCalendarService", e.message.toString())
             throw e
         }
 
