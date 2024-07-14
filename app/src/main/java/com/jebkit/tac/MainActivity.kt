@@ -49,6 +49,8 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.calendar.CalendarScopes
+import com.jebkit.tac.ui.task.TasksViewModel
+import com.jebkit.tac.ui.task.TasksViewModelFactory
 import pub.devrel.easypermissions.EasyPermissions
 //import net.openid.appauth.*
 
@@ -112,13 +114,24 @@ class MainActivity : ComponentActivity() {
                 }
 
                 if (googleAuthViewModel.googleAccountCredential.selectedAccount != null) {
+                    //TasksViewModel is made first because some Google Calendar Events
+                    //will need to reference parent tasks
+                    val tasksViewModelFactory =
+                        TasksViewModelFactory(googleAuthViewModel.googleAccountCredential)
+                    val tasksViewModel = ViewModelProvider(
+                        viewModelStore, tasksViewModelFactory
+                    )[TasksViewModel::class.java]
+
                     val calendarViewModelFactory =
                         CalendarViewModelFactory(googleAuthViewModel.googleAccountCredential)
                     val calendarViewModel = ViewModelProvider(
                         viewModelStore, calendarViewModelFactory
                     )[CalendarViewModel::class.java]
 
-                    Tac(calendarViewModel = calendarViewModel)
+                    Tac(
+                        calendarViewModel = calendarViewModel,
+                        tasksViewModel = tasksViewModel
+                    )
                 }
             }
         }

@@ -14,7 +14,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-val inputFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+val googleTasksDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
 
 data class TaskDao(
     val id: String,
@@ -46,23 +46,40 @@ data class TaskDao(
         title = mutableStateOf(googleTask.title),
         notes = mutableStateOf(googleTask.notes),
         completed = mutableStateOf(googleTask.status.equals("completed")),
-        //need to implement notes parsing to find actual start date time
-        //ZonedDateTime.parse(task.notes.dateTime.toString(), dateTimeFormat)
-        start = mutableStateOf(
-            ZonedDateTime.of(
-                LocalDateTime.of(LocalDate.now(), LocalTime.MIN),
-                ZoneId.systemDefault()
+        //use googleTask.due as DO date as in when can user start DOing the task.
+        //reason for DOing this is so we can call the google tasks api with a filter on due date
+        //as opposed to making google tasks respond with lots of data and filtering on our end.
+        //For example, if we want to see what tasks a user can start this month, we can filter
+        //dueMax = last day of this month.
+        //need to implement notes parsing to find actual start time
+        start = try {
+            mutableStateOf(
+                ZonedDateTime.parse(
+                    googleTask.due.toStringRfc3339(),
+                    googleTasksDateTimeFormat
+                )
             )
-        ),
-        //need to implement notes parsing to find actual end time and durations
+        } catch (e: Exception) {
+            mutableStateOf(
+                ZonedDateTime.of(
+                    LocalDateTime.of(LocalDate.now(), LocalTime.MIN),
+                    ZoneId.systemDefault()
+                )
+            )
+        },
+        //TODO: implement notes parsing to find actual end time and durations
+        //ZonedDateTime.parse(task.notes.dateTime.toString(), dateTimeFormat)
         end = mutableStateOf(ZonedDateTime.now()),
         deleted = mutableStateOf(googleTask.deleted),
         taskList = mutableStateOf(taskList),
         scheduledDuration = mutableIntStateOf(0),
         workedDuration = mutableIntStateOf(0),
         neededDuration = mutableIntStateOf(60)
-        ) {
-        if (googleTask.due != null) ZonedDateTime.parse(googleTask.due.toString(), inputFormat)
+    ) {
+        if (googleTask.due != null) ZonedDateTime.parse(
+            googleTask.due.toString(),
+            googleTasksDateTimeFormat
+        )
     }
 
     constructor() : this(

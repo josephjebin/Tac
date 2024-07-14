@@ -1,18 +1,23 @@
 package com.jebkit.tac.ui.task
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.services.tasks.model.TaskList
 import com.jebkit.tac.data.dummyData.dummyDataTaskLists
 import com.jebkit.tac.data.dummyData.dummyDataTasks
+import com.jebkit.tac.data.tasks.GoogleTasksService
 import com.jebkit.tac.data.tasks.TaskDao
-import com.jebkit.tac.data.tasks.TaskList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 
 //class TasksViewModel(authState: AuthState, authorizationService : AuthorizationService): ViewModel() {
-class TasksViewModel: ViewModel() {
+class TasksViewModel(credential: GoogleAccountCredential): ViewModel() {
     val TAG = "TasksViewModel"
     private val _uiState = MutableStateFlow(
         TasksState(
@@ -23,26 +28,40 @@ class TasksViewModel: ViewModel() {
         )
     )
     val uiState: StateFlow<TasksState> = _uiState.asStateFlow()
-//    var tasksService: TasksService
+    private var tasksService: GoogleTasksService = GoogleTasksService(credential)
 
-//    init {
-//        tasksService = TasksService(authState, authorizationService)
-//    }
+    init {
+        getTaskListsAndTasks(
+            LocalDate.now().plusMonths(2).year,
+            LocalDate.now().plusMonths(2).monthValue
+            LocalDate.now().plusMonths(2).year,
+            LocalDate.now().plusMonths(2).monthValue)
+    }
 
-//    fun getTaskListsAndTasks() {
-//        viewModelScope.launch {
-//            val taskLists = tasksService.getTaskLists()
-//            updateTaskLists(taskLists)
-//            val tasks = mutableListOf<TaskDao>()
-//            for (taskList in taskLists) {
-//                val tasksInProject = tasksService.getTasks(taskList.id)
-//                for(taskInProject in tasksInProject) {
-//                    tasks.add(TaskDao(taskInProject, taskList.title))
-//                }
-//            }
+    fun getTaskListsAndTasks(
+        minYear: Int,
+        minMonth: Int,
+        maxYear: Int,
+        maxMonth: Int
+    ) {
+        viewModelScope.launch {
+            val taskLists = tasksService.getTaskLists()
+            updateTaskLists(taskLists)
+            for (taskList in taskLists) {
+                val tasksInProject = tasksService.getTasksForSpecificYearAndMonth(
+                    taskList.title,
+                    minYear,
+                    minMonth,
+                    maxYear,
+                    maxMonth
+                )
+                for(task in tasksInProject) {
+                    tasks.add(TaskDao(task, taskList.title))
+                }
+            }
 //            updateTasks(tasks)
-//        }
-//    }
+        }
+    }
 
     private fun updateTaskLists(newLists: List<TaskList>) {
         _uiState.update {currentState ->

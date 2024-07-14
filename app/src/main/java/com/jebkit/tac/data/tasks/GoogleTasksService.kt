@@ -18,8 +18,6 @@ import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.DateTime
-import com.google.api.services.calendar.Calendar
-import com.google.api.services.calendar.model.Event
 import com.google.api.services.tasks.Tasks
 import com.google.api.services.tasks.model.Task
 import com.google.api.services.tasks.model.TaskList
@@ -73,31 +71,37 @@ class GoogleTasksService(private var credential: GoogleAccountCredential) {
 
 
     //returns all tasks that are overdue or can be done during the specified year and month
-    suspend fun getTasksFromGoogleForSpecificYearAndMonth(year: Int, month: Int): ArrayList<Task> {
+    suspend fun getTasksForSpecificYearAndMonth(
+        taskList: String,
+        minYear: Int,
+        minMonth: Int,
+        maxYear: Int,
+        maxMonth: Int
+    ): ArrayList<Task> {
         //have to use Calendar to work with Google's Date
-        val calendarFirstDateOfSpecifiedYearAndMonth = java.util.Calendar.getInstance()
-        calendarFirstDateOfSpecifiedYearAndMonth.set(year, month, 1, 0, 0, 0)
-        val dateTimeFirstDateOfMonth = DateTime(calendarFirstDateOfSpecifiedYearAndMonth.time)
-        var localDateLastDateOfMonth = LocalDate.of(year, month, 1)
+        var localDateLastDateOfMonth = LocalDate.of(maxYear, maxMonth, 1)
         localDateLastDateOfMonth = localDateLastDateOfMonth.withDayOfMonth(localDateLastDateOfMonth.month.length(localDateLastDateOfMonth.isLeapYear))
+
+        val calendarFirstDateOfSpecifiedYearAndMonth = java.util.Calendar.getInstance()
+        calendarFirstDateOfSpecifiedYearAndMonth.set(minYear, minMonth, 1, 0, 0, 0)
         val calendarLastDateOfSpecifiedYearAndMonth = java.util.Calendar.getInstance()
-        calendarLastDateOfSpecifiedYearAndMonth.set(year, month, localDateLastDateOfMonth.dayOfMonth, 23, 59, 59)
+        calendarLastDateOfSpecifiedYearAndMonth.set(maxYear, maxMonth, localDateLastDateOfMonth.dayOfMonth, 23, 59, 59)
+
+        val dateTimeFirstDateOfMonth = DateTime(calendarFirstDateOfSpecifiedYearAndMonth.time)
         val dateTimeLastDateOfMonth = DateTime(calendarLastDateOfSpecifiedYearAndMonth.time)
-        val apiResponse = ArrayList<Event>()
+        val apiResponse = ArrayList<Task>()
 
         try {
             withContext(Dispatchers.IO) {
-                val events = tasksService
-                    .tasklists()
-                    .list()
-                    .setTimeMin(dateTimeFirstDateOfMonth)
-                    .setTimeMax(dateTimeLastDateOfMonth)
-                    .setOrderBy("startTime")
-                    .setSingleEvents(true)
+                val tasks = tasksService
+                    .tasks()
+                    .list(taskList)
+                    .setDueMin(dateTimeFirstDateOfMonth.toStringRfc3339())
+                    .setDueMax(dateTimeLastDateOfMonth.toStringRfc3339())
                     .execute()
                     .items
 
-                apiResponse.addAll(events)
+                apiResponse.addAll(tasks)
             }
         } catch (e: Exception) {
             Log.d("GoogleCalendarService", e.message.toString())
