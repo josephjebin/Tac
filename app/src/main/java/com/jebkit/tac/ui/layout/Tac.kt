@@ -24,7 +24,7 @@ import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskList
 import com.jebkit.tac.ui.calendar.Calendar
 import com.jebkit.tac.ui.calendar.GoogleCalendarState
-import com.jebkit.tac.ui.calendar.CalendarViewModel
+import com.jebkit.tac.ui.calendar.TasksAndCalendarViewModel
 import com.jebkit.tac.ui.calendar.DayHeader
 import com.jebkit.tac.ui.dragAndDrop.RootDragInfoProvider
 import com.jebkit.tac.ui.task.TaskSheet
@@ -36,31 +36,31 @@ import java.time.format.DateTimeFormatter
 val outputFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy")
 
 @Composable
-fun Tac(calendarViewModel: CalendarViewModel = viewModel(),
+fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel(),
         tasksViewModel: TasksViewModel = viewModel()
 ) {
     Surface(color = MaterialTheme.colors.background) {
-        val uiCalendarState by calendarViewModel.uiState.collectAsState()
+        val uiCalendarState by tasksAndCalendarViewModel.uiState.collectAsState()
         val uiTasksState by tasksViewModel.uiState.collectAsState()
 
         if(uiCalendarState.googleCalendarState.value is GoogleCalendarState.Success) {
 
             TasksAndCalendarScreen(
-                selectedDate = uiCalendarState.selectedDate.value,
+                selectedDate = uiCalendarState.minSelectedDate.value,
                 events = (uiCalendarState.googleCalendarState.value as GoogleCalendarState.Success).events,
                 scheduledTasks = (uiCalendarState.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks,
                 addScheduledTask = { scheduledTask: ScheduledTask ->
-                    calendarViewModel.addScheduledTask(
+                    tasksAndCalendarViewModel.addScheduledTask(
                         scheduledTask
                     )
                 },
                 removeScheduledTask = { scheduledTask: ScheduledTask ->
-                    calendarViewModel.removeScheduledTask(
+                    tasksAndCalendarViewModel.removeScheduledTask(
                         scheduledTask
                     )
                 },
-                addEventDao = { eventDao: EventDao -> calendarViewModel.addEventDao(eventDao) },
-                removeEventDao = { eventDao: EventDao -> calendarViewModel.removeEventDao(eventDao) },
+                addEventDao = { eventDao: EventDao -> tasksAndCalendarViewModel.addEventDao(eventDao) },
+                removeEventDao = { eventDao: EventDao -> tasksAndCalendarViewModel.removeEventDao(eventDao) },
                 taskLists = uiTasksState.taskLists,
                 tasks = uiTasksState.tasks,
                 currentSelectedTaskList = uiTasksState.currentSelectedTaskList,

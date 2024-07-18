@@ -35,7 +35,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.jebkit.tac.data.constants.GoogleAuthConstants
 import com.jebkit.tac.data.constants.GoogleAuthConstants.PREF_ACCOUNT_NAME
 import com.jebkit.tac.data.constants.GoogleAuthConstants.REQUEST_GOOGLE_PLAY_SERVICES
-import com.jebkit.tac.ui.calendar.CalendarViewModel
+import com.jebkit.tac.ui.calendar.TasksAndCalendarViewModel
 import com.jebkit.tac.ui.calendar.CalendarViewModelFactory
 import com.jebkit.tac.ui.googleAuth.GoogleAuthViewModel
 import com.jebkit.tac.ui.googleAuth.GoogleAuthViewModelFactory
@@ -124,12 +124,12 @@ class MainActivity : ComponentActivity() {
 
                     val calendarViewModelFactory =
                         CalendarViewModelFactory(googleAuthViewModel.googleAccountCredential)
-                    val calendarViewModel = ViewModelProvider(
+                    val tasksAndCalendarViewModel = ViewModelProvider(
                         viewModelStore, calendarViewModelFactory
-                    )[CalendarViewModel::class.java]
+                    )[TasksAndCalendarViewModel::class.java]
 
                     Tac(
-                        calendarViewModel = calendarViewModel,
+                        tasksAndCalendarViewModel = tasksAndCalendarViewModel,
                         tasksViewModel = tasksViewModel
                     )
                 }

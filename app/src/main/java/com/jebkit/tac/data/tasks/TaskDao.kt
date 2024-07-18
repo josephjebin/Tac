@@ -34,7 +34,7 @@ data class TaskDao(
         )
     ),
     val deleted: MutableState<Boolean> = mutableStateOf(false),
-    val taskList: MutableState<String>,
+    val parentTaskListId: MutableState<String>,
     val scheduledDuration: MutableIntState = mutableIntStateOf(0),
     val workedDuration: MutableIntState = mutableIntStateOf(0),
     val neededDuration: MutableIntState,
@@ -71,7 +71,7 @@ data class TaskDao(
         //ZonedDateTime.parse(task.notes.dateTime.toString(), dateTimeFormat)
         end = mutableStateOf(ZonedDateTime.now()),
         deleted = mutableStateOf(googleTask.deleted),
-        taskList = mutableStateOf(taskList),
+        parentTaskListId = mutableStateOf(taskList),
         scheduledDuration = mutableIntStateOf(0),
         workedDuration = mutableIntStateOf(0),
         neededDuration = mutableIntStateOf(60)
@@ -86,7 +86,7 @@ data class TaskDao(
         id = "STUB",
         title = mutableStateOf("STUB"),
         notes = mutableStateOf("STUB"),
-        taskList = mutableStateOf("STUB"),
+        parentTaskListId = mutableStateOf("STUB"),
         neededDuration = mutableIntStateOf(0)
     )
 }

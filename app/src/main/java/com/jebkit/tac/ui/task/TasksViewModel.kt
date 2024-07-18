@@ -20,14 +20,14 @@ import java.time.LocalDate
 class TasksViewModel(credential: GoogleAccountCredential): ViewModel() {
     val TAG = "TasksViewModel"
     private val _uiState = MutableStateFlow(
-        TasksState(
+        GoogleTasksState(
             taskLists = dummyDataTaskLists(),
             tasks = dummyDataTasks(),
             currentSelectedTaskList = dummyDataTaskLists()[0],
             currentSelectedTask = TaskDao()
         )
     )
-    val uiState: StateFlow<TasksState> = _uiState.asStateFlow()
+    val uiState: StateFlow<GoogleTasksState> = _uiState.asStateFlow()
     private var tasksService: GoogleTasksService = GoogleTasksService(credential)
 
     init {

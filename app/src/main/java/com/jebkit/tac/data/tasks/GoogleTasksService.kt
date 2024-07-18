@@ -69,26 +69,19 @@ class GoogleTasksService(private var credential: GoogleAccountCredential) {
         return apiResponse
     }
 
-
-    //returns all tasks that are overdue or can be done during the specified year and month
+    //returns all tasks that can be done during between the minDate and maxDate for the specified tasklist
     suspend fun getTasksForSpecificYearAndMonth(
         taskList: String,
-        minYear: Int,
-        minMonth: Int,
-        maxYear: Int,
-        maxMonth: Int
+        minDate: LocalDate,
+        maxDate: LocalDate
     ): ArrayList<Task> {
         //have to use Calendar to work with Google's Date
-        var localDateLastDateOfMonth = LocalDate.of(maxYear, maxMonth, 1)
-        localDateLastDateOfMonth = localDateLastDateOfMonth.withDayOfMonth(localDateLastDateOfMonth.month.length(localDateLastDateOfMonth.isLeapYear))
-
-        val calendarFirstDateOfSpecifiedYearAndMonth = java.util.Calendar.getInstance()
-        calendarFirstDateOfSpecifiedYearAndMonth.set(minYear, minMonth, 1, 0, 0, 0)
-        val calendarLastDateOfSpecifiedYearAndMonth = java.util.Calendar.getInstance()
-        calendarLastDateOfSpecifiedYearAndMonth.set(maxYear, maxMonth, localDateLastDateOfMonth.dayOfMonth, 23, 59, 59)
-
-        val dateTimeFirstDateOfMonth = DateTime(calendarFirstDateOfSpecifiedYearAndMonth.time)
-        val dateTimeLastDateOfMonth = DateTime(calendarLastDateOfSpecifiedYearAndMonth.time)
+        val minCalendar = java.util.Calendar.getInstance()
+        val maxCalendar = java.util.Calendar.getInstance()
+        minCalendar.set(minDate.year, minDate.monthValue, minDate.dayOfMonth, 0, 0, 0)
+        maxCalendar.set(maxDate.year, maxDate.monthValue, maxDate.dayOfMonth, 23, 59, 59)
+        val minDateTime = DateTime(minCalendar.time)
+        val maxDateTime = DateTime(maxCalendar.time)
         val apiResponse = ArrayList<Task>()
 
         try {
@@ -96,8 +89,8 @@ class GoogleTasksService(private var credential: GoogleAccountCredential) {
                 val tasks = tasksService
                     .tasks()
                     .list(taskList)
-                    .setDueMin(dateTimeFirstDateOfMonth.toStringRfc3339())
-                    .setDueMax(dateTimeLastDateOfMonth.toStringRfc3339())
+                    .setDueMin(minDateTime.toStringRfc3339())
+                    .setDueMax(maxDateTime.toStringRfc3339())
                     .execute()
                     .items
 

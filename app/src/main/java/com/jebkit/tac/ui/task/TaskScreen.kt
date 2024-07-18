@@ -107,7 +107,7 @@ fun TaskSheet(
 
         //tasks
         val filteredTasks =
-            tasks.filter { taskDao -> taskDao.taskList.value == currentSelectedTaskList.title }
+            tasks.filter { taskDao -> taskDao.parentTaskListId.value == currentSelectedTaskList.title }
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
             filteredTasks.forEachIndexed { index, taskDao ->
                 val eventDurationMinutes = taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue

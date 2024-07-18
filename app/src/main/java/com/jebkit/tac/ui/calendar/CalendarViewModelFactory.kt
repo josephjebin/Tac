@@ -7,8 +7,8 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 @Suppress("UNCHECKED_CAST")
 class CalendarViewModelFactory(private val credential: GoogleAccountCredential): ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if(modelClass.isAssignableFrom(CalendarViewModel::class.java))
-            return CalendarViewModel(credential) as T
+        if(modelClass.isAssignableFrom(TasksAndCalendarViewModel::class.java))
+            return TasksAndCalendarViewModel(credential) as T
         throw IllegalArgumentException("Calendar View Model not found.")
     }
 }

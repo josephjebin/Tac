@@ -16,41 +16,60 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import kotlinx.coroutines.launch
 
 
-class CalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
-    val TAG = "CalendarViewModel"
-    private val _uiState = MutableStateFlow(CalendarState())
-    val uiState: StateFlow<CalendarState> = _uiState.asStateFlow()
+class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
+//    var maxLocalDate = LocalDate.of(maxYear, maxMonth, 1)
+//        maxLocalDate = maxLocalDate.withDayOfMonth(maxLocalDate.month.length(maxLocalDate.isLeapYear))
+    val TAG = "TasksAndCalendarViewModel"
+    private val _uiState = MutableStateFlow(TasksAndCalendarState())
+    val uiState: StateFlow<TasksAndCalendarState> = _uiState.asStateFlow()
 
     private val googleCalendarService: GoogleCalendarService
 
     init {
         googleCalendarService = GoogleCalendarService(credential)
-        readGoogleCalendarForSpecificYearAndMonth(year = _uiState.value.selectedDate.value.year,
-            month =  _uiState.value.selectedDate.value.monthValue
+        readGoogleCalendarForSpecificYearAndMonthRange(
+            minYear = _uiState.value.minSelectedDate.value.minusMonths(1).year,
+            minMonth = _uiState.value.minSelectedDate.value.minusMonths(1).monthValue,
+            maxYear = _uiState.value.minSelectedDate.value.plusMonths(1).year,
+            maxMonth = _uiState.value.minSelectedDate.value.plusMonths(1).monthValue,
         )
     }
 
-    fun readGoogleCalendarForSpecificYearAndMonth(year: Int, month: Int) {
-        Log.i("CalendarViewModel", "getting events for YYYY/MM: $year/$month")
+    fun readGoogleCalendarForSpecificYearAndMonthRange(
+        minYear: Int,
+        minMonth: Int,
+        maxYear: Int,
+        maxMonth: Int
+    ) {
+        Log.i("TasksAndCalendarViewModel", "getting events")
         viewModelScope.launch {
             try {
                 //update calendarS
 
                 _uiState.value.googleCalendarState.value = GoogleCalendarState.Success()
-
-
                 googleCalendarService
-                    .getEventsFromCalendarForSpecificYearAndMonth(year = year, month = month)
-                    .forEach {
-                        googleEvent ->
-                //these events are a mixed bag of EventDaos and ScheduledTasks.
-                //we will separate them and update our viewmodel accordingly
-                    Log.i("CalendarViewModel", "got results from Calendar: ${googleEvent.summary}")
-                    if(googleEvent.description.contains("parentTaskId"))
-                            (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.add(ScheduledTask(googleEvent))
-                     else (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).events.add(EventDao(googleEvent))
-                }
-                Log.i("CalendarViewModel", "finished refreshing")
+                    .getEvents(
+                        minYear = minYear,
+                        minMonth = minMonth,
+                        maxYear = maxYear,
+                        maxMonth = maxMonth
+                    )
+                    .forEach { googleEvent ->
+                        //these events are a mixed bag of EventDaos and ScheduledTasks.
+                        //we will separate them and update our viewmodel accordingly
+                        Log.i(
+                            "TasksAndCalendarViewModel",
+                            "got results from Calendar: ${googleEvent.summary}"
+                        )
+                        if (googleEvent.description.contains("parentTaskId"))
+                            (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.add(
+                                ScheduledTask(googleEvent)
+                            )
+                        else (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).events.add(
+                            EventDao(googleEvent)
+                        )
+                    }
+                Log.i("TasksAndCalendarViewModel", "finished refreshing")
             } catch (e: Exception) {
                 _uiState.value.googleCalendarState.value = GoogleCalendarState.Error(e)
             }
@@ -126,7 +145,7 @@ class CalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
 //                    application,
 //                    appAuthConfiguration)
 //
-//                CalendarViewModel(authState, authorizationService)
+//                TasksAndCalendarViewModel(authState, authorizationService)
 //            }
 //        }
 //    }

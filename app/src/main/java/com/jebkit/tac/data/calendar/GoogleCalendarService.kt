@@ -54,18 +54,17 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
             .build()
     }
 
-
-    suspend fun getEventsFromCalendarForSpecificYearAndMonth(year: Int, month: Int): ArrayList<Event> {
+    suspend fun getEvents(
+        minDate: LocalDate,
+        maxDate: LocalDate
+    ): ArrayList<Event> {
         //have to use Calendar to work with Google's Date
-        val calendarFirstDateOfSpecifiedYearAndMonth = java.util.Calendar.getInstance()
-        calendarFirstDateOfSpecifiedYearAndMonth.set(year, month, 1, 0, 0, 0)
-        val dateTimeFirstDateOfMonth = DateTime(calendarFirstDateOfSpecifiedYearAndMonth.time)
-
-        var localDateLastDateOfMonth = LocalDate.of(year, month, 1)
-        localDateLastDateOfMonth = localDateLastDateOfMonth.withDayOfMonth(localDateLastDateOfMonth.month.length(localDateLastDateOfMonth.isLeapYear))
-        val calendarLastDateOfSpecifiedYearAndMonth = java.util.Calendar.getInstance()
-        calendarLastDateOfSpecifiedYearAndMonth.set(year, month, localDateLastDateOfMonth.dayOfMonth, 23, 59, 59)
-        val dateTimeLastDateOfMonth = DateTime(calendarLastDateOfSpecifiedYearAndMonth.time)
+        val minCalendar = java.util.Calendar.getInstance()
+        val maxCalendar = java.util.Calendar.getInstance()
+        minCalendar.set(minDate.year, minDate.monthValue, minDate.dayOfMonth, 0, 0, 0)
+        maxCalendar.set(maxDate.year, maxDate.monthValue, maxDate.dayOfMonth, 23, 59, 59)
+        val minDateTime = DateTime(minCalendar.time)
+        val maxDateTime = DateTime(maxCalendar.time)
         val apiResponse = ArrayList<Event>()
         try {
             withContext(Dispatchers.IO) {
@@ -73,8 +72,8 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
                     .events()
                     .list("primary")
                     .setMaxResults(10)
-                    .setTimeMin(dateTimeFirstDateOfMonth)
-                    .setTimeMax(dateTimeLastDateOfMonth)
+                    .setTimeMin(minDateTime)
+                    .setTimeMax(maxDateTime)
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .execute()
