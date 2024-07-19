@@ -35,10 +35,15 @@ data class ScheduledTask(
         title = mutableStateOf(googleEvent.summary),
         parentTaskId =
         try {
-            val lengthStartIndex = googleEvent.description.indexOf("parentTaskId").plus("parentTaskId".length)
-            val lengthEndIndex = googleEvent.description.indexOf(":", lengthStartIndex)
-            val length = Integer.parseInt(googleEvent.description.substring(lengthStartIndex, lengthEndIndex))
-            googleEvent.description.substring(lengthEndIndex + 1, lengthEndIndex + 1 + length)
+            //commented code is if we encode parentTaskId as: parentTaskId3:123 where the number
+            //right after parentTaskId is the length of the id
+            //val lengthStartIndex = googleEvent.description.indexOf("parentTaskId").plus("parentTaskId".length)
+            //val lengthEndIndex = googleEvent.description.indexOf(":", lengthStartIndex)
+            //val length = Integer.parseInt(googleEvent.description.substring(lengthStartIndex, lengthEndIndex))
+            //googleEvent.description.substring(lengthEndIndex + 1, lengthEndIndex + 1 + length)
+            val parentTaskIdStartIndex = googleEvent.description.indexOf("parentTaskId:").plus(13)
+            val parentTaskIdEndIndex = googleEvent.description.indexOf(";", parentTaskIdStartIndex)
+            googleEvent.description.substring(parentTaskIdStartIndex, parentTaskIdEndIndex)
         } catch (e: Exception) {
             null
         },

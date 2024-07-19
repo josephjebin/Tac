@@ -3,7 +3,7 @@ package com.jebkit.tac.data.dummyData
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import com.jebkit.tac.data.tasks.TaskDao
-import com.jebkit.tac.data.tasks.TaskList
+import com.jebkit.tac.data.tasks.TaskListDao
 import java.time.ZonedDateTime
 
 //fun dummyEvents(): List<EventDao> {
@@ -105,11 +105,11 @@ import java.time.ZonedDateTime
 //    )
 //}
 
-fun dummyDataTaskLists(): List<TaskList> {
+fun dummyDataTaskListDaos(): List<TaskListDao> {
     return listOf(
-        TaskList(id = "careerTaskListId", title = "Career"),
-        TaskList(id = "financeTaskListId", title = "Finance"),
-        TaskList(id = "fitnessTaskListId", title = "Fitness")
+        TaskListDao(id = "careerTaskListDaoId", title = mutableStateOf("Career")),
+        TaskListDao(id = "financeTaskListDaoId", title = mutableStateOf("Finance")),
+        TaskListDao(id = "fitnessTaskListDaoId", title = mutableStateOf("Fitness"))
     )
 }
 

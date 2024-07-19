@@ -71,10 +71,10 @@ class GoogleTasksService(private var credential: GoogleAccountCredential) {
 
     //returns all tasks that can be done during between the minDate and maxDate for the specified tasklist
     suspend fun getTasksForSpecificYearAndMonth(
-        taskList: String,
+        taskListId: String,
         minDate: LocalDate,
         maxDate: LocalDate
-    ): ArrayList<Task> {
+    ): Pair<String, ArrayList<Task>> {
         //have to use Calendar to work with Google's Date
         val minCalendar = java.util.Calendar.getInstance()
         val maxCalendar = java.util.Calendar.getInstance()
@@ -88,11 +88,12 @@ class GoogleTasksService(private var credential: GoogleAccountCredential) {
             withContext(Dispatchers.IO) {
                 val tasks = tasksService
                     .tasks()
-                    .list(taskList)
+                    .list(taskListId)
                     .setDueMin(minDateTime.toStringRfc3339())
                     .setDueMax(maxDateTime.toStringRfc3339())
                     .execute()
                     .items
+
 
                 apiResponse.addAll(tasks)
             }
@@ -101,7 +102,7 @@ class GoogleTasksService(private var credential: GoogleAccountCredential) {
             throw e
         }
 
-        return apiResponse
+        return Pair(taskListId, apiResponse)
     }
 }
 

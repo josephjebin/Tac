@@ -1,8 +1,9 @@
 package com.jebkit.tac.ui.calendar
 
-import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.GoogleCalendarService
 import com.jebkit.tac.data.calendar.ScheduledTask
@@ -12,66 +13,89 @@ import kotlinx.coroutines.flow.asStateFlow
 //import com.jebkit.tac.data.dummyData.dummyEvents
 //import com.jebkit.tac.data.dummyData.dummyScheduledTasks
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.services.tasks.model.Task
+import com.jebkit.tac.data.tasks.GoogleTasksService
+import com.jebkit.tac.data.tasks.TaskDao
+import com.jebkit.tac.data.tasks.TaskListDao
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 
 import kotlinx.coroutines.launch
 
 
 class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
-//    var maxLocalDate = LocalDate.of(maxYear, maxMonth, 1)
+    //    var maxLocalDate = LocalDate.of(maxYear, maxMonth, 1)
 //        maxLocalDate = maxLocalDate.withDayOfMonth(maxLocalDate.month.length(maxLocalDate.isLeapYear))
     val TAG = "TasksAndCalendarViewModel"
     private val _uiState = MutableStateFlow(TasksAndCalendarState())
     val uiState: StateFlow<TasksAndCalendarState> = _uiState.asStateFlow()
 
     private val googleCalendarService: GoogleCalendarService
+    private val googleTasksService: GoogleTasksService
 
     init {
+        googleTasksService = GoogleTasksService(credential)
         googleCalendarService = GoogleCalendarService(credential)
-        readGoogleCalendarForSpecificYearAndMonthRange(
-            minYear = _uiState.value.minSelectedDate.value.minusMonths(1).year,
-            minMonth = _uiState.value.minSelectedDate.value.minusMonths(1).monthValue,
-            maxYear = _uiState.value.minSelectedDate.value.plusMonths(1).year,
-            maxMonth = _uiState.value.minSelectedDate.value.plusMonths(1).monthValue,
-        )
-    }
 
-    fun readGoogleCalendarForSpecificYearAndMonthRange(
-        minYear: Int,
-        minMonth: Int,
-        maxYear: Int,
-        maxMonth: Int
-    ) {
-        Log.i("TasksAndCalendarViewModel", "getting events")
         viewModelScope.launch {
-            try {
-                //update calendarS
+            //get tasklists - can release thread
+            val taskLists = async {
+                googleTasksService.getTaskLists()
+            }
 
-                _uiState.value.googleCalendarState.value = GoogleCalendarState.Success()
-                googleCalendarService
-                    .getEvents(
-                        minYear = minYear,
-                        minMonth = minMonth,
-                        maxYear = maxYear,
-                        maxMonth = maxMonth
+
+            //get all calendar tings - can release thread
+            val googleCalendarData = async {
+                googleCalendarService.getEvents(
+                    _uiState.value.minTasksAndEventsDate.value,
+                    _uiState.value.maxEventsDate.value
+                )
+            }
+
+            //add all tasklists to view model and get all tasks for each tasklist - depends on result of get tasklists
+            val taskJobs: MutableList<Deferred<Pair<String, ArrayList<Task>>>> = mutableListOf()
+            taskLists.await().forEach { googleTaskList ->
+                _uiState.value.googleTasksState.value.taskListDaos[googleTaskList.id] =
+                    TaskListDao(
+                        mutableStateOf(googleTaskList.id),
+                        mutableStateOf(googleTaskList.title)
                     )
-                    .forEach { googleEvent ->
-                        //these events are a mixed bag of EventDaos and ScheduledTasks.
-                        //we will separate them and update our viewmodel accordingly
-                        Log.i(
-                            "TasksAndCalendarViewModel",
-                            "got results from Calendar: ${googleEvent.summary}"
-                        )
-                        if (googleEvent.description.contains("parentTaskId"))
-                            (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.add(
-                                ScheduledTask(googleEvent)
-                            )
-                        else (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).events.add(
-                            EventDao(googleEvent)
-                        )
+
+                taskJobs.add(async {
+                    googleTasksService.getTasksForSpecificYearAndMonth(
+                        googleTaskList.id,
+                        _uiState.value.minTasksAndEventsDate.value,
+                        _uiState.value.maxBufferDate.value
+                    )
+                })
+
+                //parse calendar tings into events and scheduled tasks and update view model for each - depends on tasks
+                taskJobs.awaitAll().forEach { (parentTaskListId, googleTasks) ->
+                    googleTasks.forEach { googleTask ->
+                        _uiState.value.googleTasksState.value.taskDaos[googleTask.id] =
+                            TaskDao(googleTask, parentTaskListId)
                     }
-                Log.i("TasksAndCalendarViewModel", "finished refreshing")
-            } catch (e: Exception) {
-                _uiState.value.googleCalendarState.value = GoogleCalendarState.Error(e)
+                }.also {
+                    googleCalendarData.await().forEach { googleEvent ->
+                        if (googleEvent.description.contains("parentTaskId:")) {
+                            val parentTaskIdStartIndex = googleEvent.description.indexOf("parentTaskId:").plus(13)
+                            val parentTaskIdEndIndex = googleEvent.description.indexOf(";", parentTaskIdStartIndex)
+                            val parentTaskId = googleEvent.description.substring(parentTaskIdStartIndex, parentTaskIdEndIndex)
+                            val scheduledTask = ScheduledTask(googleEvent)
+                            (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks[googleEvent.id] =
+                                scheduledTask
+                            val parentTask = _uiState.value.googleTasksState.value.taskDaos[parentTaskId]
+                            if(parentTask != null) {
+                                val parentTaskScheduledDuration = parentTask.scheduledDuration.intValue
+                                parentTask.scheduledDuration.intValue = parentTaskScheduledDuration + scheduledTask.duration.intValue
+                            }
+                        }
+                        else
+                            (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).events[googleEvent.id] =
+                                EventDao(googleEvent)
+                    }
+                }
             }
         }
     }
@@ -100,13 +124,13 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
 //        }
 //    }
 
-    fun addScheduledTask(newTask: ScheduledTask) {
+    fun saveScheduledTask(newTask: ScheduledTask) {
         //call calendar api to add scheduled task event
         //add response to view model because response contains proper id
 //        _uiState.value.googleCalendarState.value  += newTask
     }
 
-    fun removeScheduledTask(scheduledTask: ScheduledTask) {
+    fun deleteScheduledTask(scheduledTask: ScheduledTask) {
 //        _uiState.value.scheduledTasks.value -= scheduledTask
     }
 

@@ -2,7 +2,6 @@ package com.jebkit.tac.ui.task
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -21,7 +20,7 @@ import androidx.compose.ui.unit.times
 import com.jebkit.tac.R
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.tasks.TaskDao
-import com.jebkit.tac.data.tasks.TaskList
+import com.jebkit.tac.data.tasks.TaskListDao
 import com.jebkit.tac.ui.dragAndDrop.DragTarget
 import com.jebkit.tac.ui.layout.outputFormat
 import com.jebkit.tac.ui.theme.accent_gray
@@ -29,10 +28,10 @@ import com.jebkit.tac.ui.theme.accent_gray
 @Composable
 fun TaskSheet(
     tasksSheetState: MutableState<TasksSheetState>,
-    taskLists: List<TaskList>,
-    tasks: List<TaskDao>,
-    currentSelectedTaskList: TaskList,
-    onTaskListSelected: (TaskList) -> Unit,
+    taskListDaos: List<TaskListDao>,
+    taskDaos: List<TaskDao>,
+    currentSelectedTaskListDao: TaskListDao?,
+    onTaskListDaoSelected: (TaskListDao) -> Unit,
     onTaskSelected: (TaskDao) -> Unit,
     onTaskCompleted: (TaskDao) -> Unit,
     onTaskDrag: () -> Unit
@@ -92,24 +91,25 @@ fun TaskSheet(
 
         //projects
         Row {
-            taskLists.forEach { taskList ->
+            taskListDaos.forEach { taskListDao ->
                 Card(
                     modifier = Modifier
                         .padding(8.dp, 16.dp)
                         .border(BorderStroke(1.dp, SolidColor(Color.Black)))
-                        .clickable { onTaskListSelected(taskList) }
+                        .clickable { onTaskListDaoSelected(taskListDao) }
                 ) {
-                    Text(modifier = Modifier.padding(8.dp), text = taskList.title)
+                    Text(modifier = Modifier.padding(8.dp), text = taskListDao.title.value)
                 }
             }
         }
 
 
         //tasks
-        val filteredTasks =
-            tasks.filter { taskDao -> taskDao.parentTaskListId.value == currentSelectedTaskList.title }
+        //TODO filter by tasklist properly
+        val taskDaosFilteredByTaskList =
+            taskDaos.filter { taskDao -> taskDao.parentTaskListId.value == currentSelectedTaskListDao?.id }
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            filteredTasks.forEachIndexed { index, taskDao ->
+            taskDaosFilteredByTaskList.forEachIndexed { index, taskDao ->
                 val eventDurationMinutes = taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
 
@@ -140,7 +140,7 @@ fun TaskSheet(
                         onTaskCompleted = onTaskCompleted
                     )
                 }
-                if (index < taskLists.lastIndex) Divider(color = Color.Black, thickness = 1.dp)
+                if (index < taskListDaos.lastIndex) Divider(color = Color.Black, thickness = 1.dp)
             }
 
         }
