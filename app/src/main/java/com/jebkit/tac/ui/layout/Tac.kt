@@ -47,9 +47,11 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
                     val scheduledTasks: MutableList<ScheduledTask> = mutableListOf()
                     (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.values.forEach { scheduledTasksMap ->
                         scheduledTasksMap.values.filter { scheduledTask ->
-                            scheduledTask.start.value.toLocalDate() == tasksAndCalendarState.minSelectedDate.value ||
-                                    scheduledTask.end.value.toLocalDate() ==
-                        }
+                            //scheduled task's end lies within current selected range OR
+                            (scheduledTask.end.value.toLocalDate() >= tasksAndCalendarState.minSelectedDate.value && scheduledTask.end.value.toLocalDate() < tasksAndCalendarState.maxSelectedDate.value.plusDays(1)) ||
+                                    //scheduled task starts within current selected range
+                                    (scheduledTask.start.value.toLocalDate() >= tasksAndCalendarState.minSelectedDate.value && scheduledTask.start.value.toLocalDate() < tasksAndCalendarState.maxSelectedDate.value.plusDays(1))
+                        }.forEach { scheduledTasks.add(it) }
                     }
                     scheduledTasks.toList()
                 } catch (e: Exception) {
