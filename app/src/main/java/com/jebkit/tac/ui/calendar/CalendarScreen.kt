@@ -34,9 +34,9 @@ fun Calendar(
             )
 
             Box(modifier = Modifier) {
-                Schedule(
-                    selectedDate = selectedDate,
-                    events = events,
+                DaysSchedule(
+                    minSelectedDate = selectedDate,
+                    eventDaos = events,
                     scheduledTasks = scheduledTasks,
                     hourHeight = hourHeight,
                     tasksSheetState = tasksSheetState,

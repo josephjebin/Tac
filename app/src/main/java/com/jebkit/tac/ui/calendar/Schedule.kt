@@ -27,9 +27,10 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 @Composable
-fun Schedule(
-    selectedDate: LocalDate,
-    events: List<EventDao>,
+fun DaysSchedule(
+    minSelectedDate: LocalDate,
+    maxSelectedDate: LocalDate,
+    eventDaos: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
     hourHeight: Dp,
     tasksSheetState: TasksSheetState,
@@ -43,7 +44,7 @@ fun Schedule(
 
     Layout(
         content = {
-            events.sortedBy { eventDao -> eventDao.start.value }.forEach { event ->
+            eventDaos.filter { eventDao -> eventDao.start.value.toLocalDate() }.sortedBy { eventDao -> eventDao.start.value }.forEach { event ->
                 val eventHeight = ((event.duration.value / 60f) * hourHeight)
                 val planComposableModifier = Modifier
                     .startData(event.start.value.toLocalTime())
@@ -94,7 +95,7 @@ fun Schedule(
             if (tasksSheetState == TasksSheetState.COLLAPSED) {
                 DropTargets(
                     fiveMinuteHeight = hourHeight / 12,
-                    selectedDate = selectedDate,
+                    selectedDate = minSelectedDate,
                     removeScheduledTask = removeScheduledTask,
                     removeEventDao = removeEventDao,
                     addScheduledTask = addScheduledTask,
