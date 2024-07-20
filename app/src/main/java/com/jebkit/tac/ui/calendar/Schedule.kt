@@ -20,7 +20,7 @@ import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.dragAndDrop.DragTarget
 import com.jebkit.tac.ui.dragAndDrop.DropTarget
-import com.jebkit.tac.ui.task.TasksSheetState
+import com.jebkit.tac.ui.tasks.TasksSheetState
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit

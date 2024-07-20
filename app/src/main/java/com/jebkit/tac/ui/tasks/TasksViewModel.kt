@@ -1,4 +1,4 @@
-package com.jebkit.tac.ui.task
+package com.jebkit.tac.ui.tasks
 //
 //import androidx.lifecycle.ViewModel
 //import androidx.lifecycle.viewModelScope

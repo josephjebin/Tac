@@ -1,5 +1,6 @@
-package com.jebkit.tac.ui.calendar
+package com.jebkit.tac.ui.tasksAndCalendar
 
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -31,21 +32,17 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
     private val _uiState = MutableStateFlow(TasksAndCalendarState())
     val uiState: StateFlow<TasksAndCalendarState> = _uiState.asStateFlow()
 
-    private val googleCalendarService: GoogleCalendarService
-    private val googleTasksService: GoogleTasksService
+    private val googleCalendarService: GoogleCalendarService = GoogleCalendarService(credential)
+    private val googleTasksService: GoogleTasksService = GoogleTasksService(credential)
 
     init {
-        googleTasksService = GoogleTasksService(credential)
-        googleCalendarService = GoogleCalendarService(credential)
-
         viewModelScope.launch {
             //get tasklists - can release thread
             val taskLists = async {
                 googleTasksService.getTaskLists()
             }
 
-
-            //get all calendar tings - can release thread
+            //get all calendar data - can release thread
             val googleCalendarData = async {
                 googleCalendarService.getEvents(
                     _uiState.value.minTasksAndEventsDate.value,
@@ -58,7 +55,7 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
             taskLists.await().forEach { googleTaskList ->
                 _uiState.value.googleTasksState.value.taskListDaos[googleTaskList.id] =
                     TaskListDao(
-                        mutableStateOf(googleTaskList.id),
+                        googleTaskList.id,
                         mutableStateOf(googleTaskList.title)
                     )
 
@@ -69,32 +66,42 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
                         _uiState.value.maxBufferDate.value
                     )
                 })
+            }
 
-                //parse calendar tings into events and scheduled tasks and update view model for each - depends on tasks
-                taskJobs.awaitAll().forEach { (parentTaskListId, googleTasks) ->
-                    googleTasks.forEach { googleTask ->
-                        _uiState.value.googleTasksState.value.taskDaos[googleTask.id] =
-                            TaskDao(googleTask, parentTaskListId)
-                    }
-                }.also {
-                    googleCalendarData.await().forEach { googleEvent ->
-                        if (googleEvent.description.contains("parentTaskId:")) {
-                            val parentTaskIdStartIndex = googleEvent.description.indexOf("parentTaskId:").plus(13)
-                            val parentTaskIdEndIndex = googleEvent.description.indexOf(";", parentTaskIdStartIndex)
-                            val parentTaskId = googleEvent.description.substring(parentTaskIdStartIndex, parentTaskIdEndIndex)
-                            val scheduledTask = ScheduledTask(googleEvent)
-                            (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks[googleEvent.id] =
-                                scheduledTask
-                            val parentTask = _uiState.value.googleTasksState.value.taskDaos[parentTaskId]
-                            if(parentTask != null) {
-                                val parentTaskScheduledDuration = parentTask.scheduledDuration.intValue
-                                parentTask.scheduledDuration.intValue = parentTaskScheduledDuration + scheduledTask.duration.intValue
-                            }
+            //parse calendar data into events and scheduled tasks and update view model for each - depends on tasks
+            taskJobs.awaitAll().forEach { (parentTaskListId, googleTasks) ->
+                googleTasks.forEach { googleTask ->
+                    _uiState.value.googleTasksState.value.taskDaos[googleTask.id] =
+                        TaskDao(googleTask, parentTaskListId)
+                }
+            }.also {
+                googleCalendarData.await().forEach { googleEvent ->
+                    if (googleEvent.description.contains("parentTaskId:")) {
+                        val parentTaskIdStartIndex = googleEvent.description.indexOf("parentTaskId:").plus(13)
+                        val parentTaskIdEndIndex = googleEvent.description.indexOf(";", parentTaskIdStartIndex)
+                        val parentTaskId = googleEvent.description.substring(parentTaskIdStartIndex, parentTaskIdEndIndex)
+                        val scheduledTask = ScheduledTask(googleEvent)
+                        val parentTask = _uiState.value.googleTasksState.value.taskDaos[parentTaskId]
+                        if(parentTask != null) {
+                            val parentTaskScheduledDuration = parentTask.scheduledDuration.intValue
+                            parentTask.scheduledDuration.intValue = parentTaskScheduledDuration + scheduledTask.duration.intValue
+                        } else {
+                            //OH NO
+                            //ORPHANED SCHEDULED TASKS
+                            //todo: how to handle?
                         }
-                        else
-                            (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).events[googleEvent.id] =
-                                EventDao(googleEvent)
+                        //todo: do we wanna do this block of logic for orphaned tasks??
+                        var scheduledTaskMap = (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks[parentTaskId]
+                        if(scheduledTaskMap == null) {
+                            scheduledTaskMap = mutableStateMapOf(Pair(googleEvent.id, scheduledTask))
+                            (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks[parentTaskId] = scheduledTaskMap
+                        } else {
+                            scheduledTaskMap.put(googleEvent.id, scheduledTask)
+                        }
                     }
+                    else
+                        (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).eventDaos[googleEvent.id] =
+                            EventDao(googleEvent)
                 }
             }
         }

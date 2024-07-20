@@ -1,4 +1,4 @@
-package com.jebkit.tac.ui.task
+package com.jebkit.tac.ui.tasks
 
 import com.jebkit.tac.data.tasks.TaskList
 import org.junit.Assert.assertEquals

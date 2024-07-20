@@ -1,4 +1,4 @@
-package com.jebkit.tac.ui.task
+package com.jebkit.tac.ui.tasks
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*

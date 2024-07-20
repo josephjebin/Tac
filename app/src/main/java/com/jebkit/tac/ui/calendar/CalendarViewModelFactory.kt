@@ -3,6 +3,7 @@ package com.jebkit.tac.ui.calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.jebkit.tac.ui.tasksAndCalendar.TasksAndCalendarViewModel
 
 @Suppress("UNCHECKED_CAST")
 class CalendarViewModelFactory(private val credential: GoogleAccountCredential): ViewModelProvider.Factory {

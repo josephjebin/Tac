@@ -22,12 +22,12 @@ import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskListDao
 import com.jebkit.tac.ui.calendar.Calendar
-import com.jebkit.tac.ui.calendar.GoogleCalendarState
-import com.jebkit.tac.ui.calendar.TasksAndCalendarViewModel
+import com.jebkit.tac.ui.tasksAndCalendar.GoogleCalendarState
+import com.jebkit.tac.ui.tasksAndCalendar.TasksAndCalendarViewModel
 import com.jebkit.tac.ui.calendar.DayHeader
 import com.jebkit.tac.ui.dragAndDrop.RootDragInfoProvider
-import com.jebkit.tac.ui.task.TaskSheet
-import com.jebkit.tac.ui.task.TasksSheetState
+import com.jebkit.tac.ui.tasks.TaskSheet
+import com.jebkit.tac.ui.tasks.TasksSheetState
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -42,7 +42,7 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
 
             TasksAndCalendarScreen(
                 selectedDate = tasksAndCalendarState.minSelectedDate.value,
-                eventDaos = (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).events.values.toList(),
+                eventDaos = (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).eventDaos.values.toList(),
                 scheduledTasks = (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.values.toList(),
                 saveScheduledTask = { scheduledTask: ScheduledTask ->
                     tasksAndCalendarViewModel.saveScheduledTask(

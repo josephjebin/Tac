@@ -1,4 +1,4 @@
-package com.jebkit.tac.ui.task
+package com.jebkit.tac.ui.tasks
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateMapOf

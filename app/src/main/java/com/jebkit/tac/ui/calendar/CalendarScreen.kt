@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.dp
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.dragAndDrop.ScheduleDraggable
-import com.jebkit.tac.ui.task.TasksSheetState
+import com.jebkit.tac.ui.tasks.TasksSheetState
 import java.time.LocalDate
 
 @Composable

@@ -35,13 +35,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.jebkit.tac.data.constants.GoogleAuthConstants
 import com.jebkit.tac.data.constants.GoogleAuthConstants.PREF_ACCOUNT_NAME
 import com.jebkit.tac.data.constants.GoogleAuthConstants.REQUEST_GOOGLE_PLAY_SERVICES
-import com.jebkit.tac.ui.calendar.TasksAndCalendarViewModel
+import com.jebkit.tac.ui.tasksAndCalendar.TasksAndCalendarViewModel
 import com.jebkit.tac.ui.calendar.CalendarViewModelFactory
 import com.jebkit.tac.ui.googleAuth.GoogleAuthViewModel
 import com.jebkit.tac.ui.googleAuth.GoogleAuthViewModelFactory
 import com.jebkit.tac.ui.layout.Tac
-import com.jebkit.tac.ui.task.TasksSheetState
-import com.jebkit.tac.ui.task.TasksSheetState.*
+import com.jebkit.tac.ui.tasks.TasksSheetState
+import com.jebkit.tac.ui.tasks.TasksSheetState.*
 import com.jebkit.tac.ui.theme.TacTheme
 import com.jebkit.tac.ui.theme.accent_gray
 import com.google.android.gms.common.ConnectionResult
@@ -49,7 +49,6 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.calendar.CalendarScopes
-import com.jebkit.tac.ui.task.TasksViewModelFactory
 import pub.devrel.easypermissions.EasyPermissions
 //import net.openid.appauth.*
 
