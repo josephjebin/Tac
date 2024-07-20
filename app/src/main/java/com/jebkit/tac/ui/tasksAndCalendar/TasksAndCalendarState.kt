@@ -15,14 +15,10 @@ import java.time.LocalDate
 //Tasks and calendar data are stored together because they both are dependent on the selected dates
 data class TasksAndCalendarState(
     val calendarLayout: MutableState<CalendarLayout> = mutableStateOf(CalendarLayout.ONE_DAY),
-    //minSelectedDate will be used for one day calendar view
     val minSelectedDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now()),
     val maxSelectedDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now()),
-    val minBufferDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now().minusDays(3)),
-    //maxBufferDate will also represent maxTasksDate
-    val maxBufferDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now().plusDays(3)),
-    val minTasksAndEventsDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now().minusDays(3).minusWeeks(6)),
-    val maxEventsDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now().plusDays(3).plusWeeks(6)),
+    val minBufferDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now().minusWeeks(1)),
+    val maxBufferDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now().plusWeeks(1)),
     val googleCalendarState: MutableState<GoogleCalendarState> = mutableStateOf(GoogleCalendarState.Success()),
     val googleTasksState: MutableState<GoogleTasksState> = mutableStateOf(GoogleTasksState())
 )

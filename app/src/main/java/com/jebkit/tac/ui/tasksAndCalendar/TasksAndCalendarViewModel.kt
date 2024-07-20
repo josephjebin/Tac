@@ -45,8 +45,8 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
             //get all calendar data - can release thread
             val googleCalendarData = async {
                 googleCalendarService.getEvents(
-                    _uiState.value.minTasksAndEventsDate.value,
-                    _uiState.value.maxEventsDate.value
+                    _uiState.value.minBufferDate.value,
+                    _uiState.value.maxBufferDate.value
                 )
             }
 
@@ -62,13 +62,15 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
                 taskJobs.add(async {
                     googleTasksService.getTasksForSpecificYearAndMonth(
                         googleTaskList.id,
-                        _uiState.value.minTasksAndEventsDate.value,
+                        _uiState.value.minBufferDate.value,
                         _uiState.value.maxBufferDate.value
                     )
                 })
             }
 
-            //parse calendar data into events and scheduled tasks and update view model for each - depends on tasks
+            //put calendar data into view model
+
+
             taskJobs.awaitAll().forEach { (parentTaskListId, googleTasks) ->
                 googleTasks.forEach { googleTask ->
                     _uiState.value.googleTasksState.value.taskDaos[googleTask.id] =
