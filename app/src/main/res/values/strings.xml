@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Tac</string>
+    <string name="scheduled_task_json">Tac data - please don’t modify this section. Modifying this section can orphan this scheduled task from its parent task.</string>
 </resources>
