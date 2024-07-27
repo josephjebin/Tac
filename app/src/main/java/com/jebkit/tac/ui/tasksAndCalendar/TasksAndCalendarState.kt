@@ -44,7 +44,7 @@ sealed interface GoogleCalendarState {
         val eventDaos: SnapshotStateMap<String, EventDao> = mutableStateMapOf(),
         //map of a map... used for associating Google Task Id with ScheduledTasks
         //map of ParentTaskId to map of EventId to ScheduledTask
-        val scheduledTasks: SnapshotStateMap<String, SnapshotStateMap<String, ScheduledTask>> = mutableStateMapOf(),
+        val scheduledTasks: SnapshotStateMap<String, ScheduledTask> = mutableStateMapOf(),
     ) : GoogleCalendarState
 
     data class Error(val exception: Exception) : GoogleCalendarState
