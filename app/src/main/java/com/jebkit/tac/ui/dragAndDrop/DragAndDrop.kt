@@ -49,7 +49,7 @@ internal class DragTargetInfo {
         ScheduledTask(
             id = "defaultId",
             title = mutableStateOf("defaultTitle"),
-            parentTaskId = null,
+            parentTaskId = "defaultParentTaskId",
             description = mutableStateOf("defaultDescription"),
             start = mutableStateOf(
                 ZonedDateTime.of(

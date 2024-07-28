@@ -25,6 +25,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 
@@ -114,17 +115,6 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
                         } else {
                             //OH NO - ORPHANED SCHEDULED TASKS
                             //todo: how to handle?
-                        }
-                        //todo: do we wanna do this block of logic for orphaned tasks??
-                        var scheduledTaskMap =
-                            (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks[parentTaskId]
-                        if (scheduledTaskMap == null) {
-                            scheduledTaskMap =
-                                mutableStateMapOf(Pair(googleEvent.id, scheduledTask))
-                            (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks[parentTaskId] =
-                                scheduledTaskMap
-                        } else {
-                            scheduledTaskMap.put(googleEvent.id, scheduledTask)
                         }
                     } else
                         (_uiState.value.googleCalendarState.value as GoogleCalendarState.Success).eventDaos[googleEvent.id] =

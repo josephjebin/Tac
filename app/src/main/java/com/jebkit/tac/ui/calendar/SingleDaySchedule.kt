@@ -27,9 +27,8 @@ import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 @Composable
-fun DaysSchedule(
-    minSelectedDate: LocalDate,
-    maxSelectedDate: LocalDate,
+fun SingleDaySchedule(
+    selectedDate: LocalDate,
     eventDaos: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
     hourHeight: Dp,
@@ -44,58 +43,65 @@ fun DaysSchedule(
 
     Layout(
         content = {
-            eventDaos.filter { eventDao -> eventDao.start.value.toLocalDate() }.sortedBy { eventDao -> eventDao.start.value }.forEach { event ->
-                val eventHeight = ((event.duration.value / 60f) * hourHeight)
-                val planComposableModifier = Modifier
-                    .startData(event.start.value.toLocalTime())
-                    .height(eventHeight)
-                    .fillMaxWidth()
+            eventDaos
+                .sortedBy { eventDao -> eventDao.start.value }
+                .forEach { event ->
+                    val eventHeight = ((event.duration.intValue / 60f) * hourHeight)
+                    val planComposableModifier = Modifier
+                        .startData(event.start.value.toLocalTime())
+                        .height(eventHeight)
+                        .fillMaxWidth()
 
-                DragTarget(
-                    dataToDrop = event,
-                    modifier = planComposableModifier,
-                    draggableHeight = eventHeight,
-                    isRescheduling = true
-                ) {
-                    PlanComposable(
-                        name = event.title.value,
-                        description = event.description.value,
-                        color = event.color.value,
-                        start = event.start.value.toLocalTime(),
-                        end = event.end.value.toLocalTime()
-                    )
+                    DragTarget(
+                        dataToDrop = event,
+                        modifier = planComposableModifier,
+                        draggableHeight = eventHeight,
+                        isRescheduling = true
+                    ) {
+                        PlanComposable(
+                            name = event.title.value,
+                            description = event.description.value,
+                            color = event.color.value,
+                            start = event.start.value.toLocalTime(),
+                            end = event.end.value.toLocalTime()
+                        )
+                    }
                 }
-            }
 
-            scheduledTasks.sortedBy { scheduledTask -> scheduledTask.start.value }.forEach { scheduledTask ->
-                val eventDurationMinutes =
-                    ChronoUnit.MINUTES.between(scheduledTask.start.value, scheduledTask.end.value)
-                val taskHeight = ((eventDurationMinutes / 60f) * hourHeight)
-                val planComposableModifier = Modifier
-                    .startData(scheduledTask.start.value.toLocalTime())
-                    .height(taskHeight)
-                    .fillMaxWidth()
+            scheduledTasks
+                .sortedBy { scheduledTask -> scheduledTask.start.value }
+                .forEach { scheduledTask ->
+                    val eventDurationMinutes =
+                        ChronoUnit.MINUTES.between(
+                            scheduledTask.start.value,
+                            scheduledTask.end.value
+                        )
+                    val taskHeight = ((eventDurationMinutes / 60f) * hourHeight)
+                    val planComposableModifier = Modifier
+                        .startData(scheduledTask.start.value.toLocalTime())
+                        .height(taskHeight)
+                        .fillMaxWidth()
 
-                DragTarget(
-                    dataToDrop = scheduledTask,
-                    modifier = planComposableModifier,
-                    draggableHeight = taskHeight,
-                    isRescheduling = true
-                ) {
-                    PlanComposable(
-                        name = scheduledTask.title.value,
-                        description = scheduledTask.description.value,
-                        color = scheduledTask.color.value,
-                        start = scheduledTask.start.value.toLocalTime(),
-                        end = scheduledTask.end.value.toLocalTime()
-                    )
+                    DragTarget(
+                        dataToDrop = scheduledTask,
+                        modifier = planComposableModifier,
+                        draggableHeight = taskHeight,
+                        isRescheduling = true
+                    ) {
+                        PlanComposable(
+                            name = scheduledTask.title.value,
+                            description = scheduledTask.description.value,
+                            color = scheduledTask.color.value,
+                            start = scheduledTask.start.value.toLocalTime(),
+                            end = scheduledTask.end.value.toLocalTime()
+                        )
+                    }
                 }
-            }
 
             if (tasksSheetState == TasksSheetState.COLLAPSED) {
                 DropTargets(
                     fiveMinuteHeight = hourHeight / 12,
-                    selectedDate = minSelectedDate,
+                    selectedDate = selectedDate,
                     removeScheduledTask = removeScheduledTask,
                     removeEventDao = removeEventDao,
                     addScheduledTask = addScheduledTask,

@@ -16,7 +16,7 @@ import java.time.LocalDate
 fun Calendar(
     verticalScrollState: ScrollState,
     selectedDate: LocalDate,
-    events: List<EventDao>,
+    eventDaos: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
     tasksSheetState: TasksSheetState,
     addScheduledTask: (ScheduledTask) -> Unit,
@@ -34,10 +34,10 @@ fun Calendar(
             )
 
             Box(modifier = Modifier) {
-                DaysSchedule(
-                    minSelectedDate = selectedDate,
-                    eventDaos = events,
-                    scheduledTasks = scheduledTasks,
+                SingleDaySchedule(
+                    selectedDate = selectedDate,
+                    eventDaos = eventDaos.filter { eventDao -> eventDao.start.value.toLocalDate() == selectedDate || eventDao.end.value.toLocalDate() == selectedDate },
+                    scheduledTasks = scheduledTasks.filter { scheduledTask -> scheduledTask.start.value.toLocalDate() == selectedDate || scheduledTask.end.value.toLocalDate() == selectedDate },
                     hourHeight = hourHeight,
                     tasksSheetState = tasksSheetState,
                     addScheduledTask = addScheduledTask,

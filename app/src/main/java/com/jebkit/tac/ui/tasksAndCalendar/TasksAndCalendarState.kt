@@ -16,7 +16,6 @@ import java.time.LocalDate
 data class TasksAndCalendarState(
     val calendarLayout: MutableState<CalendarLayout> = mutableStateOf(CalendarLayout.ONE_DAY),
     val minSelectedDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now()),
-    val maxSelectedDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now()),
     val minBufferDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now().minusWeeks(1)),
     val maxBufferDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now().plusWeeks(1)),
     val googleCalendarState: MutableState<GoogleCalendarState> = mutableStateOf(GoogleCalendarState.Success()),

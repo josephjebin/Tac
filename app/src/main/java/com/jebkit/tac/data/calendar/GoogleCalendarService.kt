@@ -28,6 +28,7 @@ import com.google.api.services.calendar.model.Event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import java.util.Date
 
 
 class GoogleCalendarService(private var credential: GoogleAccountCredential) {
@@ -58,11 +59,15 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
         minDate: LocalDate,
         maxDate: LocalDate
     ): ArrayList<Event> {
+        val weirdShiftedMinDate = minDate.minusMonths(1)
+        val weirdShiftedMaxDate = maxDate.minusMonths(1)
         //have to use Calendar to work with Google's Date
         val minCalendar = java.util.Calendar.getInstance()
+        minCalendar.clear()
         val maxCalendar = java.util.Calendar.getInstance()
-        minCalendar.set(minDate.year, minDate.monthValue, minDate.dayOfMonth, 0, 0, 0)
-        maxCalendar.set(maxDate.year, maxDate.monthValue, maxDate.dayOfMonth, 23, 59, 59)
+        maxCalendar.clear()
+        minCalendar.set(weirdShiftedMinDate.year, weirdShiftedMinDate.monthValue, weirdShiftedMinDate.dayOfMonth, 0, 0, 0)
+        maxCalendar.set(weirdShiftedMaxDate.year, weirdShiftedMaxDate.monthValue, weirdShiftedMaxDate.dayOfMonth, 23, 59, 59)
         val minDateTime = DateTime(minCalendar.time)
         val maxDateTime = DateTime(maxCalendar.time)
         val apiResponse = ArrayList<Event>()
@@ -71,11 +76,11 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
                 val events = calendar
                     .events()
                     .list("primary")
-                    .setMaxResults(10)
                     .setTimeMin(minDateTime)
+                    .setSingleEvents(true)
+                    .setMaxResults(100)
                     .setTimeMax(maxDateTime)
                     .setOrderBy("startTime")
-                    .setSingleEvents(true)
                     .execute()
                     .items
 

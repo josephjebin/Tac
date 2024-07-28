@@ -43,21 +43,22 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
             TasksAndCalendarScreen(
                 selectedDate = tasksAndCalendarState.minSelectedDate.value,
                 eventDaos = (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).eventDaos.values.toList(),
-                scheduledTasks = try {
-                    val scheduledTasks: MutableList<ScheduledTask> = mutableListOf()
-                    (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.values.forEach { scheduledTasksMap ->
-                        scheduledTasksMap.values.filter { scheduledTask ->
-                            //scheduled task's end lies within current selected range OR
-                            (scheduledTask.end.value.toLocalDate() >= tasksAndCalendarState.minSelectedDate.value && scheduledTask.end.value.toLocalDate() < tasksAndCalendarState.maxSelectedDate.value.plusDays(1)) ||
-                                    //scheduled task starts within current selected range
-                                    (scheduledTask.start.value.toLocalDate() >= tasksAndCalendarState.minSelectedDate.value && scheduledTask.start.value.toLocalDate() < tasksAndCalendarState.maxSelectedDate.value.plusDays(1))
-                        }.forEach { scheduledTasks.add(it) }
-                    }
-                    scheduledTasks.toList()
-                } catch (e: Exception) {
-                    val scheduledTasks: MutableList<ScheduledTask> = mutableListOf()
-                    scheduledTasks.toList()
-                },
+                scheduledTasks = (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.values.toList(),
+//                try {
+//                    val scheduledTasks: MutableList<ScheduledTask> = mutableListOf()
+//                    (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.values.forEach { scheduledTasksMap ->
+//                        scheduledTasksMap.values.filter { scheduledTask ->
+//                            //scheduled task's end lies within current selected range OR
+//                            (scheduledTask.end.value.toLocalDate() >= tasksAndCalendarState.minSelectedDate.value && scheduledTask.end.value.toLocalDate() < tasksAndCalendarState.maxSelectedDate.value.plusDays(1)) ||
+//                                    //scheduled task starts within current selected range
+//                                    (scheduledTask.start.value.toLocalDate() >= tasksAndCalendarState.minSelectedDate.value && scheduledTask.start.value.toLocalDate() < tasksAndCalendarState.maxSelectedDate.value.plusDays(1))
+//                        }.forEach { scheduledTasks.add(it) }
+//                    }
+//                    scheduledTasks.toList()
+//                } catch (e: Exception) {
+//                    val scheduledTasks: MutableList<ScheduledTask> = mutableListOf()
+//                    scheduledTasks.toList()
+//                },
                 saveScheduledTask = { scheduledTask: ScheduledTask ->
                     tasksAndCalendarViewModel.saveScheduledTask(
                         scheduledTask
@@ -122,18 +123,11 @@ fun TasksAndCalendarScreen(
                             .weight(1.0f)
                             .fillMaxWidth()
                     ) {
-
                         Calendar(
                             verticalScrollState = verticalScrollState,
                             selectedDate = selectedDate,
-                            events = eventDaos.filter { eventDao ->
-                                eventDao.start.value.toLocalDate()
-                                    .equals(selectedDate)
-                            },
-                            scheduledTasks = scheduledTasks.filter { scheduledTask ->
-                                scheduledTask.start.value.toLocalDate()
-                                    .equals(selectedDate)
-                            },
+                            eventDaos = eventDaos,
+                            scheduledTasks = scheduledTasks,
                             tasksSheetState = tasksSheetState.value,
                             addScheduledTask = saveScheduledTask,
                             removeScheduledTask = deleteScheduledTask,
