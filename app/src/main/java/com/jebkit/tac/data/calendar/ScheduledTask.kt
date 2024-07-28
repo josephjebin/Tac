@@ -54,25 +54,30 @@ data class ScheduledTask(
         color = mutableStateOf(onSurfaceGray)
     ) {
         duration.intValue = Duration.between(start.value, end.value).toMinutes().toInt()
-//        try {
-//            //commented code is if we encode parentTaskId as: parentTaskId3:123 where the number
-//            //right after parentTaskId is the length of the id
-//            //val lengthStartIndex = googleEvent.description.indexOf("parentTaskId").plus("parentTaskId".length)
-//            //val lengthEndIndex = googleEvent.description.indexOf(":", lengthStartIndex)
-//            //val length = Integer.parseInt(googleEvent.description.substring(lengthStartIndex, lengthEndIndex))
-//            //googleEvent.description.substring(lengthEndIndex + 1, lengthEndIndex + 1 + length)
-//
-//            val parentTaskIdStartIndex = googleEvent.description.indexOf("parentTaskId:").plus(13)
-//            val parentTaskIdEndIndex = googleEvent.description.indexOf(";", parentTaskIdStartIndex)
-//            googleEvent.description.substring(parentTaskIdStartIndex, parentTaskIdEndIndex)
-//
-//            //TODO: json parsing for parentTaskId
-//            val jsonStartIndex = googleEvent.description.indexOf(R.string.scheduled_task_json.toString()).plus(R.string.scheduled_task_json.toString().length)
-//            val jsonEndIndex = googleEvent.description.indexOf("}\n)", jsonStartIndex)
-//            Json.decodeFromString<ScheduledTaskJson>(googleEvent.description.substring(jsonStartIndex, jsonEndIndex.plus(1)))
-//        } catch (e: Exception) {
-//            ""
-//        }
+    }
+
+    constructor(googleEvent: Event, parentTaskId: String, completed: Boolean) : this(
+        id = googleEvent.id,
+        title = mutableStateOf(googleEvent.summary),
+        parentTaskId = parentTaskId,
+        description = mutableStateOf(googleEvent.description),
+        start = mutableStateOf(
+            ZonedDateTime.parse(
+                googleEvent.start.dateTime.toString(),
+                googleCalendarDateTimeFormat
+            )
+        ),
+        end = mutableStateOf(
+            ZonedDateTime.parse(
+                googleEvent.end.dateTime.toString(),
+                googleCalendarDateTimeFormat
+            )
+        ),
+        duration = mutableIntStateOf(30),
+        completed = mutableStateOf(completed),
+        color = mutableStateOf(onSurfaceGray)
+    ) {
+        duration.intValue = Duration.between(start.value, end.value).toMinutes().toInt()
     }
 }
 

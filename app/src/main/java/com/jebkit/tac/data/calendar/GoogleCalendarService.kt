@@ -59,15 +59,14 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
         minDate: LocalDate,
         maxDate: LocalDate
     ): ArrayList<Event> {
-        val weirdShiftedMinDate = minDate.minusMonths(1)
-        val weirdShiftedMaxDate = maxDate.minusMonths(1)
         //have to use Calendar to work with Google's Date
         val minCalendar = java.util.Calendar.getInstance()
         minCalendar.clear()
         val maxCalendar = java.util.Calendar.getInstance()
         maxCalendar.clear()
-        minCalendar.set(weirdShiftedMinDate.year, weirdShiftedMinDate.monthValue, weirdShiftedMinDate.dayOfMonth, 0, 0, 0)
-        maxCalendar.set(weirdShiftedMaxDate.year, weirdShiftedMaxDate.monthValue, weirdShiftedMaxDate.dayOfMonth, 23, 59, 59)
+        //subtract 1 from month values because calendar's month is 0-indexed (e.g. January is 0)
+        minCalendar.set(minDate.year, minDate.monthValue - 1, minDate.dayOfMonth, 0, 0, 0)
+        maxCalendar.set(maxDate.year, maxDate.monthValue - 1, maxDate.dayOfMonth, 23, 59, 59)
         val minDateTime = DateTime(minCalendar.time)
         val maxDateTime = DateTime(maxCalendar.time)
         val apiResponse = ArrayList<Event>()
@@ -92,6 +91,14 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
         }
 
         return apiResponse
+    }
+
+    suspend fun updateEventTime(event: Event) {
+        calendar.events().update("", "", event).execute()
+    }
+
+    suspend fun updateEvent() {
+
     }
 }
 

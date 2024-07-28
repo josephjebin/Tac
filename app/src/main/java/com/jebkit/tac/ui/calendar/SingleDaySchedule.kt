@@ -45,25 +45,25 @@ fun SingleDaySchedule(
         content = {
             eventDaos
                 .sortedBy { eventDao -> eventDao.start.value }
-                .forEach { event ->
-                    val eventHeight = ((event.duration.intValue / 60f) * hourHeight)
+                .forEach { eventDao ->
+                    val eventHeight = ((eventDao.duration.intValue / 60f) * hourHeight)
                     val planComposableModifier = Modifier
-                        .startData(event.start.value.toLocalTime())
+                        .startData(eventDao.start.value.toLocalTime())
                         .height(eventHeight)
                         .fillMaxWidth()
 
                     DragTarget(
-                        dataToDrop = event,
+                        dataToDrop = eventDao,
                         modifier = planComposableModifier,
                         draggableHeight = eventHeight,
                         isRescheduling = true
                     ) {
                         PlanComposable(
-                            name = event.title.value,
-                            description = event.description.value,
-                            color = event.color.value,
-                            start = event.start.value.toLocalTime(),
-                            end = event.end.value.toLocalTime()
+                            name = eventDao.title.value,
+                            description = eventDao.description.value,
+                            color = eventDao.color.value,
+                            start = eventDao.start.value.toLocalTime(),
+                            end = eventDao.end.value.toLocalTime()
                         )
                     }
                 }

@@ -107,7 +107,7 @@ fun ScheduleDraggable() {
                     description = state.dataToDrop.description.value,
                     color = state.dataToDrop.color.value,
                     start = state.currentDropTargetTime,
-                    end = state.currentDropTargetTime.plusMinutes(state.dataToDrop.duration.value.toLong()),
+                    end = state.currentDropTargetTime.plusMinutes(state.dataToDrop.duration.intValue.toLong()),
                     modifier = state.draggableModifier
                 )
             }
@@ -181,9 +181,9 @@ fun DropTarget(
     selectedDate: LocalDate,
     timeSlot: LocalTime,
     addScheduledTask: (ScheduledTask) -> Unit,
-    removeScheduledTask: (ScheduledTask) -> Unit,
+    updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
     addEventDao: (EventDao) -> Unit,
-    removeEventDao: (EventDao) -> Unit,
+    updateEventDao: (String, ZonedDateTime) -> Unit,
     modifier: Modifier,
     content: @Composable() (BoxScope.(isInBound: Boolean) -> Unit)
 ) {
@@ -198,30 +198,26 @@ fun DropTarget(
             }
         }
     }) {
-        //user dropped droppable in this drop target
+        //user dropped payload in this drop target
         if (dragInfo.currentDropTarget == index && !dragInfo.isDragging) {
             if (dragInfo.isRescheduling) {
                 if (dragInfo.dataToDrop is ScheduledTask) {
-                    removeScheduledTask(dragInfo.dataToDrop as ScheduledTask)
+                    updateScheduledTaskTime(dragInfo.dataToDrop.id, ZonedDateTime.of(
+                        LocalDateTime.of(selectedDate, timeSlot),
+                        ZoneId.systemDefault()
+                    ))
                 } else {
-                    removeEventDao(dragInfo.dataToDrop as EventDao)
+                    updateEventDao(dragInfo.dataToDrop.id, ZonedDateTime.of(
+                        LocalDateTime.of(selectedDate, timeSlot),
+                        ZoneId.systemDefault()
+                    ))
                 }
-            }
-
-            dragInfo.dataToDrop.start.value = ZonedDateTime.of(
-                LocalDateTime.of(selectedDate, timeSlot),
-                ZoneId.systemDefault()
-            )
-            dragInfo.dataToDrop.end.value = ZonedDateTime.of(
-                LocalDateTime.of(selectedDate, timeSlot)
-                    .plusMinutes(dragInfo.dataToDrop.duration.value.toLong()),
-                ZoneId.systemDefault()
-            )
-
-            if (dragInfo.dataToDrop is ScheduledTask) {
-                addScheduledTask(dragInfo.dataToDrop as ScheduledTask)
             } else {
-                addEventDao(dragInfo.dataToDrop as EventDao)
+                if (dragInfo.dataToDrop is ScheduledTask) {
+                    addScheduledTask(dragInfo.dataToDrop as ScheduledTask)
+                } else {
+                    addEventDao(dragInfo.dataToDrop as EventDao)
+                }
             }
 
             //after updating viewmodel, reset currentDropTarget to prevent repeated calls to viewmodel

@@ -38,12 +38,10 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
     Surface(color = MaterialTheme.colors.background) {
         val tasksAndCalendarState by tasksAndCalendarViewModel.uiState.collectAsState()
 
-        if (tasksAndCalendarState.googleCalendarState.value is GoogleCalendarState.Success) {
-
-            TasksAndCalendarScreen(
-                selectedDate = tasksAndCalendarState.minSelectedDate.value,
-                eventDaos = (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).eventDaos.values.toList(),
-                scheduledTasks = (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.values.toList(),
+        TasksAndCalendarScreen(
+            selectedDate = tasksAndCalendarState.minSelectedDate.value,
+            eventDaos = tasksAndCalendarState.googleCalendarState.value.eventDaos.values.toList(),
+            scheduledTasks = tasksAndCalendarState.googleCalendarState.value.scheduledTasks.values.toList(),
 //                try {
 //                    val scheduledTasks: MutableList<ScheduledTask> = mutableListOf()
 //                    (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.values.forEach { scheduledTasksMap ->
@@ -59,33 +57,33 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
 //                    val scheduledTasks: MutableList<ScheduledTask> = mutableListOf()
 //                    scheduledTasks.toList()
 //                },
-                saveScheduledTask = { scheduledTask: ScheduledTask ->
-                    tasksAndCalendarViewModel.saveScheduledTask(
-                        scheduledTask
-                    )
-                },
-                deleteScheduledTask = { scheduledTask: ScheduledTask ->
-                    tasksAndCalendarViewModel.deleteScheduledTask(
-                        scheduledTask
-                    )
-                },
-                addEventDao = { eventDao: EventDao -> tasksAndCalendarViewModel.addEventDao(eventDao) },
-                removeEventDao = { eventDao: EventDao ->
-                    tasksAndCalendarViewModel.removeEventDao(
-                        eventDao
-                    )
-                },
-                taskListDaos = tasksAndCalendarState.googleTasksState.value.taskListDaos.values.toList(),
-                taskDaos = tasksAndCalendarState.googleTasksState.value.taskDaos.values.toList(),
-                currentSelectedTaskListDao = tasksAndCalendarState.googleTasksState.value.currentSelectedTaskListDao.value,
-                onTaskListDaoSelected = { taskListDao: TaskListDao ->
-                    //TODO
-                },
-                onTaskDaoSelected = {
-                    //TODO
-                }
-            )
-        }
+            saveScheduledTask = { scheduledTask: ScheduledTask ->
+                tasksAndCalendarViewModel.addScheduledTask(
+                    scheduledTask
+                )
+            },
+            deleteScheduledTask = { scheduledTask: ScheduledTask ->
+                tasksAndCalendarViewModel.deleteScheduledTask(
+                    scheduledTask
+                )
+            },
+            addEventDao = { eventDao: EventDao -> tasksAndCalendarViewModel.addEventDao(eventDao) },
+            removeEventDao = { eventDao: EventDao ->
+                tasksAndCalendarViewModel.deleteEventDao(
+                    eventDao
+                )
+            },
+            taskListDaos = tasksAndCalendarState.googleTasksState.value.taskListDaos.values.toList(),
+            taskDaos = tasksAndCalendarState.googleTasksState.value.taskDaos.values.toList(),
+            currentSelectedTaskListDao = tasksAndCalendarState.googleTasksState.value.currentSelectedTaskListDao.value,
+            onTaskListDaoSelected = { taskListDao: TaskListDao ->
+                //TODO
+            },
+            onTaskDaoSelected = {
+                //TODO
+            }
+        )
+
     }
 }
 

@@ -18,7 +18,7 @@ data class TasksAndCalendarState(
     val minSelectedDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now()),
     val minBufferDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now().minusWeeks(1)),
     val maxBufferDate: MutableState<LocalDate> = mutableStateOf(LocalDate.now().plusWeeks(1)),
-    val googleCalendarState: MutableState<GoogleCalendarState> = mutableStateOf(GoogleCalendarState.Success()),
+    val googleCalendarState: MutableState<GoogleCalendarState> = mutableStateOf(GoogleCalendarState()),
     val googleTasksState: MutableState<GoogleTasksState> = mutableStateOf(GoogleTasksState())
 )
 
@@ -31,20 +31,15 @@ enum class CalendarLayout {
     ONE_MONTH
 }
 
-sealed interface GoogleCalendarState {
-    data class Success(
-        //need to add Calendar data type. stub with event dao for now
-        val calendars: SnapshotStateList<EventDao> = mutableStateListOf(),
-        //used to interact with Google Calendar API
-        //map of EventId to Google Event
-        val googleEvents: SnapshotStateMap<String, Event> = mutableStateMapOf(),
-        //map of EventDaos shown in Tac's calendar
-        //map of EventId to EventDaos
-        val eventDaos: SnapshotStateMap<String, EventDao> = mutableStateMapOf(),
-        //map of a map... used for associating Google Task Id with ScheduledTasks
-        //map of ParentTaskId to map of EventId to ScheduledTask
-        val scheduledTasks: SnapshotStateMap<String, ScheduledTask> = mutableStateMapOf(),
-    ) : GoogleCalendarState
-
-    data class Error(val exception: Exception) : GoogleCalendarState
-}
+data class GoogleCalendarState(
+    val calendars: SnapshotStateList<EventDao> = mutableStateListOf(),
+    //used to interact with Google Calendar API
+    //map of EventId to Google Event
+    val googleEvents: SnapshotStateMap<String, Event> = mutableStateMapOf(),
+    //map of EventDaos shown in Tac's calendar
+    //map of EventId to EventDaos
+    val eventDaos: SnapshotStateMap<String, EventDao> = mutableStateMapOf(),
+    //map of a map... used for associating Google Task Id with ScheduledTasks
+    //map of ParentTaskId to map of EventId to ScheduledTask
+    val scheduledTasks: SnapshotStateMap<String, ScheduledTask> = mutableStateMapOf()
+)
