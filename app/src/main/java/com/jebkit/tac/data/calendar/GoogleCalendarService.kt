@@ -28,7 +28,6 @@ import com.google.api.services.calendar.model.Event
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import java.util.Date
 
 
 class GoogleCalendarService(private var credential: GoogleAccountCredential) {
@@ -92,7 +91,15 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
         return apiResponse
     }
 
-    suspend fun updateEventTime(event: Event): Event {
+    suspend fun addEvent(event: Event): Event {
+        var result: Event
+        withContext(Dispatchers.IO) {
+            result = calendar.events().insert("primary", event).execute()
+        }
+        return result
+    }
+
+    suspend fun updateEvent(event: Event): Event {
         var result: Event
         withContext(Dispatchers.IO) {
             result = calendar.events().update("primary", event.id, event).execute()
@@ -100,8 +107,10 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
         return result
     }
 
-    suspend fun updateEvent() {
-
+    suspend fun deleteEvent(eventId: String) {
+        withContext(Dispatchers.IO) {
+            calendar.events().delete("primary", eventId).execute()
+        }
     }
 }
 

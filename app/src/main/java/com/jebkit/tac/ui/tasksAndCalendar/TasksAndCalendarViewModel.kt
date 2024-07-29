@@ -180,7 +180,7 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
 
                 try {
                     viewModelScope.launch {
-                        _uiState.value.googleCalendarState.value.googleEvents[scheduledTaskId] = googleCalendarService.updateEventTime(event)
+                        _uiState.value.googleCalendarState.value.googleEvents[scheduledTaskId] = googleCalendarService.updateEvent(event)
                     }
                 } catch (ioException: IOException) {
                     Log.e(TAG, "Couldn't update google calendar for event ${event.summary} with id: ${event.id}. Reverting changes.")
@@ -242,7 +242,7 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
                         newEndEventDateTime.setDateTime(newEndDateTime)
                         event.setEnd(newEndEventDateTime)
                         _uiState.value.googleCalendarState.value.googleEvents[eventDaoId] =
-                            googleCalendarService.updateEventTime(event)
+                            googleCalendarService.updateEvent(event)
                     }
                 } catch (ioException: IOException) {
                     Log.e(TAG, "Couldn't update google calendar for event ${event.summary} with id: ${event.id}. Reverting changes.")
