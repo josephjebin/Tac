@@ -95,7 +95,7 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
     suspend fun updateEventTime(event: Event): Event {
         var result: Event
         withContext(Dispatchers.IO) {
-            result = calendar.events().update("", "", event).execute()
+            result = calendar.events().update("primary", event.id, event).execute()
         }
         return result
     }

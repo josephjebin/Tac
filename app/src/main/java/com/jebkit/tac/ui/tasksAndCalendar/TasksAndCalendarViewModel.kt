@@ -30,11 +30,8 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.IOException
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.Date
+import java.util.Calendar
 import java.util.TimeZone
 
 
@@ -210,21 +207,42 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
 //        _uiState.value.events.value += newEventDao
     }
 
-    fun updateEventDaoTime(eventDaoId: String, newStartTime: ZonedDateTime) {
+    fun updateEventDaoTime(eventDaoId: String, newStartZonedDateTime: ZonedDateTime) {
         val event = _uiState.value.googleCalendarState.value.googleEvents[eventDaoId]
         if(event != null) {
             val eventDao = _uiState.value.googleCalendarState.value.eventDaos[eventDaoId]
             if(eventDao != null) {
                 val oldStartTime = eventDao.start.value
-                eventDao.start.value = newStartTime
-                eventDao.end.value = newStartTime.plusMinutes(eventDao.duration.intValue.toLong())
+                eventDao.start.value = newStartZonedDateTime
+                eventDao.end.value = newStartZonedDateTime.plusMinutes(eventDao.duration.intValue.toLong())
 
                 try {
                     viewModelScope.launch {
-                        val newEventDateTime: EventDateTime = EventDateTime()
-                        newEventDateTime.setDateTime(DateTime(Date(), TimeZone.getDefault()))
-                        event.setStart(newStartTime)
-                        _uiState.value.googleCalendarState.value.googleEvents[eventDaoId] = googleCalendarService.updateEventTime(event)
+                        val newStartTimeCalendar = java.util.Calendar.getInstance()
+                        newStartTimeCalendar.clear()
+                        newStartTimeCalendar.set(
+                            newStartZonedDateTime.year,
+                            //minus 1 because it's 0-indexed
+                            newStartZonedDateTime.monthValue.minus(1),
+                            newStartZonedDateTime.dayOfMonth,
+                            newStartZonedDateTime.hour,
+                            newStartZonedDateTime.minute,
+                            newStartZonedDateTime.second
+                        )
+                        val newStartDateTime =
+                            DateTime(newStartTimeCalendar.time, TimeZone.getDefault())
+                        val newStartEventDateTime = EventDateTime()
+                        newStartEventDateTime.setDateTime(newStartDateTime)
+                        event.setStart(newStartEventDateTime)
+
+                        //reusing start time calendar
+                        newStartTimeCalendar.add(Calendar.MINUTE, eventDao.duration.intValue)
+                        val newEndDateTime = DateTime(newStartTimeCalendar.time, TimeZone.getDefault())
+                        val newEndEventDateTime = EventDateTime()
+                        newEndEventDateTime.setDateTime(newEndDateTime)
+                        event.setEnd(newEndEventDateTime)
+                        _uiState.value.googleCalendarState.value.googleEvents[eventDaoId] =
+                            googleCalendarService.updateEventTime(event)
                     }
                 } catch (ioException: IOException) {
                     Log.e(TAG, "Couldn't update google calendar for event ${event.summary} with id: ${event.id}. Reverting changes.")
