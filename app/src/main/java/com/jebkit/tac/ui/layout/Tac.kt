@@ -22,13 +22,13 @@ import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskListDao
 import com.jebkit.tac.ui.calendar.Calendar
-import com.jebkit.tac.ui.tasksAndCalendar.GoogleCalendarState
 import com.jebkit.tac.ui.tasksAndCalendar.TasksAndCalendarViewModel
 import com.jebkit.tac.ui.calendar.DayHeader
 import com.jebkit.tac.ui.dragAndDrop.RootDragInfoProvider
 import com.jebkit.tac.ui.tasks.TaskSheet
 import com.jebkit.tac.ui.tasks.TasksSheetState
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 val outputFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy")
@@ -57,21 +57,16 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
 //                    val scheduledTasks: MutableList<ScheduledTask> = mutableListOf()
 //                    scheduledTasks.toList()
 //                },
-            saveScheduledTask = { scheduledTask: ScheduledTask ->
+            addScheduledTask = { scheduledTask: ScheduledTask ->
                 tasksAndCalendarViewModel.addScheduledTask(
                     scheduledTask
                 )
             },
-            deleteScheduledTask = { scheduledTask: ScheduledTask ->
-                tasksAndCalendarViewModel.deleteScheduledTask(
-                    scheduledTask
-                )
+            updateScheduledTaskTime = { scheduledTaskId: String, newStartTime: ZonedDateTime ->
+                tasksAndCalendarViewModel.updateScheduledTaskTime(scheduledTaskId, newStartTime)
             },
-            addEventDao = { eventDao: EventDao -> tasksAndCalendarViewModel.addEventDao(eventDao) },
-            removeEventDao = { eventDao: EventDao ->
-                tasksAndCalendarViewModel.deleteEventDao(
-                    eventDao
-                )
+            updateEventDaoTime = { eventDaoId: String, newStartTime: ZonedDateTime ->
+                tasksAndCalendarViewModel.updateEventDaoTime(eventDaoId, newStartTime)
             },
             taskListDaos = tasksAndCalendarState.googleTasksState.value.taskListDaos.values.toList(),
             taskDaos = tasksAndCalendarState.googleTasksState.value.taskDaos.values.toList(),
@@ -93,10 +88,9 @@ fun TasksAndCalendarScreen(
     selectedDate: LocalDate,
     eventDaos: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
-    saveScheduledTask: (ScheduledTask) -> Unit,
-    deleteScheduledTask: (ScheduledTask) -> Unit,
-    addEventDao: (EventDao) -> Unit,
-    removeEventDao: (EventDao) -> Unit,
+    addScheduledTask: (ScheduledTask) -> Unit,
+    updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
+    updateEventDaoTime: (String, ZonedDateTime) -> Unit,
     taskListDaos: List<TaskListDao>,
     taskDaos: List<TaskDao>,
     currentSelectedTaskListDao: TaskListDao?,
@@ -127,10 +121,9 @@ fun TasksAndCalendarScreen(
                             eventDaos = eventDaos,
                             scheduledTasks = scheduledTasks,
                             tasksSheetState = tasksSheetState.value,
-                            addScheduledTask = saveScheduledTask,
-                            removeScheduledTask = deleteScheduledTask,
-                            addEventDao = addEventDao,
-                            removeEventDao = removeEventDao
+                            addScheduledTask = addScheduledTask,
+                            updateScheduledTaskTime = updateScheduledTaskTime,
+                            updateEventDaoTime = updateEventDaoTime,
                         )
 
 

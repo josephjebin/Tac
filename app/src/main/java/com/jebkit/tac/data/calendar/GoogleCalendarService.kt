@@ -77,7 +77,6 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
                     .list("primary")
                     .setTimeMin(minDateTime)
                     .setSingleEvents(true)
-                    .setMaxResults(100)
                     .setTimeMax(maxDateTime)
                     .setOrderBy("startTime")
                     .execute()
@@ -93,8 +92,12 @@ class GoogleCalendarService(private var credential: GoogleAccountCredential) {
         return apiResponse
     }
 
-    suspend fun updateEventTime(event: Event) {
-        calendar.events().update("", "", event).execute()
+    suspend fun updateEventTime(event: Event): Event {
+        var result: Event
+        withContext(Dispatchers.IO) {
+            result = calendar.events().update("", "", event).execute()
+        }
+        return result
     }
 
     suspend fun updateEvent() {

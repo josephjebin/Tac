@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 //import com.jebkit.tac.data.dummyData.dummyEvents
 //import com.jebkit.tac.data.dummyData.dummyScheduledTasks
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.client.util.DateTime
+import com.google.api.services.calendar.model.EventDateTime
 import com.google.api.services.tasks.model.Task
 import com.jebkit.tac.R
 import com.jebkit.tac.data.calendar.ScheduledTaskJson
@@ -32,6 +34,8 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.Date
+import java.util.TimeZone
 
 
 class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
@@ -126,7 +130,7 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
                             }
                         } catch (e: Exception) {
                             //JSON parsing error
-                            Log.e("TasksAndCalendarViewModel", "error making scheduled task")
+                            Log.e(TAG, "error making scheduled task")
                             val scheduledTask = ScheduledTask(googleEvent, "DefaultParentTaskId", false)
                             _uiState.value.googleCalendarState.value.scheduledTasks[scheduledTask.id] = scheduledTask
                         }
@@ -178,11 +182,19 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
                 scheduledTask.end.value = newStartTime.plusMinutes(scheduledTask.duration.intValue.toLong())
 
                 try {
-                    viewModelScope.launch { googleCalendarService.updateEventTime(event) }
+                    viewModelScope.launch {
+                        _uiState.value.googleCalendarState.value.googleEvents[scheduledTaskId] = googleCalendarService.updateEventTime(event)
+                    }
                 } catch (ioException: IOException) {
-                    Log.e("")
+                    Log.e(TAG, "Couldn't update google calendar for event ${event.summary} with id: ${event.id}. Reverting changes.")
+                    scheduledTask.start.value = oldStartTime
+                    scheduledTask.end.value = oldStartTime.plusMinutes(scheduledTask.duration.intValue.toLong())
                 }
+            } else {
+                Log.e(TAG, "Could not find scheduled task with id $scheduledTaskId")
             }
+        } else {
+            Log.e(TAG, "Could not find event with id $scheduledTaskId")
         }
     }
 
@@ -199,11 +211,36 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
     }
 
     fun updateEventDaoTime(eventDaoId: String, newStartTime: ZonedDateTime) {
-        val eventDao = _uiState.value.googleCalendarState.value.eventDaos[eventDaoId]
-        if(eventDao != null) {
-            eventDao.start.value = newStartTime
-            eventDao.end.value = newStartTime.plusMinutes(eventDao.duration.intValue.toLong())
+        val event = _uiState.value.googleCalendarState.value.googleEvents[eventDaoId]
+        if(event != null) {
+            val eventDao = _uiState.value.googleCalendarState.value.eventDaos[eventDaoId]
+            if(eventDao != null) {
+                val oldStartTime = eventDao.start.value
+                eventDao.start.value = newStartTime
+                eventDao.end.value = newStartTime.plusMinutes(eventDao.duration.intValue.toLong())
+
+                try {
+                    viewModelScope.launch {
+                        val newEventDateTime: EventDateTime = EventDateTime()
+                        newEventDateTime.setDateTime(DateTime(Date(), TimeZone.getDefault()))
+                        event.setStart(newStartTime)
+                        _uiState.value.googleCalendarState.value.googleEvents[eventDaoId] = googleCalendarService.updateEventTime(event)
+                    }
+                } catch (ioException: IOException) {
+                    Log.e(TAG, "Couldn't update google calendar for event ${event.summary} with id: ${event.id}. Reverting changes.")
+                    eventDao.start.value = oldStartTime
+                    eventDao.end.value = oldStartTime.plusMinutes(eventDao.duration.intValue.toLong())
+                }
+            } else {
+                Log.e(TAG, "Could not find scheduled task with id $eventDaoId")
+            }
+        } else {
+            Log.e(TAG, "Could not find event with id $eventDaoId")
         }
+
+
+
+
     }
 
     fun deleteEventDao(eventDao: EventDao) {

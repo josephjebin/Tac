@@ -25,7 +25,6 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.Plan
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.calendar.PlanComposable
@@ -182,8 +181,7 @@ fun DropTarget(
     timeSlot: LocalTime,
     addScheduledTask: (ScheduledTask) -> Unit,
     updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
-    addEventDao: (EventDao) -> Unit,
-    updateEventDao: (String, ZonedDateTime) -> Unit,
+    updateEventDaoTime: (String, ZonedDateTime) -> Unit,
     modifier: Modifier,
     content: @Composable() (BoxScope.(isInBound: Boolean) -> Unit)
 ) {
@@ -207,17 +205,13 @@ fun DropTarget(
                         ZoneId.systemDefault()
                     ))
                 } else {
-                    updateEventDao(dragInfo.dataToDrop.id, ZonedDateTime.of(
+                    updateEventDaoTime(dragInfo.dataToDrop.id, ZonedDateTime.of(
                         LocalDateTime.of(selectedDate, timeSlot),
                         ZoneId.systemDefault()
                     ))
                 }
             } else {
-                if (dragInfo.dataToDrop is ScheduledTask) {
-                    addScheduledTask(dragInfo.dataToDrop as ScheduledTask)
-                } else {
-                    addEventDao(dragInfo.dataToDrop as EventDao)
-                }
+                addScheduledTask(dragInfo.dataToDrop as ScheduledTask)
             }
 
             //after updating viewmodel, reset currentDropTarget to prevent repeated calls to viewmodel

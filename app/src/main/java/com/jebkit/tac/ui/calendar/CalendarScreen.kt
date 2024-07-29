@@ -11,6 +11,7 @@ import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.dragAndDrop.ScheduleDraggable
 import com.jebkit.tac.ui.tasks.TasksSheetState
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 @Composable
 fun Calendar(
@@ -20,9 +21,8 @@ fun Calendar(
     scheduledTasks: List<ScheduledTask>,
     tasksSheetState: TasksSheetState,
     addScheduledTask: (ScheduledTask) -> Unit,
-    removeScheduledTask: (ScheduledTask) -> Unit,
-    addEventDao: (EventDao) -> Unit,
-    removeEventDao: (EventDao) -> Unit
+    updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
+    updateEventDaoTime: (String, ZonedDateTime) -> Unit
 ) {
     val hourHeight = 64.dp
     Box {
@@ -41,9 +41,8 @@ fun Calendar(
                     hourHeight = hourHeight,
                     tasksSheetState = tasksSheetState,
                     addScheduledTask = addScheduledTask,
-                    removeScheduledTask = removeScheduledTask,
-                    addEventDao = addEventDao,
-                    removeEventDao = removeEventDao,
+                    updateScheduledTaskTime = updateScheduledTaskTime,
+                    updateEventDaoTime = updateEventDaoTime,
                     modifier = Modifier
                         .verticalScroll(verticalScrollState)
                 )

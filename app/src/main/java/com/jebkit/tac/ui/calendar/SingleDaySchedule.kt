@@ -23,6 +23,7 @@ import com.jebkit.tac.ui.dragAndDrop.DropTarget
 import com.jebkit.tac.ui.tasks.TasksSheetState
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
@@ -34,9 +35,8 @@ fun SingleDaySchedule(
     hourHeight: Dp,
     tasksSheetState: TasksSheetState,
     addScheduledTask: (ScheduledTask) -> Unit,
-    removeScheduledTask: (ScheduledTask) -> Unit,
-    addEventDao: (EventDao) -> Unit,
-    removeEventDao: (EventDao) -> Unit,
+    updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
+    updateEventDaoTime: (String, ZonedDateTime) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
@@ -102,10 +102,9 @@ fun SingleDaySchedule(
                 DropTargets(
                     fiveMinuteHeight = hourHeight / 12,
                     selectedDate = selectedDate,
-                    removeScheduledTask = removeScheduledTask,
-                    removeEventDao = removeEventDao,
                     addScheduledTask = addScheduledTask,
-                    addEventDao = addEventDao
+                    updateScheduledTaskTime = updateScheduledTaskTime,
+                    updateEventDaoTime = updateEventDaoTime
                 )
             }
         },
@@ -142,9 +141,8 @@ fun DropTargets(
     fiveMinuteHeight: Dp,
     selectedDate: LocalDate,
     addScheduledTask: (ScheduledTask) -> Unit,
-    removeScheduledTask: (ScheduledTask) -> Unit,
-    addEventDao: (EventDao) -> Unit,
-    removeEventDao: (EventDao) -> Unit
+    updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
+    updateEventDaoTime: (String, ZonedDateTime) -> Unit
 ) {
     repeat(288) {
         val timeSlot: LocalTime = LocalTime.MIN.plusMinutes(it * 5L)
@@ -154,9 +152,8 @@ fun DropTargets(
             timeSlot = timeSlot,
             selectedDate = selectedDate,
             addScheduledTask = addScheduledTask,
-            removeScheduledTask = removeScheduledTask,
-            addEventDao = addEventDao,
-            removeEventDao = removeEventDao,
+            updateScheduledTaskTime = updateScheduledTaskTime,
+            updateEventDaoTime = updateEventDaoTime,
             modifier = Modifier
                 .startData(timeSlot)
         ) { isCurrentDropTarget ->
