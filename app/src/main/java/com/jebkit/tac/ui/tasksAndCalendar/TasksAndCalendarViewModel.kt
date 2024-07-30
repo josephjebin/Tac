@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.services.calendar.model.Event
+import com.google.api.services.tasks.model.Task
 import com.jebkit.tac.R
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.GoogleCalendarService
@@ -14,30 +16,21 @@ import com.jebkit.tac.data.tasks.GoogleTasksService
 import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskListDao
 import com.jebkit.tac.util.toEventDateTime
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
-import com.google.api.client.util.DateTime
-import com.google.api.services.calendar.model.Event
-import com.google.api.services.calendar.model.EventDateTime
-import com.google.api.services.tasks.model.Task
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.IOException
 import java.time.ZonedDateTime
-import java.util.Calendar
-import java.util.TimeZone
 
 
 class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel() {
-    //    var maxLocalDate = LocalDate.of(maxYear, maxMonth, 1)
-//        maxLocalDate = maxLocalDate.withDayOfMonth(maxLocalDate.month.length(maxLocalDate.isLeapYear))
     val TAG = "TasksAndCalendarViewModel"
     private val _uiState = MutableStateFlow(TasksAndCalendarState())
     val uiState: StateFlow<TasksAndCalendarState> = _uiState.asStateFlow()
@@ -137,16 +130,27 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
     }
 
     fun addScheduledTask(newTask: ScheduledTask) {
-        val event = Event()
+        var event = Event()
             .setSummary(newTask.title.value)
             .setDescription(newTask.description.value +
                     "\n" +
-
+                    R.string.scheduled_task_json +
+                    "\n" +
                     Json.encodeToString(ScheduledTaskJson(newTask.parentTaskId, newTask.completed.value)
                 )
             )
-            .setStart()
-            .setEnd()
+            .setStart(newTask.start.value.toEventDateTime())
+            .setEnd(newTask.end.value.toEventDateTime())
+
+        viewModelScope.launch {
+            try {
+                event = googleCalendarService.addEvent(event)
+                _uiState.value.googleCalendarState.value.scheduledTasks[event.id] = ScheduledTask(event, newTask.parentTaskId, newTask.completed.value)
+                _uiState.value.googleCalendarState.value.googleEvents[event.id] = event
+            } catch (e: Exception) {
+                Log.e(TAG, "Could not add scheduled task")
+            }
+        }
     }
 
     fun updateScheduledTaskTime(scheduledTaskId: String, newStartTime: ZonedDateTime) {
@@ -194,17 +198,17 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
 //        _uiState.value.events.value += newEventDao
     }
 
-    fun updateEventDaoTime(eventDao: EventDao, newStartZonedDateTime: ZonedDateTime) {
+    fun updateEventDaoTime(eventDao: EventDao, startTime: ZonedDateTime) {
         val event = _uiState.value.googleCalendarState.value.googleEvents[eventDao.id]
         if (event != null) {
             val oldStartTime = eventDao.start.value
-            eventDao.start.value = newStartZonedDateTime
-            val newEndTime = newStartZonedDateTime.plusMinutes(eventDao.duration.intValue.toLong())
+            eventDao.start.value = startTime
+            val newEndTime = startTime.plusMinutes(eventDao.duration.intValue.toLong())
             eventDao.end.value = newEndTime
 
             try {
                 viewModelScope.launch {
-                    event.setStart(newStartZonedDateTime.toEventDateTime())
+                    event.setStart(startTime.toEventDateTime())
                     event.setEnd(newEndTime.toEventDateTime())
                     _uiState.value.googleCalendarState.value.googleEvents[eventDao.id] =
                         googleCalendarService.updateEvent(event)
@@ -223,39 +227,11 @@ class TasksAndCalendarViewModel(credential: GoogleAccountCredential) : ViewModel
         }
     }
 
+    fun updateEventDao(eventDao: EventDao) {
+
+    }
+
     fun deleteEventDao(eventDao: EventDao) {
 //        _uiState.value.events.value -= eventDao
     }
-
-//    companion object {
-//        val Factory: ViewModelProvider.Factory = viewModelFactory {
-//            initializer {
-//                val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as TacApplication)
-//
-//                var authState = AuthState()
-//                val jsonString = application
-//                    .getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
-//                    .getString(Constants.AUTH_STATE, null)
-//
-//                if (jsonString != null && !TextUtils.isEmpty(jsonString)) {
-//                    try { authState = AuthState.jsonDeserialize(jsonString) }
-//                    catch (jsonException: JSONException) { }
-//                }
-//
-//                val appAuthConfiguration = AppAuthConfiguration.Builder()
-//                    .setBrowserMatcher(
-//                        BrowserAllowList(
-//                            VersionedBrowserMatcher.CHROME_CUSTOM_TAB,
-//                            VersionedBrowserMatcher.SAMSUNG_CUSTOM_TAB
-//                        )
-//                    ).build()
-//
-//                val authorizationService = AuthorizationService(
-//                    application,
-//                    appAuthConfiguration)
-//
-//                TasksAndCalendarViewModel(authState, authorizationService)
-//            }
-//        }
-//    }
 }

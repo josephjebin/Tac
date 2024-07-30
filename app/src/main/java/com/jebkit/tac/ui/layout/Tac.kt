@@ -65,8 +65,8 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
             updateScheduledTaskTime = { scheduledTaskId: String, newStartTime: ZonedDateTime ->
                 tasksAndCalendarViewModel.updateScheduledTaskTime(scheduledTaskId, newStartTime)
             },
-            updateEventDaoTime = { eventDaoId: String, newStartTime: ZonedDateTime ->
-                tasksAndCalendarViewModel.updateEventDaoTime(eventDaoId, newStartTime)
+            updateEventDaoTime = { eventDao: EventDao, newStartTime: ZonedDateTime ->
+                tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
             },
             taskListDaos = tasksAndCalendarState.googleTasksState.value.taskListDaos.values.toList(),
             taskDaos = tasksAndCalendarState.googleTasksState.value.taskDaos.values.toList(),
@@ -90,7 +90,7 @@ fun TasksAndCalendarScreen(
     scheduledTasks: List<ScheduledTask>,
     addScheduledTask: (ScheduledTask) -> Unit,
     updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
-    updateEventDaoTime: (String, ZonedDateTime) -> Unit,
+    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     taskListDaos: List<TaskListDao>,
     taskDaos: List<TaskDao>,
     currentSelectedTaskListDao: TaskListDao?,

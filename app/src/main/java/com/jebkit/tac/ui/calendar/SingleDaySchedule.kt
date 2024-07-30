@@ -36,7 +36,7 @@ fun SingleDaySchedule(
     tasksSheetState: TasksSheetState,
     addScheduledTask: (ScheduledTask) -> Unit,
     updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
-    updateEventDaoTime: (String, ZonedDateTime) -> Unit,
+    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
@@ -142,7 +142,7 @@ fun DropTargets(
     selectedDate: LocalDate,
     addScheduledTask: (ScheduledTask) -> Unit,
     updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
-    updateEventDaoTime: (String, ZonedDateTime) -> Unit
+    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit
 ) {
     repeat(288) {
         val timeSlot: LocalTime = LocalTime.MIN.plusMinutes(it * 5L)

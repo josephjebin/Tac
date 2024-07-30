@@ -49,7 +49,9 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.util.ExponentialBackOff
 import com.google.api.services.calendar.CalendarScopes
+import com.google.api.services.tasks.TasksScopes
 import pub.devrel.easypermissions.EasyPermissions
+
 //import net.openid.appauth.*
 
 class MainActivity : ComponentActivity() {
@@ -99,9 +101,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             TacTheme {
-                if (googleAuthViewModel.googleAccountCredential.selectedAccount == null
-//                    && googleAuthViewModel.loginAttemptCount != 0
-                    ) {
+                if (googleAuthViewModel.gmail == "user") {
                     Log.i("SIGN IN", "sign in called")
                     SignIn(
                         this,
@@ -109,22 +109,20 @@ class MainActivity : ComponentActivity() {
                         googleAuthViewModel,
                         googleSignInLauncher
                     )
-                }
-
-                if (googleAuthViewModel.googleAccountCredential.selectedAccount != null) {
+                } else {
                     val calendarViewModelFactory =
                         CalendarViewModelFactory(googleAuthViewModel.googleAccountCredential)
                     val tasksAndCalendarViewModel = ViewModelProvider(
                         viewModelStore, calendarViewModelFactory
                     )[TasksAndCalendarViewModel::class.java]
 
+                    Log.e(TAG, "scopes: ${googleAuthViewModel.googleAccountCredential.scope}")
                     Tac(tasksAndCalendarViewModel = tasksAndCalendarViewModel)
-                } else {
-                    //TODO: sign in page!
                 }
             }
         }
     }
+}
 
 //    fun persistState() {
 //        application.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
@@ -219,7 +217,7 @@ class MainActivity : ComponentActivity() {
 //            }
 //        }
 //    }
-}
+
 
 
 @Composable
@@ -290,7 +288,7 @@ private fun SignIn(
 private fun initCredentials(context: Context): GoogleAccountCredential {
     return GoogleAccountCredential.usingOAuth2(
         context,
-        arrayListOf(CalendarScopes.CALENDAR)
+        arrayListOf(CalendarScopes.CALENDAR, TasksScopes.TASKS)
     ).setBackOff(ExponentialBackOff())
 }
 

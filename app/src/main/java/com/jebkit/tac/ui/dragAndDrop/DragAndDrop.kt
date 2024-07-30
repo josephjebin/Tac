@@ -25,6 +25,7 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.Plan
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.calendar.PlanComposable
@@ -181,7 +182,7 @@ fun DropTarget(
     timeSlot: LocalTime,
     addScheduledTask: (ScheduledTask) -> Unit,
     updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
-    updateEventDaoTime: (String, ZonedDateTime) -> Unit,
+    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     modifier: Modifier,
     content: @Composable() (BoxScope.(isInBound: Boolean) -> Unit)
 ) {
@@ -205,7 +206,7 @@ fun DropTarget(
                         ZoneId.systemDefault()
                     ))
                 } else {
-                    updateEventDaoTime(dragInfo.dataToDrop.id, ZonedDateTime.of(
+                    updateEventDaoTime(dragInfo.dataToDrop as EventDao, ZonedDateTime.of(
                         LocalDateTime.of(selectedDate, timeSlot),
                         ZoneId.systemDefault()
                     ))
