@@ -13,9 +13,12 @@ package com.jebkit.tac.data.tasks
 //import okhttp3.Request
 //import org.json.JSONObject
 //
+import android.content.Intent
 import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.DateTime
 import com.google.api.services.tasks.Tasks
@@ -23,9 +26,14 @@ import com.google.api.services.tasks.model.Task
 import com.google.api.services.tasks.model.TaskList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.time.LocalDate
 
-class GoogleTasksService(private var credential: GoogleAccountCredential) {
+class GoogleTasksService(
+    private var credential: GoogleAccountCredential,
+    private val userRecoverableLauncher: ActivityResultLauncher<Intent>
+) {
+    private val TAG = "GoogleTasksService"
     private var tasksService: Tasks
 
     init {
@@ -52,8 +60,8 @@ class GoogleTasksService(private var credential: GoogleAccountCredential) {
     suspend fun getTaskLists(): ArrayList<TaskList> {
         val apiResponse = ArrayList<TaskList>()
 
-        try {
-            withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
+            try {
                 val taskLists = tasksService
                     .tasklists()
                     .list()
@@ -61,46 +69,49 @@ class GoogleTasksService(private var credential: GoogleAccountCredential) {
                     .items
 
                 apiResponse.addAll(taskLists)
+            } catch (recoverableException: UserRecoverableAuthIOException) {
+                userRecoverableLauncher.launch(recoverableException.intent)
+            } catch (ioException: IOException) {
+                Log.e("GoogleCalendarService", "Error getting task lists: ${ioException.message}")
+            } catch (exception: Exception) {
+                Log.e("GoogleCalendarService", "Unexpected error getting task lists: ${exception.message}")
             }
-        } catch (e: Exception) {
-            Log.d("GoogleTasksService", "Error getting task lists: ${e.message}. ${e.cause}")
         }
 
         return apiResponse
     }
 
-    //returns all tasks that can be done during between the minDate and maxDate for the specified tasklist
-    suspend fun getTasks(
-        taskListId: String,
-    ): Pair<String, ArrayList<Task>> {
-        //have to use Calendar to work with Google's Date
-//        val minCalendar = java.util.Calendar.getInstance()
-//        val maxCalendar = java.util.Calendar.getInstance()
-//        minCalendar.set(minDate.year, minDate.monthValue, minDate.dayOfMonth, 0, 0, 0)
-//        maxCalendar.set(maxDate.year, maxDate.monthValue, maxDate.dayOfMonth, 23, 59, 59)
-//        val minDateTime = DateTime(minCalendar.time)
-//        val maxDateTime = DateTime(maxCalendar.time)
+    suspend fun getTasks(taskListId: String): Pair<String, ArrayList<Task>> {
         val apiResponse = ArrayList<Task>()
 
-        try {
-            withContext(Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
+            try {
                 val tasks = tasksService
                     .tasks()
                     .list(taskListId)
-//                    .setDueMin(minDateTime.toStringRfc3339())
-//                    .setDueMax(maxDateTime.toStringRfc3339())
                     .execute()
                     .items
 
-
                 apiResponse.addAll(tasks)
+            } catch (recoverableException: UserRecoverableAuthIOException) {
+                userRecoverableLauncher.launch(recoverableException.intent)
+            } catch (ioException: IOException) {
+                Log.e("GoogleCalendarService", "Error getting task lists: ${ioException.message}")
+            } catch (exception: Exception) {
+                Log.e("GoogleCalendarService", "Unexpected error getting task lists: ${exception.message}")
             }
-        } catch (e: Exception) {
-            Log.d("GoogleCalendarService", e.message.toString())
-            throw e
         }
 
         return Pair(taskListId, apiResponse)
+    }
+
+    suspend fun updateTask(taskListId: String, task: Task): Task {
+        var apiResponse: Task
+        withContext(Dispatchers.IO) {
+            apiResponse = tasksService.tasks().update(taskListId, task.id, task).execute()
+        }
+
+        return apiResponse
     }
 }
 

@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun PlanComposable(
     name: String,
-    description: String,
+    description: String?,
     color: Color,
     start: LocalTime,
     end: LocalTime,
@@ -48,11 +48,13 @@ fun PlanComposable(
             fontWeight = FontWeight.Bold,
         )
 
-        Text(
-            text = description,
-            style = MaterialTheme.typography.body2,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
+        if (description != null) {
+            Text(
+                text = description,
+                style = MaterialTheme.typography.body2,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }

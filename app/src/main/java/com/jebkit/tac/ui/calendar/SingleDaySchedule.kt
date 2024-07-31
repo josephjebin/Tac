@@ -35,7 +35,7 @@ fun SingleDaySchedule(
     hourHeight: Dp,
     tasksSheetState: TasksSheetState,
     addScheduledTask: (ScheduledTask) -> Unit,
-    updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
+    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
     updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -141,7 +141,7 @@ fun DropTargets(
     fiveMinuteHeight: Dp,
     selectedDate: LocalDate,
     addScheduledTask: (ScheduledTask) -> Unit,
-    updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
+    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
     updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit
 ) {
     repeat(288) {

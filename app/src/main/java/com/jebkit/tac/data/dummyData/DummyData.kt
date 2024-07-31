@@ -120,7 +120,7 @@ fun dummyDataTasks(): List<TaskDao> {
             title = mutableStateOf("Apply"),
             notes = mutableStateOf("notes"),
             completed = mutableStateOf(false),
-            end = mutableStateOf(
+            due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
@@ -132,7 +132,7 @@ fun dummyDataTasks(): List<TaskDao> {
             title = mutableStateOf("Make Tac Prototype"),
             notes = mutableStateOf("notes"),
             completed = mutableStateOf(false),
-            end = mutableStateOf(
+            due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
@@ -144,7 +144,7 @@ fun dummyDataTasks(): List<TaskDao> {
             title = mutableStateOf("LeetCode"),
             notes = mutableStateOf("notes"),
             completed = mutableStateOf(false),
-            end = mutableStateOf(
+            due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
@@ -156,7 +156,7 @@ fun dummyDataTasks(): List<TaskDao> {
             title = mutableStateOf("Get a job"),
             notes = mutableStateOf("notes"),
             completed = mutableStateOf(false),
-            end = mutableStateOf(
+            due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
@@ -168,7 +168,7 @@ fun dummyDataTasks(): List<TaskDao> {
             title = mutableStateOf("Revise budget"),
             notes = mutableStateOf("notes"),
             completed = mutableStateOf(true),
-            end = mutableStateOf(
+            due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
@@ -180,7 +180,7 @@ fun dummyDataTasks(): List<TaskDao> {
             title = mutableStateOf("Categorize expenses"),
             notes = mutableStateOf("notes"),
             completed = mutableStateOf(false),
-            end = mutableStateOf(
+            due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
@@ -192,7 +192,7 @@ fun dummyDataTasks(): List<TaskDao> {
             title = mutableStateOf("Gym"),
             notes = mutableStateOf("notes"),
             completed = mutableStateOf(false),
-            end = mutableStateOf(
+            due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
@@ -204,7 +204,7 @@ fun dummyDataTasks(): List<TaskDao> {
             title = mutableStateOf("Stretch"),
             notes = mutableStateOf("notes"),
             completed = mutableStateOf(false),
-            end = mutableStateOf(
+            due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
@@ -216,7 +216,7 @@ fun dummyDataTasks(): List<TaskDao> {
             title = mutableStateOf("Walk"),
             notes = mutableStateOf("notes"),
             completed = mutableStateOf(false),
-            end = mutableStateOf(
+            due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),

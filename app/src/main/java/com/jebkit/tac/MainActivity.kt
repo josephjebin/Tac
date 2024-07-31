@@ -32,9 +32,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
-import com.jebkit.tac.data.constants.GoogleAuthConstants
-import com.jebkit.tac.data.constants.GoogleAuthConstants.PREF_ACCOUNT_NAME
-import com.jebkit.tac.data.constants.GoogleAuthConstants.REQUEST_GOOGLE_PLAY_SERVICES
+import com.jebkit.tac.constants.GoogleAuthConstants
+import com.jebkit.tac.constants.GoogleAuthConstants.PREF_ACCOUNT_NAME
+import com.jebkit.tac.constants.GoogleAuthConstants.REQUEST_GOOGLE_PLAY_SERVICES
 import com.jebkit.tac.ui.tasksAndCalendar.TasksAndCalendarViewModel
 import com.jebkit.tac.ui.calendar.CalendarViewModelFactory
 import com.jebkit.tac.ui.googleAuth.GoogleAuthViewModel
@@ -111,7 +111,7 @@ class MainActivity : ComponentActivity() {
                     )
                 } else {
                     val calendarViewModelFactory =
-                        CalendarViewModelFactory(googleAuthViewModel.googleAccountCredential)
+                        CalendarViewModelFactory(googleAuthViewModel.googleAccountCredential, userRecoverableLauncher)
                     val tasksAndCalendarViewModel = ViewModelProvider(
                         viewModelStore, calendarViewModelFactory
                     )[TasksAndCalendarViewModel::class.java]

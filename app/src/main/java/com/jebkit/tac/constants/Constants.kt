@@ -1,4 +1,4 @@
-package com.jebkit.tac.data.constants
+package com.jebkit.tac.constants
 
 class Constants {
     companion object {
@@ -18,5 +18,8 @@ class Constants {
         val URL_CALENDAR_WITHOUT_HOST = "www.googleapis.com"
 
 //        val URL_LOGOUT_REDIRECT = "com.example.tac:/logout"
+
+        val TASK_JSON_HEADER = "Tac data - please don’t modify this section. Modifying this section can orphan associated scheduled tasks."
+        val SCHEDULEDTASK_JSON_HEADER = "Tac data - please don’t modify this section. Modifying this section can orphan this scheduled task from its parent task."
     }
 }

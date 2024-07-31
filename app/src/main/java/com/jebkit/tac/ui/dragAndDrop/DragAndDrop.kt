@@ -181,7 +181,7 @@ fun DropTarget(
     selectedDate: LocalDate,
     timeSlot: LocalTime,
     addScheduledTask: (ScheduledTask) -> Unit,
-    updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
+    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
     updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     modifier: Modifier,
     content: @Composable() (BoxScope.(isInBound: Boolean) -> Unit)
@@ -201,7 +201,8 @@ fun DropTarget(
         if (dragInfo.currentDropTarget == index && !dragInfo.isDragging) {
             if (dragInfo.isRescheduling) {
                 if (dragInfo.dataToDrop is ScheduledTask) {
-                    updateScheduledTaskTime(dragInfo.dataToDrop.id, ZonedDateTime.of(
+                    updateScheduledTaskTime(
+                        dragInfo.dataToDrop as ScheduledTask, ZonedDateTime.of(
                         LocalDateTime.of(selectedDate, timeSlot),
                         ZoneId.systemDefault()
                     ))

@@ -1,4 +1,4 @@
-package com.jebkit.tac.data.constants
+package com.jebkit.tac.constants
 
 object GoogleAuthConstants {
     const val REQUEST_GOOGLE_PLAY_SERVICES = 1001

@@ -124,9 +124,9 @@ fun TaskSheet(
                         parentTaskId = taskDao.id,
                         description = taskDao.notes,
                         //STUB
-                        start = taskDao.start,
+                        start = taskDao.due,
                         //STUB
-                        end = taskDao.end,
+                        end = taskDao.due,
                         duration = mutableIntStateOf(eventDurationMinutes),
                         color = taskDao.color
                     ),
@@ -185,7 +185,7 @@ fun TaskRow(
                     contentDescription = "Due date"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = taskDao.end.value.format(outputFormat))
+                Text(text = taskDao.due.value.format(outputFormat))
             }
             //duration
             Row() {

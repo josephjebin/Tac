@@ -21,7 +21,7 @@ fun Calendar(
     scheduledTasks: List<ScheduledTask>,
     tasksSheetState: TasksSheetState,
     addScheduledTask: (ScheduledTask) -> Unit,
-    updateScheduledTaskTime: (String, ZonedDateTime) -> Unit,
+    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
     updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit
 ) {
     val hourHeight = 64.dp

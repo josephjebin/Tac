@@ -15,7 +15,7 @@ val googleCalendarDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:
 abstract class Plan(
     open val id: String,
     open val title: MutableState<String> = mutableStateOf(""),
-    open val description: MutableState<String> = mutableStateOf(""),
+    open val description: MutableState<String?> = mutableStateOf(null),
     open val start: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now()),
     open val end: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now().plusMinutes(30)),
     open val duration: MutableIntState = mutableIntStateOf(30),

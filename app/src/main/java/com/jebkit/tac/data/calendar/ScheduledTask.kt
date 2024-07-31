@@ -17,7 +17,7 @@ data class ScheduledTask(
     override val id: String,
     override val title: MutableState<String>,
     val parentTaskId: String,
-    override val description: MutableState<String>,
+    override val description: MutableState<String?>,
     override val start: MutableState<ZonedDateTime>,
     override val end: MutableState<ZonedDateTime>,
     override val duration: MutableIntState,
@@ -32,11 +32,11 @@ data class ScheduledTask(
     duration = duration,
     color = color
 ) {
-    constructor(googleEvent: Event, scheduledTaskJson: ScheduledTaskJson) : this(
+    constructor(googleEvent: Event, scheduledTaskJson: ScheduledTaskJson, description: String?) : this(
         id = googleEvent.id,
         title = mutableStateOf(googleEvent.summary),
         parentTaskId = scheduledTaskJson.parentTaskId,
-        description = mutableStateOf(googleEvent.description),
+        description = mutableStateOf(description),
         start = mutableStateOf(
             ZonedDateTime.parse(
                 googleEvent.start.dateTime.toString(),

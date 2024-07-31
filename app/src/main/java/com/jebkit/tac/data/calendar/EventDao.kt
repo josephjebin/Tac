@@ -15,7 +15,7 @@ data class EventDao(
     override val id: String,
     override val title: MutableState<String>,
     val busy: MutableState<Boolean>,
-    override val description: MutableState<String>,
+    override val description: MutableState<String?>,
     override val start: MutableState<ZonedDateTime>,
     override val end: MutableState<ZonedDateTime>,
     override val duration: MutableIntState,

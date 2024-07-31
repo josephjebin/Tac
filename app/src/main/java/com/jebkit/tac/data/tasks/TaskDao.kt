@@ -19,20 +19,15 @@ val googleTasksDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:
 data class TaskDao(
     val id: String,
     val title: MutableState<String>,
-    val notes: MutableState<String>,
+    val notes: MutableState<String?>,
     val completed: MutableState<Boolean> = mutableStateOf(false),
-    val start: MutableState<ZonedDateTime> = mutableStateOf(
-        ZonedDateTime.of(
-            LocalDateTime.MIN,
-            ZoneId.systemDefault()
-        )
-    ),
-    val end: MutableState<ZonedDateTime> = mutableStateOf(
-        ZonedDateTime.of(
-            LocalDateTime.MIN,
-            ZoneId.systemDefault()
-        )
-    ),
+//    val start: MutableState<ZonedDateTime> = mutableStateOf(
+//        ZonedDateTime.of(
+//            LocalDateTime.MIN,
+//            ZoneId.systemDefault()
+//        )
+//    ),
+    val due: MutableState<ZonedDateTime?> = mutableStateOf(null),
     val deleted: MutableState<Boolean> = mutableStateOf(false),
     val parentTaskListId: MutableState<String>,
     val scheduledDuration: MutableIntState = mutableIntStateOf(0),
@@ -41,7 +36,7 @@ data class TaskDao(
     val priority: Priority = Priority.Priority4,
     val color: MutableState<Color> = mutableStateOf(onSurfaceGray)
 ) {
-    constructor(googleTask: Task, taskList: String) : this(
+    constructor(googleTask: Task, taskListId: String) : this(
         id = googleTask.id,
         title = mutableStateOf(googleTask.title),
         notes = mutableStateOf(googleTask.notes),
@@ -52,7 +47,24 @@ data class TaskDao(
         //For example, if we want to see what tasks a user can start this month, we can filter
         //dueMax = last day of this month.
         //need to implement notes parsing to find actual start time
-        start = try {
+//        start = try {
+//            mutableStateOf(
+//                ZonedDateTime.parse(
+//                    googleTask.due.toStringRfc3339(),
+//                    googleTasksDateTimeFormat
+//                )
+//            )
+//        } catch (e: Exception) {
+//            mutableStateOf(
+//                ZonedDateTime.of(
+//                    LocalDateTime.of(LocalDate.now(), LocalTime.MIN),
+//                    ZoneId.systemDefault()
+//                )
+//            )
+//        },
+        //TODO: implement notes parsing to find actual end time and durations
+        //ZonedDateTime.parse(task.notes.dateTime.toString(), dateTimeFormat)
+        due = try {
             mutableStateOf(
                 ZonedDateTime.parse(
                     googleTask.due.toStringRfc3339(),
@@ -60,26 +72,15 @@ data class TaskDao(
                 )
             )
         } catch (e: Exception) {
-            mutableStateOf(
-                ZonedDateTime.of(
-                    LocalDateTime.of(LocalDate.now(), LocalTime.MIN),
-                    ZoneId.systemDefault()
-                )
-            )
+            mutableStateOf(null)
         },
-        //TODO: implement notes parsing to find actual end time and durations
-        //ZonedDateTime.parse(task.notes.dateTime.toString(), dateTimeFormat)
-        end = mutableStateOf(ZonedDateTime.now()),
         deleted = mutableStateOf(googleTask.deleted),
-        parentTaskListId = mutableStateOf(taskList),
+        parentTaskListId = mutableStateOf(taskListId),
         scheduledDuration = mutableIntStateOf(0),
         workedDuration = mutableIntStateOf(0),
         neededDuration = mutableIntStateOf(60)
     ) {
-        if (googleTask.due != null) ZonedDateTime.parse(
-            googleTask.due.toString(),
-            googleTasksDateTimeFormat
-        )
+        //
     }
 
     constructor() : this(
