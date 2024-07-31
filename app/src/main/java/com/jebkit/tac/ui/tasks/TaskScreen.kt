@@ -7,6 +7,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -24,6 +25,7 @@ import com.jebkit.tac.data.tasks.TaskListDao
 import com.jebkit.tac.ui.dragAndDrop.DragTarget
 import com.jebkit.tac.ui.layout.outputFormat
 import com.jebkit.tac.ui.theme.accent_gray
+import java.time.ZonedDateTime
 
 @Composable
 fun TaskSheet(
@@ -83,14 +85,14 @@ fun TaskSheet(
                 painterResource(id = R.drawable.caret_down),
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .rotate(if(tasksSheetState.value == TasksSheetState.COLLAPSED)180f else 0f),
+                    .rotate(if (tasksSheetState.value == TasksSheetState.COLLAPSED) 180f else 0f),
                 contentDescription = "Task Sheet Peek Arrow"
             )
         }
 
 
         //projects
-        Row {
+        Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
             taskListDaos.forEach { taskListDao ->
                 Card(
                     modifier = Modifier
@@ -124,9 +126,9 @@ fun TaskSheet(
                         parentTaskId = taskDao.id,
                         description = taskDao.notes,
                         //STUB
-                        start = taskDao.due,
+                        start = mutableStateOf(ZonedDateTime.now()),
                         //STUB
-                        end = taskDao.due,
+                        end = mutableStateOf(ZonedDateTime.now()),
                         duration = mutableIntStateOf(eventDurationMinutes),
                         color = taskDao.color
                     ),
@@ -185,7 +187,7 @@ fun TaskRow(
                     contentDescription = "Due date"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = taskDao.due.value.format(outputFormat))
+                Text(text = taskDao.due.value?.format(outputFormat) ?: "Unscheduled")
             }
             //duration
             Row() {

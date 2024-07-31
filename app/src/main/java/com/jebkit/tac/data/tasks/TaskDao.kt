@@ -74,7 +74,7 @@ data class TaskDao(
         } catch (e: Exception) {
             mutableStateOf(null)
         },
-        deleted = mutableStateOf(googleTask.deleted),
+        deleted = mutableStateOf(googleTask.deleted?: false),
         parentTaskListId = mutableStateOf(taskListId),
         scheduledDuration = mutableIntStateOf(0),
         workedDuration = mutableIntStateOf(0),

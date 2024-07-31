@@ -108,7 +108,7 @@ class TasksAndCalendarViewModel(
                                 ).trim()
                             )
 
-                            val scheduledTask = ScheduledTask(googleEvent, scheduledTaskJson)
+                            val scheduledTask = ScheduledTask(googleEvent, scheduledTaskJson, "")
                             _uiState.value.googleCalendarState.value.scheduledTasks[scheduledTask.id] =
                                 scheduledTask
 
