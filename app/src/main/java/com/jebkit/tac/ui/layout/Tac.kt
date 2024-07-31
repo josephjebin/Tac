@@ -69,10 +69,13 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
                 tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
             },
             taskListDaos = tasksAndCalendarState.googleTasksState.value.taskListDaos.values.toList(),
-            taskDaos = tasksAndCalendarState.googleTasksState.value.taskDaos.values.toList(),
+            taskDaos = tasksAndCalendarState.googleTasksState.value.taskDaos.values.toList()
+                .filter { taskDao ->
+                    taskDao.parentTaskListId.value == (tasksAndCalendarState.googleTasksState.value.currentSelectedTaskListDao.value?.id)
+                },
             currentSelectedTaskListDao = tasksAndCalendarState.googleTasksState.value.currentSelectedTaskListDao.value,
             onTaskListDaoSelected = { taskListDao: TaskListDao ->
-                //TODO
+                tasksAndCalendarViewModel.updateCurrentSelectedTaskListDao(taskListDao)
             },
             onTaskDaoSelected = {
                 //TODO

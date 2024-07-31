@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.services.calendar.model.Event
 import com.google.api.services.tasks.model.Task
+import com.google.api.services.tasks.model.TaskList
 import com.jebkit.tac.constants.Constants.Companion.SCHEDULEDTASK_JSON_HEADER
 import com.jebkit.tac.constants.Constants.Companion.TASK_JSON_HEADER
 import com.jebkit.tac.data.calendar.EventDao
@@ -74,6 +75,8 @@ class TasksAndCalendarViewModel(
                         googleTaskList.id
                     )
                 })
+            }.also {
+                _uiState.value.googleTasksState.value.currentSelectedTaskListDao.value = _uiState.value.googleTasksState.value.taskListDaos.values.toList().get(0)
             }
 
             val addJsonToTasks: MutableList<Deferred<Task>> = mutableListOf()
@@ -141,6 +144,10 @@ class TasksAndCalendarViewModel(
 
     fun refresh() {
 
+    }
+
+    fun updateCurrentSelectedTaskListDao(newTaskListDao: TaskListDao) {
+        _uiState.value.googleTasksState.value.currentSelectedTaskListDao.value = newTaskListDao
     }
 
     fun addScheduledTask(newTask: ScheduledTask) {

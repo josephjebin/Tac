@@ -107,11 +107,8 @@ fun TaskSheet(
 
 
         //tasks
-        //TODO filter by tasklist properly
-        val taskDaosFilteredByTaskList =
-            taskDaos.filter { taskDao -> taskDao.parentTaskListId.value == currentSelectedTaskListDao?.id }
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            taskDaosFilteredByTaskList.forEachIndexed { index, taskDao ->
+            taskDaos.forEachIndexed { index, taskDao ->
                 val eventDurationMinutes = taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
 
@@ -187,7 +184,7 @@ fun TaskRow(
                     contentDescription = "Due date"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = taskDao.due.value?.format(outputFormat) ?: "Unscheduled")
+                Text(text = taskDao.due.value?.format(outputFormat) ?: "")
             }
             //duration
             Row() {
@@ -197,7 +194,7 @@ fun TaskRow(
                     contentDescription = "Duration"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "${taskDao.neededDuration} mins")
+                Text(text = "${taskDao.neededDuration.intValue} mins")
             }
         }
     }
