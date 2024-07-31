@@ -18,6 +18,7 @@ import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.calendar.ScheduledTaskJson
 import com.jebkit.tac.data.tasks.GoogleTasksService
 import com.jebkit.tac.data.tasks.TaskDao
+import com.jebkit.tac.data.tasks.TaskJson
 import com.jebkit.tac.data.tasks.TaskListDao
 import com.jebkit.tac.util.toEventDateTime
 import kotlinx.coroutines.Deferred
@@ -48,6 +49,12 @@ class TasksAndCalendarViewModel(
 
     init {
         viewModelScope.launch {
+            refresh()
+        }
+    }
+
+    private suspend fun refresh() {
+        viewModelScope.launch {
             //get tasklists - can release thread
             val taskLists = async {
                 googleTasksService.getTaskLists()
@@ -64,7 +71,7 @@ class TasksAndCalendarViewModel(
             //add all tasklists to view model and get all tasks for each tasklist - depends on result of get tasklists
             val taskJobs: MutableList<Deferred<Pair<String, ArrayList<Task>>>> = mutableListOf()
             taskLists.await().forEach { googleTaskList ->
-                _uiState.value.googleTasksState.value.taskListDaos[googleTaskList.id] =
+                _uiState.value.taskListDaos[googleTaskList.id] =
                     TaskListDao(
                         googleTaskList.id,
                         mutableStateOf(googleTaskList.title)
@@ -76,23 +83,55 @@ class TasksAndCalendarViewModel(
                     )
                 })
             }.also {
-                _uiState.value.googleTasksState.value.currentSelectedTaskListDao.value = _uiState.value.googleTasksState.value.taskListDaos.values.toList().get(0)
+                _uiState.value.currentSelectedTaskListDao.value =
+                    _uiState.value.taskListDaos.values.toList()[0]
             }
 
             val addJsonToTasks: MutableList<Deferred<Task>> = mutableListOf()
             taskJobs.awaitAll().forEach { (parentTaskListId, googleTasks) ->
                 googleTasks.forEach { googleTask ->
+                    //all google tasks need supplemental json info in its notes for tac to store duration and find associated scheduled tasks
+                    //if task does not have supplementation json
+                    var taskJson = TaskJson(30, mutableListOf())
                     if (googleTask.notes == null || !googleTask.notes.contains(TASK_JSON_HEADER)) {
+                        googleTasksService.updateTask(
+                            parentTaskListId, googleTask.setNotes(
+                                googleTask.notes?.toString() +
+                                        TASK_JSON_HEADER +
+                                        "\n" +
+                                        taskJson.toString()
+                            )
+                        )
+                    } else {
+                        val jsonStartIndex =
+                            googleTask.notes.indexOf(TASK_JSON_HEADER)
+                                .plus(TASK_JSON_HEADER.length)
+                        try {
+                            //+1 at the end to include the end bracket
+                            val jsonEndIndex =
+                                googleTask.notes.indexOf("}", jsonStartIndex).plus(1)
+                            taskJson = Json.decodeFromString<TaskJson>(
+                                googleTask.notes.substring(
+                                    jsonStartIndex,
+                                    jsonEndIndex
+                                ).trim()
+                            )
+                        } catch (e: Exception) {
+                            Log.e(
+                                TAG,
+                                "Couldn't parse task's notes for json. Resetting json in notes."
+                            )
 
+                            googleTasksService.updateTask(parentTaskListId, googleTask.setNotes(googleTask.notes.substring(0, jsonStartIndex) + taskJson))
+                        }
                     }
-                    _uiState.value.googleTasksState.value.tasks[googleTask.id] = googleTask
-                    _uiState.value.googleTasksState.value.taskDaos[googleTask.id] =
-                        TaskDao(googleTask, parentTaskListId)
+                    _uiState.value.tasks[googleTask.id] = googleTask
+                    _uiState.value.taskDaos[googleTask.id] = TaskDao(googleTask, parentTaskListId, taskJson)
                 }
             }.also {
                 googleCalendarData.await().forEach { googleEvent ->
                     //add google event to google event map
-                    _uiState.value.googleCalendarState.value.googleEvents[googleEvent.id] =
+                    _uiState.value.googleEvents[googleEvent.id] =
                         googleEvent
 
                     //ScheduledTask
@@ -112,11 +151,11 @@ class TasksAndCalendarViewModel(
                             )
 
                             val scheduledTask = ScheduledTask(googleEvent, scheduledTaskJson, "")
-                            _uiState.value.googleCalendarState.value.scheduledTasks[scheduledTask.id] =
+                            _uiState.value.scheduledTasks[scheduledTask.id] =
                                 scheduledTask
 
                             val parentTask =
-                                _uiState.value.googleTasksState.value.taskDaos[scheduledTask.parentTaskId]
+                                _uiState.value.taskDaos[scheduledTask.parentTaskId]
                             if (parentTask != null) {
                                 val parentTaskScheduledDuration =
                                     parentTask.scheduledDuration.intValue
@@ -131,23 +170,79 @@ class TasksAndCalendarViewModel(
                             Log.e(TAG, "error making scheduled task")
                             val scheduledTask =
                                 ScheduledTask(googleEvent, "DefaultParentTaskId", false)
-                            _uiState.value.googleCalendarState.value.scheduledTasks[scheduledTask.id] =
+                            _uiState.value.scheduledTasks[scheduledTask.id] =
                                 scheduledTask
                         }
                     } else
-                        _uiState.value.googleCalendarState.value.eventDaos[googleEvent.id] =
+                        _uiState.value.eventDaos[googleEvent.id] =
                             EventDao(googleEvent)
                 }
             }
         }
     }
 
-    fun refresh() {
+    fun addTaskListDao() {
 
     }
 
     fun updateCurrentSelectedTaskListDao(newTaskListDao: TaskListDao) {
-        _uiState.value.googleTasksState.value.currentSelectedTaskListDao.value = newTaskListDao
+        _uiState.value.currentSelectedTaskListDao.value = newTaskListDao
+    }
+
+    fun updateTaskListDao() {
+
+    }
+
+    fun deleteTaskListDao() {}
+
+    fun addEventDao(newEventDao: EventDao) {
+//        _uiState.value.events.value += newEventDao
+    }
+
+    fun updateEventDao(eventDao: EventDao) {
+
+    }
+
+    fun updateEventDaoTime(eventDao: EventDao, startTime: ZonedDateTime) {
+        viewModelScope.launch {
+            val event = _uiState.value.googleEvents[eventDao.id]
+            if (event != null) {
+                val oldStartTime = eventDao.start.value
+                eventDao.start.value = startTime
+                val newEndTime = startTime.plusMinutes(eventDao.duration.intValue.toLong())
+                eventDao.end.value = newEndTime
+
+                try {
+                    event.setStart(startTime.toEventDateTime())
+                    event.setEnd(newEndTime.toEventDateTime())
+                    val response = googleCalendarService.updateEvent(event)
+                    if (response != null) _uiState.value.googleEvents[eventDao.id] = response
+                    else {
+                        Log.e(
+                            TAG,
+                            "Couldn't update google calendar for event ${event.summary} with id: ${event.id}. Reverting changes."
+                        )
+                        eventDao.start.value = oldStartTime
+                        eventDao.end.value =
+                            oldStartTime.plusMinutes(eventDao.duration.intValue.toLong())
+                    }
+                } catch (ioException: IOException) {
+                    Log.e(
+                        TAG,
+                        "Couldn't update google calendar for event ${event.summary} with id: ${event.id}. Reverting changes."
+                    )
+                    eventDao.start.value = oldStartTime
+                    eventDao.end.value =
+                        oldStartTime.plusMinutes(eventDao.duration.intValue.toLong())
+                }
+            } else {
+                Log.e(TAG, "Could not find event with id ${eventDao.id}")
+            }
+        }
+    }
+
+    fun deleteEventDao(eventDao: EventDao) {
+//        _uiState.value.events.value -= eventDao
     }
 
     fun addScheduledTask(newTask: ScheduledTask) {
@@ -168,9 +263,9 @@ class TasksAndCalendarViewModel(
             try {
                 val response = googleCalendarService.addEvent(event)
                 if (response != null) {
-                    _uiState.value.googleCalendarState.value.scheduledTasks[response.id] =
+                    _uiState.value.scheduledTasks[response.id] =
                         ScheduledTask(response, json, newTask.description.value)
-                    _uiState.value.googleCalendarState.value.googleEvents[response.id] = response
+                    _uiState.value.googleEvents[response.id] = response
 
                 } else {
                     Log.e(TAG, "Could not add scheduled task")
@@ -181,9 +276,11 @@ class TasksAndCalendarViewModel(
         }
     }
 
+    fun updateScheduledTask() {}
+
     fun updateScheduledTaskTime(scheduledTask: ScheduledTask, newStartTime: ZonedDateTime) {
         viewModelScope.launch {
-            var event = _uiState.value.googleCalendarState.value.googleEvents[scheduledTask.id]
+            var event = _uiState.value.googleEvents[scheduledTask.id]
             if (event != null) {
                 val oldStartTime = scheduledTask.start.value
                 scheduledTask.start.value = newStartTime
@@ -192,7 +289,7 @@ class TasksAndCalendarViewModel(
 
                 event = googleCalendarService.updateEvent(event)
                 if (event != null) {
-                    _uiState.value.googleCalendarState.value.googleEvents[scheduledTask.id] = event
+                    _uiState.value.googleEvents[scheduledTask.id] = event
                 } else {
                     Log.e(
                         TAG,
@@ -208,60 +305,11 @@ class TasksAndCalendarViewModel(
         }
     }
 
-    fun updateScheduledTask(scheduledTaskId: String, newScheduledTask: ScheduledTask) {
-        val oldScheduledTask = _uiState.value.googleCalendarState.value
-    }
+    fun deleteScheduledTask(scheduledTask: ScheduledTask) {}
 
-    fun deleteScheduledTask(scheduledTask: ScheduledTask) {
-//        _uiState.value.scheduledTasks.value -= scheduledTask
-    }
+    fun addTaskDao() {}
 
-    fun addEventDao(newEventDao: EventDao) {
-//        _uiState.value.events.value += newEventDao
-    }
+    fun updateTaskDao() {}
 
-    fun updateEventDaoTime(eventDao: EventDao, startTime: ZonedDateTime) {
-        viewModelScope.launch {
-            val event = _uiState.value.googleCalendarState.value.googleEvents[eventDao.id]
-            if (event != null) {
-                val oldStartTime = eventDao.start.value
-                eventDao.start.value = startTime
-                val newEndTime = startTime.plusMinutes(eventDao.duration.intValue.toLong())
-                eventDao.end.value = newEndTime
-
-                try {
-                    event.setStart(startTime.toEventDateTime())
-                    event.setEnd(newEndTime.toEventDateTime())
-                    val response = googleCalendarService.updateEvent(event)
-                    if(response != null) _uiState.value.googleCalendarState.value.googleEvents[eventDao.id] = response
-                    else {
-                        Log.e(
-                            TAG,
-                            "Couldn't update google calendar for event ${event.summary} with id: ${event.id}. Reverting changes."
-                        )
-                        eventDao.start.value = oldStartTime
-                        eventDao.end.value = oldStartTime.plusMinutes(eventDao.duration.intValue.toLong())
-                    }
-                } catch (ioException: IOException) {
-                    Log.e(
-                        TAG,
-                        "Couldn't update google calendar for event ${event.summary} with id: ${event.id}. Reverting changes."
-                    )
-                    eventDao.start.value = oldStartTime
-                    eventDao.end.value =
-                        oldStartTime.plusMinutes(eventDao.duration.intValue.toLong())
-                }
-            } else {
-                Log.e(TAG, "Could not find event with id ${eventDao.id}")
-            }
-        }
-    }
-
-    fun updateEventDao(eventDao: EventDao) {
-
-    }
-
-    fun deleteEventDao(eventDao: EventDao) {
-//        _uiState.value.events.value -= eventDao
-    }
+    fun deleteTaskDao() {}
 }

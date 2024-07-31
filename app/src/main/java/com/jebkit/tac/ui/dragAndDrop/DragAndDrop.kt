@@ -213,7 +213,13 @@ fun DropTarget(
                     ))
                 }
             } else {
-                addScheduledTask(dragInfo.dataToDrop as ScheduledTask)
+                val scheduledTask = dragInfo.dataToDrop as ScheduledTask
+                scheduledTask.start.value = ZonedDateTime.of(
+                    LocalDateTime.of(selectedDate, timeSlot),
+                    ZoneId.systemDefault()
+                )
+                scheduledTask.end.value = scheduledTask.start.value.plusMinutes(scheduledTask.duration.intValue.toLong())
+                addScheduledTask(scheduledTask)
             }
 
             //after updating viewmodel, reset currentDropTarget to prevent repeated calls to viewmodel

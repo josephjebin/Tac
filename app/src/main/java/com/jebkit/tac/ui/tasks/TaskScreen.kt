@@ -107,7 +107,11 @@ fun TaskSheet(
 
 
         //tasks
-        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
             taskDaos.forEachIndexed { index, taskDao ->
                 val eventDurationMinutes = taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)

@@ -71,12 +71,12 @@ fun SingleDaySchedule(
             scheduledTasks
                 .sortedBy { scheduledTask -> scheduledTask.start.value }
                 .forEach { scheduledTask ->
-                    val eventDurationMinutes =
-                        ChronoUnit.MINUTES.between(
-                            scheduledTask.start.value,
-                            scheduledTask.end.value
-                        )
-                    val taskHeight = ((eventDurationMinutes / 60f) * hourHeight)
+//                    val eventDurationMinutes =
+//                        ChronoUnit.MINUTES.between(
+//                            scheduledTask.start.value,
+//                            scheduledTask.end.value
+//                        )
+                    val taskHeight = ((scheduledTask.duration.intValue / 60f) * hourHeight)
                     val planComposableModifier = Modifier
                         .startData(scheduledTask.start.value.toLocalTime())
                         .height(taskHeight)

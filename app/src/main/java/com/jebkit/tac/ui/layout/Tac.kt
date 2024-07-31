@@ -14,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jebkit.tac.MyBottomBar
@@ -40,8 +41,8 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
 
         TasksAndCalendarScreen(
             selectedDate = tasksAndCalendarState.minSelectedDate.value,
-            eventDaos = tasksAndCalendarState.googleCalendarState.value.eventDaos.values.toList(),
-            scheduledTasks = tasksAndCalendarState.googleCalendarState.value.scheduledTasks.values.toList(),
+            eventDaos = tasksAndCalendarState.eventDaos.values.toList(),
+            scheduledTasks = tasksAndCalendarState.scheduledTasks.values.toList(),
 //                try {
 //                    val scheduledTasks: MutableList<ScheduledTask> = mutableListOf()
 //                    (tasksAndCalendarState.googleCalendarState.value as GoogleCalendarState.Success).scheduledTasks.values.forEach { scheduledTasksMap ->
@@ -68,12 +69,12 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
             updateEventDaoTime = { eventDao: EventDao, newStartTime: ZonedDateTime ->
                 tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
             },
-            taskListDaos = tasksAndCalendarState.googleTasksState.value.taskListDaos.values.toList(),
-            taskDaos = tasksAndCalendarState.googleTasksState.value.taskDaos.values.toList()
+            taskListDaos = tasksAndCalendarState.taskListDaos.values.toList(),
+            taskDaos = tasksAndCalendarState.taskDaos.values.toList()
                 .filter { taskDao ->
-                    taskDao.parentTaskListId.value == (tasksAndCalendarState.googleTasksState.value.currentSelectedTaskListDao.value?.id)
+                    taskDao.parentTaskListId.value == (tasksAndCalendarState.currentSelectedTaskListDao.value?.id)
                 },
-            currentSelectedTaskListDao = tasksAndCalendarState.googleTasksState.value.currentSelectedTaskListDao.value,
+            currentSelectedTaskListDao = tasksAndCalendarState.currentSelectedTaskListDao.value,
             onTaskListDaoSelected = { taskListDao: TaskListDao ->
                 tasksAndCalendarViewModel.updateCurrentSelectedTaskListDao(taskListDao)
             },
