@@ -8,13 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import com.jebkit.tac.ui.theme.onSurfaceGray
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.google.api.services.tasks.model.Task
 import kotlinx.serialization.Serializable
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
 val googleTasksDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX")
@@ -32,7 +28,7 @@ data class TaskDao(
 //    ),
     val due: MutableState<ZonedDateTime?> = mutableStateOf(null),
     val deleted: MutableState<Boolean> = mutableStateOf(false),
-    val parentTaskListId: MutableState<String>,
+    val taskListId: MutableState<String>,
     val associatedScheduledTaskIds: SnapshotStateList<String>,
     val scheduledDuration: MutableIntState = mutableIntStateOf(0),
     val workedDuration: MutableIntState = mutableIntStateOf(0),
@@ -56,7 +52,7 @@ data class TaskDao(
             mutableStateOf(null)
         },
         deleted = mutableStateOf(googleTask.deleted?: false),
-        parentTaskListId = mutableStateOf(taskListId),
+        taskListId = mutableStateOf(taskListId),
         associatedScheduledTaskIds = mutableStateListOf(),
         scheduledDuration = mutableIntStateOf(0),
         workedDuration = mutableIntStateOf(0),
@@ -69,5 +65,5 @@ data class TaskDao(
 @Serializable
 data class TaskJson(
     val neededDuration: Int,
-    val scheduledTasks: MutableList<String>
+    val scheduledTasks: List<String>
 )

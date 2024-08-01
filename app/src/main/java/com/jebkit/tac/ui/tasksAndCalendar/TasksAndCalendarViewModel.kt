@@ -9,9 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.services.calendar.model.Event
 import com.google.api.services.tasks.model.Task
-import com.google.api.services.tasks.model.TaskList
 import com.jebkit.tac.constants.Constants.Companion.SCHEDULEDTASK_JSON_HEADER
-import com.jebkit.tac.constants.Constants.Companion.TASK_JSON_HEADER
+import com.jebkit.tac.constants.Constants.Companion.JSON_HEADER
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.GoogleCalendarService
 import com.jebkit.tac.data.calendar.ScheduledTask
@@ -87,25 +86,23 @@ class TasksAndCalendarViewModel(
                     _uiState.value.taskListDaos.values.toList()[0]
             }
 
-            val addJsonToTasks: MutableList<Deferred<Task>> = mutableListOf()
             taskJobs.awaitAll().forEach { (parentTaskListId, googleTasks) ->
                 googleTasks.forEach { googleTask ->
-                    //all google tasks need supplemental json info in its notes for tac to store duration and find associated scheduled tasks
-                    //if task does not have supplementation json
                     var taskJson = TaskJson(30, mutableListOf())
-                    if (googleTask.notes == null || !googleTask.notes.contains(TASK_JSON_HEADER)) {
+                    if (googleTask.notes == null || !googleTask.notes.contains(JSON_HEADER)) {
                         googleTasksService.updateTask(
                             parentTaskListId, googleTask.setNotes(
-                                googleTask.notes?.toString() +
-                                        TASK_JSON_HEADER +
+                                (googleTask.notes ?: "") +
                                         "\n" +
-                                        taskJson.toString()
+                                        JSON_HEADER +
+                                        Json.encodeToString(taskJson) +
+                                        ")"
                             )
                         )
                     } else {
                         val jsonStartIndex =
-                            googleTask.notes.indexOf(TASK_JSON_HEADER)
-                                .plus(TASK_JSON_HEADER.length)
+                            googleTask.notes.indexOf(JSON_HEADER)
+                                .plus(JSON_HEADER.length)
                         try {
                             //+1 at the end to include the end bracket
                             val jsonEndIndex =
@@ -122,60 +119,105 @@ class TasksAndCalendarViewModel(
                                 "Couldn't parse task's notes for json. Resetting json in notes."
                             )
 
-                            googleTasksService.updateTask(parentTaskListId, googleTask.setNotes(googleTask.notes.substring(0, jsonStartIndex) + taskJson))
+                            googleTasksService.updateTask(
+                                parentTaskListId,
+                                googleTask.setNotes(
+                                    googleTask.notes.substring(0, jsonStartIndex) +
+                                            Json.encodeToString(taskJson) + ")"
+                                )
+                            )
                         }
                     }
+
+                    _uiState.value.taskDaos[googleTask.id] =
+                        TaskDao(googleTask, parentTaskListId, taskJson)
                     _uiState.value.tasks[googleTask.id] = googleTask
-                    _uiState.value.taskDaos[googleTask.id] = TaskDao(googleTask, parentTaskListId, taskJson)
                 }
             }.also {
                 googleCalendarData.await().forEach { googleEvent ->
-                    //add google event to google event map
-                    _uiState.value.googleEvents[googleEvent.id] =
-                        googleEvent
-
+                    //Event
+                    if (googleEvent.description == null || !googleEvent.description.contains(
+                            JSON_HEADER
+                        )
+                    ) {
+                        _uiState.value.eventDaos[googleEvent.id] = EventDao(googleEvent)
+                    }
                     //ScheduledTask
-                    if (googleEvent.description.contains("parentTaskId")) {
+                    else {
+                        var scheduledTaskJson = ScheduledTaskJson("Orphaned", false)
+                        val jsonStartIndex =
+                            googleEvent.description.indexOf(JSON_HEADER)
+                                .plus(JSON_HEADER.length)
                         try {
-                            val jsonStartIndex =
-                                googleEvent.description.indexOf(SCHEDULEDTASK_JSON_HEADER)
-                                    .plus(SCHEDULEDTASK_JSON_HEADER.length)
                             //+1 at the end to include the end bracket
                             val jsonEndIndex =
                                 googleEvent.description.indexOf("}", jsonStartIndex).plus(1)
-                            val scheduledTaskJson = Json.decodeFromString<ScheduledTaskJson>(
+                            scheduledTaskJson = Json.decodeFromString<ScheduledTaskJson>(
                                 googleEvent.description.substring(
                                     jsonStartIndex,
                                     jsonEndIndex
                                 ).trim()
                             )
+                        } catch (e: Exception) {
+                            //JSON parsing error
+                            Log.e(
+                                TAG,
+                                "Couldn't parse event's description for json. Resetting json in description."
+                            )
+                            googleCalendarService.updateEvent(
+                                googleEvent.setDescription(
+                                    googleEvent.description.substring(0, jsonStartIndex) +
+                                            scheduledTaskJson + ")"
+                                )
+                            )
+                        }
 
-                            val scheduledTask = ScheduledTask(googleEvent, scheduledTaskJson, "")
-                            _uiState.value.scheduledTasks[scheduledTask.id] =
-                                scheduledTask
+                        val scheduledTask = ScheduledTask(googleEvent, scheduledTaskJson, "")
+                        _uiState.value.scheduledTasks[scheduledTask.id] = scheduledTask
 
-                            val parentTask =
-                                _uiState.value.taskDaos[scheduledTask.parentTaskId]
-                            if (parentTask != null) {
+                        val parentTask =
+                            _uiState.value.taskDaos[scheduledTask.parentTaskId]
+                        //if parent task == null, then this scheduled task is orphaned. We'll let it exist, but it won't update a google task
+                        if (parentTask != null) {
+                            //if data is malformed, Tac may reset the json and orphan a scheduled task.
+                            //this next if block will re-associate this scheduled task with its parent task
+                            if (!parentTask.associatedScheduledTaskIds.contains(scheduledTask.id)) {
+                                parentTask.associatedScheduledTaskIds.add(scheduledTask.id)
+                                _uiState.value.tasks[parentTask.id]?.let { googleTask ->
+                                    _uiState.value.tasks[parentTask.id] =
+                                        googleTasksService.updateTask(
+                                            parentTask.taskListId.value,
+                                            googleTask.setNotes(
+                                                (googleTask.notes ?: "") +
+                                                        "\n" +
+                                                        JSON_HEADER +
+                                                        Json.encodeToString(
+                                                            TaskJson(
+                                                                parentTask.neededDuration.intValue,
+                                                                parentTask.associatedScheduledTaskIds.toList()
+                                                            )
+                                                        ) + ")"
+                                            )
+                                        )
+                                }
+
+                                //don't need to update _uiState.value.taskDaos[parentTask.id] because we update parentTask directly
+                            }
+
+                            if (scheduledTask.completed.value) {
+                                val parentTaskWorkedDuration = parentTask.workedDuration.intValue
+                                parentTask.workedDuration.intValue =
+                                    parentTaskWorkedDuration + scheduledTask.duration.intValue
+                            } else {
                                 val parentTaskScheduledDuration =
                                     parentTask.scheduledDuration.intValue
                                 parentTask.scheduledDuration.intValue =
                                     parentTaskScheduledDuration + scheduledTask.duration.intValue
-                            } else {
-                                //OH NO - ORPHANED SCHEDULED TASKS
-                                //todo: how to handle?
                             }
-                        } catch (e: Exception) {
-                            //JSON parsing error
-                            Log.e(TAG, "error making scheduled task")
-                            val scheduledTask =
-                                ScheduledTask(googleEvent, "DefaultParentTaskId", false)
-                            _uiState.value.scheduledTasks[scheduledTask.id] =
-                                scheduledTask
                         }
-                    } else
-                        _uiState.value.eventDaos[googleEvent.id] =
-                            EventDao(googleEvent)
+                    }
+
+                    _uiState.value.googleEvents[googleEvent.id] = googleEvent
                 }
             }
         }
@@ -253,8 +295,7 @@ class TasksAndCalendarViewModel(
                 .setDescription(
                     newTask.description.value +
                             "\n" +
-                            SCHEDULEDTASK_JSON_HEADER +
-                            "\n" +
+                            JSON_HEADER +
                             Json.encodeToString(json)
                 )
                 .setStart(newTask.start.value.toEventDateTime())

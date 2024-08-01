@@ -19,10 +19,7 @@ class Constants {
 
 //        val URL_LOGOUT_REDIRECT = "com.example.tac:/logout"
 
-        val TASK_JSON_HEADER = """
-            Tac Data
-            1. Please don’t modify this section. Modifying this section can orphan associated scheduled tasks.
-            2. Please put all of your notes above this section. Tac will delete any content after this section when repairing malformed data.""".trim()
+        val JSON_HEADER = "(Tac data:\n"
         val SCHEDULEDTASK_JSON_HEADER = """
             Tac Data
             1. Please don’t modify this section. Modifying this section can orphan this scheduled task from its parent task.

@@ -14,7 +14,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jebkit.tac.MyBottomBar
@@ -72,7 +71,7 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
             taskListDaos = tasksAndCalendarState.taskListDaos.values.toList(),
             taskDaos = tasksAndCalendarState.taskDaos.values.toList()
                 .filter { taskDao ->
-                    taskDao.parentTaskListId.value == (tasksAndCalendarState.currentSelectedTaskListDao.value?.id)
+                    taskDao.taskListId.value == (tasksAndCalendarState.currentSelectedTaskListDao.value?.id)
                 },
             currentSelectedTaskListDao = tasksAndCalendarState.currentSelectedTaskListDao.value,
             onTaskListDaoSelected = { taskListDao: TaskListDao ->
