@@ -36,10 +36,10 @@ data class TaskDao(
     val priority: Priority = Priority.Priority4,
     val color: MutableState<Color> = mutableStateOf(onSurfaceGray)
 ) {
-    constructor(googleTask: Task, taskListId: String, taskJson: TaskJson) : this(
+    constructor(googleTask: Task, taskListId: String, taskJson: TaskJson, notes: String) : this(
         id = googleTask.id,
         title = mutableStateOf(googleTask.title),
-        notes = mutableStateOf(googleTask.notes),
+        notes = mutableStateOf(notes),
         completed = mutableStateOf(googleTask.status.equals("completed")),
         due = try {
             mutableStateOf(
