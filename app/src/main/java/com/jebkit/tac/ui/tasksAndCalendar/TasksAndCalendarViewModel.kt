@@ -194,15 +194,15 @@ class TasksAndCalendarViewModel(
 //                                //don't need to update _uiState.value.taskDaos[parentTask.id] because we update parentTask directly
 //                            }
 
+                            val parentTaskScheduledDuration =
+                                parentTask.scheduledDuration.intValue
+                            parentTask.scheduledDuration.intValue =
+                                parentTaskScheduledDuration + scheduledTask.duration.intValue
+
                             if (scheduledTask.completed.value) {
                                 val parentTaskWorkedDuration = parentTask.workedDuration.intValue
                                 parentTask.workedDuration.intValue =
                                     parentTaskWorkedDuration + scheduledTask.duration.intValue
-                            } else {
-                                val parentTaskScheduledDuration =
-                                    parentTask.scheduledDuration.intValue
-                                parentTask.scheduledDuration.intValue =
-                                    parentTaskScheduledDuration + scheduledTask.duration.intValue
                             }
                         }
                     }
@@ -304,17 +304,17 @@ class TasksAndCalendarViewModel(
                     )
                     _uiState.value.scheduledTasks[response.id] = addedScheduledTask
                     _uiState.value.googleEvents[response.id] = response
+
                     val parentTaskDao = _uiState.value.taskDaos[addedScheduledTask.parentTaskId]
                     if (parentTaskDao != null) {
+                        val oldParentScheduledDuration =
+                            parentTaskDao.scheduledDuration.intValue
+                        parentTaskDao.scheduledDuration.intValue =
+                            oldParentScheduledDuration + addedScheduledTask.duration.intValue
                         if (newTask.completed.value) {
                             val oldParentTaskWorkedDuration = parentTaskDao.workedDuration.intValue
                             parentTaskDao.workedDuration.intValue =
                                 oldParentTaskWorkedDuration + addedScheduledTask.duration.intValue
-                        } else {
-                            val oldParentScheduledDuration =
-                                parentTaskDao.scheduledDuration.intValue
-                            parentTaskDao.scheduledDuration.intValue =
-                                oldParentScheduledDuration + addedScheduledTask.duration.intValue
                         }
                     }
                 } else {
@@ -329,7 +329,7 @@ class TasksAndCalendarViewModel(
     //ToDo
     fun updateScheduledTask() {}
 
-    fun updateScheduledTaskTime(scheduledTask: ScheduledTask, newStartTime: ZonedDateTime) {
+    fun updateScheduledTaskStartTime(scheduledTask: ScheduledTask, newStartTime: ZonedDateTime) {
         viewModelScope.launch {
             val oldStartTime = scheduledTask.start.value
             scheduledTask.start.value = newStartTime
@@ -361,14 +361,22 @@ class TasksAndCalendarViewModel(
     }
 
     fun updateScheduledTaskDuration(scheduledTask: ScheduledTask, newDuration: Int) {
-        scheduledTask.duration.intValue = newDuration
-        scheduledTask.end.value =
-            scheduledTask.start.value.plusMinutes(scheduledTask.duration.intValue.toLong())
-        val event = _uiState.value.googleEvents[scheduledTask.id]
-        if (event != null) {
-            event.setEnd(scheduledTask.end.value.toEventDateTime())
-            viewModelScope.launch {
-                googleCalendarService.updateEvent(event)
+        if(newDuration != scheduledTask.duration.intValue) {
+            scheduledTask.duration.intValue = newDuration
+            scheduledTask.end.value =
+                scheduledTask.start.value.plusMinutes(scheduledTask.duration.intValue.toLong())
+            val parentTask = _uiState.value.taskDaos[scheduledTask.parentTaskId]
+            if (parentTask != null) {
+                val timeDifference = newDuration - scheduledTask.duration.intValue
+                parentTask.scheduledDuration.intValue = parentTask.scheduledDuration.intValue.plus(timeDifference)
+                if(scheduledTask.completed.value) parentTask.workedDuration.intValue = parentTask.workedDuration.intValue.plus(timeDifference)
+            }
+            val event = _uiState.value.googleEvents[scheduledTask.id]
+            if (event != null) {
+                event.setEnd(scheduledTask.end.value.toEventDateTime())
+                viewModelScope.launch {
+                    googleCalendarService.updateEvent(event)
+                }
             }
         }
     }
@@ -457,8 +465,9 @@ class TasksAndCalendarViewModel(
         _uiState.value.taskDaos[newTaskDao.id] = newTaskDao
     }
 
-    //ToDo
-//    fun updateTaskDao() {}
+    fun updateTaskDaoNeededDuration(taskDao: TaskDao, neededDuration: Int) {
+        taskDao.neededDuration.intValue = neededDuration
+    }
 
     fun deleteTaskDao(taskDaoId: String) {
         _uiState.value.taskDaos.remove(taskDaoId)

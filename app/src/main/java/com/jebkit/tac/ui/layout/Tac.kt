@@ -48,7 +48,7 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
                 )
             },
             updateScheduledTaskTime = { scheduledTask: ScheduledTask, newStartTime: ZonedDateTime ->
-                tasksAndCalendarViewModel.updateScheduledTaskTime(scheduledTask, newStartTime)
+                tasksAndCalendarViewModel.updateScheduledTaskStartTime(scheduledTask, newStartTime)
             },
             updateEventDaoTime = { eventDao: EventDao, newStartTime: ZonedDateTime ->
                 tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
