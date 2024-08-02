@@ -32,7 +32,7 @@ data class ScheduledTask(
     duration = duration,
     color = color
 ) {
-    constructor(googleEvent: Event, scheduledTaskJson: ScheduledTaskJson, description: String?) : this(
+    constructor(googleEvent: Event, description: String?, scheduledTaskJson: ScheduledTaskJson) : this(
         id = googleEvent.id,
         title = mutableStateOf(googleEvent.summary),
         parentTaskId = scheduledTaskJson.parentTaskId,

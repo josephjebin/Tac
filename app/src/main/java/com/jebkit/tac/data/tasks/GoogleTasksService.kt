@@ -1,18 +1,11 @@
 package com.jebkit.tac.data.tasks
-//
-//
-//import android.util.Log
-//import com.jebkit.tac.data.constants.Constants
-//import com.fasterxml.jackson.core.type.TypeReference
-//import com.fasterxml.jackson.databind.ObjectMapper
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.withContext
+
 //import net.openid.appauth.AuthState
 //import net.openid.appauth.AuthorizationService
 //import okhttp3.OkHttpClient
 //import okhttp3.Request
 //import org.json.JSONObject
-//
+
 import android.content.Intent
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
@@ -20,14 +13,12 @@ import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException
 import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.client.util.DateTime
 import com.google.api.services.tasks.Tasks
 import com.google.api.services.tasks.model.Task
 import com.google.api.services.tasks.model.TaskList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.time.LocalDate
 
 class GoogleTasksService(
     private var credential: GoogleAccountCredential,

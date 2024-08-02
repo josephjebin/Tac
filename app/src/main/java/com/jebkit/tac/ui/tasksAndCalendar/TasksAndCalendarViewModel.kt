@@ -12,7 +12,6 @@ import com.google.api.services.tasks.model.Task
 import com.jebkit.tac.constants.Constants.Companion.JSON_HEADER
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.GoogleCalendarService
-import com.jebkit.tac.data.calendar.Plan
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.calendar.ScheduledTaskJson
 import com.jebkit.tac.data.tasks.GoogleTasksService
@@ -137,33 +136,33 @@ class TasksAndCalendarViewModel(
                     //ScheduledTask
                     else {
                         var scheduledTaskJson = ScheduledTaskJson("Orphaned", false)
-//                        val jsonStartIndex =
-//                            googleEvent.description.indexOf(JSON_HEADER)
-//                                .plus(JSON_HEADER.length)
-//                        try {
-//                            val jsonEndIndex =
-//                                googleEvent.description.indexOf(")", jsonStartIndex)
-//                            scheduledTaskJson = Json.decodeFromString<ScheduledTaskJson>(
-//                                googleEvent.description.substring(
-//                                    jsonStartIndex,
-//                                    jsonEndIndex
-//                                ).trim()
-//                            )
-//                        } catch (e: Exception) {
-//                            //JSON parsing error
-//                            Log.e(
-//                                TAG,
-//                                "Couldn't parse event's description for json. Resetting json in description."
-//                            )
-//                            googleCalendarService.updateEvent(
-//                                googleEvent.setDescription(
-//                                    googleEvent.description.substring(0, jsonStartIndex) +
-//                                            scheduledTaskJson + ")"
-//                                )
-//                            )
-//                        }
+                        val jsonStartIndex =
+                            googleEvent.description.indexOf(JSON_HEADER)
+                                .plus(JSON_HEADER.length)
+                        try {
+                            val jsonEndIndex =
+                                googleEvent.description.indexOf(")", jsonStartIndex)
+                            scheduledTaskJson = Json.decodeFromString<ScheduledTaskJson>(
+                                googleEvent.description.substring(
+                                    jsonStartIndex,
+                                    jsonEndIndex
+                                ).trim()
+                            )
+                        } catch (e: Exception) {
+                            //JSON parsing error
+                            Log.e(
+                                TAG,
+                                "Couldn't parse event's description for json. Resetting json in description."
+                            )
+                            googleCalendarService.updateEvent(
+                                googleEvent.setDescription(
+                                    googleEvent.description.substring(0, jsonStartIndex) +
+                                            scheduledTaskJson + ")"
+                                )
+                            )
+                        }
 
-                        val scheduledTask = ScheduledTask(googleEvent, scheduledTaskJson, "")
+                        val scheduledTask = ScheduledTask(googleEvent, "", scheduledTaskJson)
                         _uiState.value.scheduledTasks[scheduledTask.id] = scheduledTask
 
                         val parentTask =
@@ -281,11 +280,14 @@ class TasksAndCalendarViewModel(
 
     fun addScheduledTask(newTask: ScheduledTask) {
         viewModelScope.launch {
-            val json = ScheduledTaskJson(newTask.parentTaskId, newTask.completed.value)
             val event = Event()
                 .setSummary(newTask.title.value)
                 .setDescription(
-                    generateScheduledTaskDescription(newTask.description.value, newTask)
+                    generateScheduledTaskDescription(
+                        newTask.description.value,
+                        newTask.parentTaskId,
+                        newTask.completed.value
+                    )
                 )
                 .setStart(newTask.start.value.toEventDateTime())
                 .setEnd(newTask.end.value.toEventDateTime())
@@ -293,10 +295,28 @@ class TasksAndCalendarViewModel(
             try {
                 val response = googleCalendarService.addEvent(event)
                 if (response != null) {
-                    _uiState.value.scheduledTasks[response.id] =
-                        ScheduledTask(response, json, newTask.description.value)
+                    val descriptionAndScheduledTaskJson =
+                        parseEventDescription(response.description)
+                    val addedScheduledTask = ScheduledTask(
+                        response,
+                        descriptionAndScheduledTaskJson.first,
+                        descriptionAndScheduledTaskJson.second
+                    )
+                    _uiState.value.scheduledTasks[response.id] = addedScheduledTask
                     _uiState.value.googleEvents[response.id] = response
-
+                    val parentTaskDao = _uiState.value.taskDaos[addedScheduledTask.parentTaskId]
+                    if (parentTaskDao != null) {
+                        if (newTask.completed.value) {
+                            val oldParentTaskWorkedDuration = parentTaskDao.workedDuration.intValue
+                            parentTaskDao.workedDuration.intValue =
+                                oldParentTaskWorkedDuration + addedScheduledTask.duration.intValue
+                        } else {
+                            val oldParentScheduledDuration =
+                                parentTaskDao.scheduledDuration.intValue
+                            parentTaskDao.scheduledDuration.intValue =
+                                oldParentScheduledDuration + addedScheduledTask.duration.intValue
+                        }
+                    }
                 } else {
                     Log.e(TAG, "Could not add scheduled task")
                 }
@@ -311,17 +331,17 @@ class TasksAndCalendarViewModel(
 
     fun updateScheduledTaskTime(scheduledTask: ScheduledTask, newStartTime: ZonedDateTime) {
         viewModelScope.launch {
+            val oldStartTime = scheduledTask.start.value
+            scheduledTask.start.value = newStartTime
+            val newEndTime = newStartTime.plusMinutes(scheduledTask.duration.intValue.toLong())
+            scheduledTask.end.value = newEndTime
+
             var event = _uiState.value.googleEvents[scheduledTask.id]
             if (event != null) {
-                val oldStartTime = scheduledTask.start.value
-                scheduledTask.start.value = newStartTime
-                val newEndTime = newStartTime.plusMinutes(scheduledTask.duration.intValue.toLong())
-                scheduledTask.end.value = newEndTime
-
-
-                event = googleCalendarService.updateEvent(event
-                    .setStart(newStartTime.toEventDateTime())
-                    .setEnd(newEndTime.toEventDateTime())
+                event = googleCalendarService.updateEvent(
+                    event
+                        .setStart(newStartTime.toEventDateTime())
+                        .setEnd(newEndTime.toEventDateTime())
                 )
                 if (event != null) {
                     _uiState.value.googleEvents[scheduledTask.id] = event
@@ -336,6 +356,19 @@ class TasksAndCalendarViewModel(
                 }
             } else {
                 Log.e(TAG, "Could not find event with id ${scheduledTask.id}")
+            }
+        }
+    }
+
+    fun updateScheduledTaskDuration(scheduledTask: ScheduledTask, newDuration: Int) {
+        scheduledTask.duration.intValue = newDuration
+        scheduledTask.end.value =
+            scheduledTask.start.value.plusMinutes(scheduledTask.duration.intValue.toLong())
+        val event = _uiState.value.googleEvents[scheduledTask.id]
+        if (event != null) {
+            event.setEnd(scheduledTask.end.value.toEventDateTime())
+            viewModelScope.launch {
+                googleCalendarService.updateEvent(event)
             }
         }
     }
@@ -373,19 +406,27 @@ class TasksAndCalendarViewModel(
         return Pair(description.substring(0, headerIndex), scheduledTaskJson)
     }
 
-    private fun generateTaskNotes(notes: String?, taskJson: TaskJson): String {
-        return (notes?: "") +
+    private fun generateTaskNotes(
+        notes: String?,
+        neededDuration: Int,
+        scheduledTasks: List<String>
+    ): String {
+        return (notes ?: "") +
                 "\n" +
                 JSON_HEADER +
-                Json.encodeToString(taskJson) +
+                Json.encodeToString(TaskJson(neededDuration, scheduledTasks)) +
                 ")"
     }
 
-    private fun generateScheduledTaskDescription(description: String?, scheduledTask: ScheduledTask): String {
-        return (description?: "") +
+    private fun generateScheduledTaskDescription(
+        description: String?,
+        parentTaskId: String,
+        completed: Boolean
+    ): String {
+        return (description ?: "") +
                 "\n" +
                 JSON_HEADER +
-                Json.encodeToString(scheduledTask) +
+                Json.encodeToString(ScheduledTaskJson(parentTaskId, completed)) +
                 ")"
     }
 

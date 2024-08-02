@@ -1,23 +1,12 @@
 package com.jebkit.tac.data.calendar
 
 
-//import android.util.Log
-//import com.jebkit.tac.data.constants.Constants.Companion.URL_CALENDAR
-//import com.jebkit.tac.data.constants.Constants.Companion.URL_CALENDAR_WITHOUT_HOST
-//import com.fasterxml.jackson.core.type.TypeReference
-//import com.fasterxml.jackson.databind.DeserializationFeature
-//import com.fasterxml.jackson.databind.ObjectMapper
-//import com.google.api.client.util.DateTime
-//import kotlinx.coroutines.Dispatchers
-//import kotlinx.coroutines.withContext
 //import net.openid.appauth.AuthState
 //import net.openid.appauth.AuthorizationService
 //import okhttp3.HttpUrl
 //import okhttp3.OkHttpClient
 //import okhttp3.Request
 //import org.json.JSONObject
-//import java.time.ZonedDateTime
-//import java.util.*
 import android.util.Log
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential

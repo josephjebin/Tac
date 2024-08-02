@@ -20,12 +20,6 @@ data class TaskDao(
     val title: MutableState<String>,
     val notes: MutableState<String?>,
     val completed: MutableState<Boolean> = mutableStateOf(false),
-//    val start: MutableState<ZonedDateTime> = mutableStateOf(
-//        ZonedDateTime.of(
-//            LocalDateTime.MIN,
-//            ZoneId.systemDefault()
-//        )
-//    ),
     val due: MutableState<ZonedDateTime?> = mutableStateOf(null),
     val deleted: MutableState<Boolean> = mutableStateOf(false),
     val taskListId: MutableState<String>,
