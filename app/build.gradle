@@ -1,14 +1,15 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 android {
-    namespace 'com.example.tac'
+    namespace 'com.jebkit.tac'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.tac"
+        applicationId "com.jebkit.tac"
         minSdk 24
         targetSdk 34
         versionCode 1
@@ -19,9 +20,9 @@ android {
             useSupportLibrary true
         }
 
-        manifestPlaceholders = [
-                appAuthRedirectScheme: 'com.example.tac'
-        ]
+//        manifestPlaceholders = [
+//                appAuthRedirectScheme: 'com.example.tac'
+//        ]
     }
 
     buildTypes {
@@ -42,7 +43,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.2.0'
+        kotlinCompilerExtensionVersion '1.3.0'
     }
     packagingOptions {
         resources {
@@ -57,12 +58,38 @@ dependencies {
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.material:material:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.core:core-ktx:1.13.1'
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_ui_version"
 
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
     implementation 'androidx.compose.foundation:foundation:1.3.0'
+
+    //json
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0'
+
+    //to avoid conflicts in libraries
+    implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
+
+    //google auth
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+    //3rd party permissions library (to get google account via contacts)
+    implementation("pub.devrel:easypermissions:3.0.0")
+
+    //google calendar service
+    implementation("com.google.apis:google-api-services-calendar:v3-rev411-1.25.0")
+
+    //google tasks service
+    implementation("com.google.apis:google-api-services-tasks:v1-rev71-1.25.0")
+
+    //make AndroidHTTP transport
+    implementation("com.google.api-client:google-api-client-android:1.23.0") {
+        exclude group: "org.apache.httpcomponents"
+    }
+
+
+
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
@@ -71,15 +98,19 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_ui_version"
 
 
-    //http
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
 
-    //jackson
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.1'
 
-    //AppAuth
-    implementation 'net.openid:appauth:0.11.1'
+//    //http
+//    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+//
+//    //jackson
+//    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.1'
+//
+//    //AppAuth
+//    implementation 'net.openid:appauth:0.11.1'
+//
+//    //Google APIs
+//    implementation group: 'com.google.api-client', name: 'google-api-client', version: '2.2.0'
 
-    //Google APIs
-    implementation group: 'com.google.api-client', name: 'google-api-client', version: '2.2.0'
+
 }
