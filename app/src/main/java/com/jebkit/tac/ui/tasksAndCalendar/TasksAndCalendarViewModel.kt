@@ -35,8 +35,7 @@ import java.time.ZonedDateTime
 
 
 class TasksAndCalendarViewModel(
-    credential: GoogleAccountCredential,
-    userRecoverableLauncher: ActivityResultLauncher<Intent>
+    credential: GoogleAccountCredential, userRecoverableLauncher: ActivityResultLauncher<Intent>
 ) : ViewModel() {
     val TAG = "TasksAndCalendarViewModel"
     private val _uiState = MutableStateFlow(TasksAndCalendarState())
@@ -62,19 +61,16 @@ class TasksAndCalendarViewModel(
             //get all calendar data - can release thread
             val googleCalendarData = async {
                 googleCalendarService.getEvents(
-                    _uiState.value.minBufferDate.value,
-                    _uiState.value.maxBufferDate.value
+                    _uiState.value.minBufferDate.value, _uiState.value.maxBufferDate.value
                 )
             }
 
             //add all tasklists to view model and get all tasks for each tasklist - depends on result of get tasklists
             val taskJobs: MutableList<Deferred<Pair<String, ArrayList<Task>>>> = mutableListOf()
             taskLists.await().forEach { googleTaskList ->
-                _uiState.value.taskListDaos[googleTaskList.id] =
-                    TaskListDao(
-                        googleTaskList.id,
-                        mutableStateOf(googleTaskList.title)
-                    )
+                _uiState.value.taskListDaos[googleTaskList.id] = TaskListDao(
+                    googleTaskList.id, mutableStateOf(googleTaskList.title)
+                )
 
                 taskJobs.add(async {
                     googleTasksService.getTasks(
@@ -137,15 +133,13 @@ class TasksAndCalendarViewModel(
                     else {
                         var scheduledTaskJson = ScheduledTaskJson("Orphaned", false)
                         val jsonStartIndex =
-                            googleEvent.description.indexOf(JSON_HEADER)
-                                .plus(JSON_HEADER.length)
+                            googleEvent.description.indexOf(JSON_HEADER).plus(JSON_HEADER.length)
                         try {
-                            val jsonEndIndex =
-                                googleEvent.description.indexOf(")", jsonStartIndex)
+                            //TODO: use parse event description
+                            val jsonEndIndex = googleEvent.description.indexOf(")", jsonStartIndex)
                             scheduledTaskJson = Json.decodeFromString<ScheduledTaskJson>(
                                 googleEvent.description.substring(
-                                    jsonStartIndex,
-                                    jsonEndIndex
+                                    jsonStartIndex, jsonEndIndex
                                 ).trim()
                             )
                         } catch (e: Exception) {
@@ -156,8 +150,10 @@ class TasksAndCalendarViewModel(
                             )
                             googleCalendarService.updateEvent(
                                 googleEvent.setDescription(
-                                    googleEvent.description.substring(0, jsonStartIndex) +
-                                            scheduledTaskJson + ")"
+                                    generateScheduledTaskDescription(
+                                        googleEvent.description.substring(0, jsonStartIndex),
+                                        scheduledTaskJson
+                                    )
                                 )
                             )
                         }
@@ -165,8 +161,7 @@ class TasksAndCalendarViewModel(
                         val scheduledTask = ScheduledTask(googleEvent, "", scheduledTaskJson)
                         _uiState.value.scheduledTasks[scheduledTask.id] = scheduledTask
 
-                        val parentTask =
-                            _uiState.value.taskDaos[scheduledTask.parentTaskId]
+                        val parentTask = _uiState.value.taskDaos[scheduledTask.parentTaskId]
                         //if parent task == null, then this scheduled task is orphaned. We'll let it exist, but it won't update a google task
                         if (parentTask != null) {
                             //if data is malformed, Tac may reset the json and orphan a scheduled task.
@@ -194,16 +189,10 @@ class TasksAndCalendarViewModel(
 //                                //don't need to update _uiState.value.taskDaos[parentTask.id] because we update parentTask directly
 //                            }
 
-                            val parentTaskScheduledDuration =
-                                parentTask.scheduledDuration.intValue
-                            parentTask.scheduledDuration.intValue =
-                                parentTaskScheduledDuration + scheduledTask.duration.intValue
+                            parentTask.scheduledDuration.intValue += scheduledTask.duration.intValue
 
-                            if (scheduledTask.completed.value) {
-                                val parentTaskWorkedDuration = parentTask.workedDuration.intValue
-                                parentTask.workedDuration.intValue =
-                                    parentTaskWorkedDuration + scheduledTask.duration.intValue
-                            }
+                            if (scheduledTask.completed.value)
+                                parentTask.workedDuration.intValue += scheduledTask.duration.intValue
                         }
                     }
 
@@ -217,12 +206,12 @@ class TasksAndCalendarViewModel(
         _uiState.value.taskListDaos[newTaskListDao.id] = newTaskListDao
     }
 
-    fun updateCurrentSelectedTaskListDao(newTaskListDao: TaskListDao) {
-        _uiState.value.currentSelectedTaskListDao.value = newTaskListDao
+    fun updateCurrentSelectedTaskListDao(taskListDao: TaskListDao) {
+        _uiState.value.currentSelectedTaskListDao.value = taskListDao
     }
 
     fun updateTaskListDaoTitle(taskListDaoId: String, newTitle: String) {
-        _uiState.value.taskListDaos[taskListDaoId]?.title = mutableStateOf(newTitle)
+        _uiState.value.taskListDaos[taskListDaoId]?.title?.value = newTitle
     }
 
     fun deleteTaskListDao(taskListDaoId: String) {
@@ -307,15 +296,8 @@ class TasksAndCalendarViewModel(
 
                     val parentTaskDao = _uiState.value.taskDaos[addedScheduledTask.parentTaskId]
                     if (parentTaskDao != null) {
-                        val oldParentScheduledDuration =
-                            parentTaskDao.scheduledDuration.intValue
-                        parentTaskDao.scheduledDuration.intValue =
-                            oldParentScheduledDuration + addedScheduledTask.duration.intValue
-                        if (newTask.completed.value) {
-                            val oldParentTaskWorkedDuration = parentTaskDao.workedDuration.intValue
-                            parentTaskDao.workedDuration.intValue =
-                                oldParentTaskWorkedDuration + addedScheduledTask.duration.intValue
-                        }
+                        parentTaskDao.scheduledDuration.intValue += addedScheduledTask.duration.intValue
+                        if (newTask.completed.value) parentTaskDao.workedDuration.intValue += addedScheduledTask.duration.intValue
                     }
                 } else {
                     Log.e(TAG, "Could not add scheduled task")
@@ -347,8 +329,7 @@ class TasksAndCalendarViewModel(
                     _uiState.value.googleEvents[scheduledTask.id] = event
                 } else {
                     Log.e(
-                        TAG,
-                        "Couldn't update scheduled task time. Reverting changes."
+                        TAG, "Couldn't update scheduled task time. Reverting changes."
                     )
                     scheduledTask.start.value = oldStartTime
                     scheduledTask.end.value =
@@ -361,16 +342,16 @@ class TasksAndCalendarViewModel(
     }
 
     fun updateScheduledTaskDuration(scheduledTask: ScheduledTask, newDuration: Int) {
-        if(newDuration != scheduledTask.duration.intValue) {
-            scheduledTask.duration.intValue = newDuration
-            scheduledTask.end.value =
-                scheduledTask.start.value.plusMinutes(scheduledTask.duration.intValue.toLong())
+        if (newDuration != scheduledTask.duration.intValue) {
             val parentTask = _uiState.value.taskDaos[scheduledTask.parentTaskId]
             if (parentTask != null) {
                 val timeDifference = newDuration - scheduledTask.duration.intValue
-                parentTask.scheduledDuration.intValue = parentTask.scheduledDuration.intValue.plus(timeDifference)
-                if(scheduledTask.completed.value) parentTask.workedDuration.intValue = parentTask.workedDuration.intValue.plus(timeDifference)
+                parentTask.scheduledDuration.intValue += timeDifference
+                if (scheduledTask.completed.value) parentTask.workedDuration.intValue += timeDifference
             }
+            scheduledTask.duration.intValue = newDuration
+            scheduledTask.end.value =
+                scheduledTask.start.value.plusMinutes(scheduledTask.duration.intValue.toLong())
             val event = _uiState.value.googleEvents[scheduledTask.id]
             if (event != null) {
                 event.setEnd(scheduledTask.end.value.toEventDateTime())
@@ -382,6 +363,7 @@ class TasksAndCalendarViewModel(
     }
 
     fun deleteScheduledTask(scheduledTaskId: String) {
+        //TODO: remove scheduled task durations from parent task
         _uiState.value.scheduledTasks.remove(scheduledTaskId)
     }
 
@@ -391,8 +373,7 @@ class TasksAndCalendarViewModel(
         val jsonEndIndex = notes.indexOf(")", jsonStartIndex)
         val taskJson = Json.decodeFromString<TaskJson>(
             notes.substring(
-                jsonStartIndex,
-                jsonEndIndex
+                jsonStartIndex, jsonEndIndex
             ).trim()
         )
 
@@ -406,8 +387,7 @@ class TasksAndCalendarViewModel(
         val jsonEndIndex = description.indexOf(")", jsonStartIndex)
         val scheduledTaskJson = Json.decodeFromString<ScheduledTaskJson>(
             description.substring(
-                jsonStartIndex,
-                jsonEndIndex
+                jsonStartIndex, jsonEndIndex
             ).trim()
         )
 
@@ -415,27 +395,31 @@ class TasksAndCalendarViewModel(
     }
 
     private fun generateTaskNotes(
-        notes: String?,
-        neededDuration: Int,
-        scheduledTasks: List<String>
+        notes: String?, neededDuration: Int, scheduledTasks: List<String>
     ): String {
-        return (notes ?: "") +
-                "\n" +
-                JSON_HEADER +
-                Json.encodeToString(TaskJson(neededDuration, scheduledTasks)) +
-                ")"
+        return (notes ?: "") + "\n" + JSON_HEADER + Json.encodeToString(
+            TaskJson(
+                neededDuration,
+                scheduledTasks
+            )
+        ) + ")"
     }
 
     private fun generateScheduledTaskDescription(
-        description: String?,
-        parentTaskId: String,
-        completed: Boolean
+        description: String?, parentTaskId: String, completed: Boolean
     ): String {
-        return (description ?: "") +
-                "\n" +
-                JSON_HEADER +
-                Json.encodeToString(ScheduledTaskJson(parentTaskId, completed)) +
-                ")"
+        return (description ?: "") + "\n" + JSON_HEADER + Json.encodeToString(
+            ScheduledTaskJson(
+                parentTaskId,
+                completed
+            )
+        ) + ")"
+    }
+
+    private fun generateScheduledTaskDescription(
+        description: String?, scheduledTaskJson: ScheduledTaskJson
+    ): String {
+        return (description ?: "") + "\n" + JSON_HEADER + Json.encodeToString(scheduledTaskJson) + ")"
     }
 
 //    fun applyChangesToEvent(plan: Plan): Boolean {
@@ -462,6 +446,7 @@ class TasksAndCalendarViewModel(
 //    }
 
     fun addTaskDao(newTaskDao: TaskDao) {
+        //TODO: need to call google tasks service cuz we need an ID
         _uiState.value.taskDaos[newTaskDao.id] = newTaskDao
     }
 
@@ -472,6 +457,4 @@ class TasksAndCalendarViewModel(
     fun deleteTaskDao(taskDaoId: String) {
         _uiState.value.taskDaos.remove(taskDaoId)
     }
-
-
 }
