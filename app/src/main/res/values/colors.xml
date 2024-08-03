@@ -8,4 +8,11 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#FF2D3436</color>
+    <color name="background_dark_gray">#FF202125</color>
+    <color name="surface_dark_gray">#FF323337</color>
+    <color name="akiflow_purple">#FF9000FF</color>
+    <color name="akiflow_lavendar">#FF7B8CFE</color>
+    <color name="google_text_white">#FFEBECF0</color>
+    <color name="google_text_gray">#FF9BA0A4</color>
+
 </resources>

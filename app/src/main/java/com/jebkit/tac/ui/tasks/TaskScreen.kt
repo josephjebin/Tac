@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -65,7 +66,10 @@ fun TaskSheet(
             )
             .fillMaxHeight()
             .fillMaxWidth()
-            .background(accent_gray, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+            .background(
+                color = colorResource(id = R.color.surface_dark_gray),
+                RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+            )
     ) {
         val hourHeight = 64.dp
 
