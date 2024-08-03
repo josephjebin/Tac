@@ -162,7 +162,8 @@ fun TaskRow(
         .clickable { onTaskSelected(taskDao) }
     ) {
         IconButton(
-            modifier = Modifier.align(Alignment.CenterVertically),
+            modifier = Modifier
+                .align(Alignment.CenterVertically),
             onClick = { onTaskCompleted(taskDao) }) {
             Icon(painterResource(id = R.drawable.priority3_button), "")
         }
@@ -172,33 +173,36 @@ fun TaskRow(
         Text(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
-                .widthIn(max = 160.dp),
+                .weight(1f)
+                .fillMaxWidth(),
             text = taskDao.title.value,
             overflow = TextOverflow.Ellipsis
         )
 
-        Spacer(modifier = Modifier.weight(1f))
-
-        Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+        Column(modifier = Modifier
+            .align(Alignment.CenterVertically)
+            .width(128.dp)
+            .padding(start = 8.dp)
+        ) {
             //due date
-            Row() {
+            Row {
                 Icon(
                     modifier = Modifier.scale(.8f),
                     painter = painterResource(id = R.drawable.round_calendar_today_24),
                     contentDescription = "Due date"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = taskDao.due.value?.format(outputFormat) ?: "")
+                Text(text = taskDao.due.value?.format(outputFormat) ?: "None")
             }
             //duration
-            Row() {
+            Row {
                 Icon(
                     modifier = Modifier.scale(.8f),
                     painter = painterResource(id = R.drawable.round_access_time_24),
                     contentDescription = "Duration"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "${taskDao.neededDuration.intValue} mins")
+                Text(text = "${taskDao.scheduledDuration.intValue} / ${taskDao.workedDuration.intValue} / ${taskDao.neededDuration.intValue}")
             }
         }
     }
