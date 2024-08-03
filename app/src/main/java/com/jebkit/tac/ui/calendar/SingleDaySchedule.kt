@@ -12,10 +12,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.ParentDataModifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import com.jebkit.tac.R
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.dragAndDrop.DragTarget
@@ -39,7 +41,8 @@ fun SingleDaySchedule(
     updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
+    //TODO: light and dark themes
+//    val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
 
     Layout(
         content = {
@@ -107,7 +110,7 @@ fun SingleDaySchedule(
             .drawBehind {
                 repeat(23) {
                     drawLine(
-                        dividerColor,
+                        Color(65, 66, 70),
                         start = Offset(0f, (it + 1) * hourHeight.toPx()),
                         end = Offset(size.width, (it + 1) * hourHeight.toPx()),
                         strokeWidth = 1.dp.toPx()

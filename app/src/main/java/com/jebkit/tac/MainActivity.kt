@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,7 +46,6 @@ import com.jebkit.tac.ui.layout.Tac
 import com.jebkit.tac.ui.tasks.TasksSheetState
 import com.jebkit.tac.ui.tasks.TasksSheetState.*
 import com.jebkit.tac.ui.theme.TacTheme
-import com.jebkit.tac.ui.theme.accent_gray
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
@@ -385,7 +385,7 @@ fun MyBottomBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(accent_gray)
+            .background(colorResource(R.color.surface_dark_gray))
     ) {
         //CALENDAR BUTTON
         Box(
@@ -400,6 +400,7 @@ fun MyBottomBar(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.round_calendar_today_24),
+                tint = colorResource(id = R.color.akiflow_app_light_purple),
                 contentDescription = "Calendar button"
             )
         }
