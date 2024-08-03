@@ -59,7 +59,7 @@ fun SingleDaySchedule(
                         isRescheduling = true
                     ) {
                         PlanComposable(
-                            name = eventDao.title.value,
+                            title = eventDao.title.value,
                             description = eventDao.description.value,
                             color = eventDao.color.value,
                             start = eventDao.start.value.toLocalTime(),
@@ -84,7 +84,7 @@ fun SingleDaySchedule(
                         isRescheduling = true
                     ) {
                         PlanComposable(
-                            name = scheduledTask.title.value,
+                            title = scheduledTask.title.value,
                             description = scheduledTask.description.value,
                             color = scheduledTask.color.value,
                             start = scheduledTask.start.value.toLocalTime(),
