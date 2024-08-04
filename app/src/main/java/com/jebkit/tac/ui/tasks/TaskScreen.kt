@@ -6,8 +6,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -23,9 +26,9 @@ import com.jebkit.tac.R
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskListDao
+import com.jebkit.tac.ui.dragAndDrop.CancelDropTarget
 import com.jebkit.tac.ui.dragAndDrop.DragTarget
 import com.jebkit.tac.ui.layout.outputFormat
-import com.jebkit.tac.ui.theme.accent_gray
 import java.time.ZonedDateTime
 
 @Composable
@@ -58,11 +61,15 @@ fun TaskSheet(
         }
     }
 
+
     Column(
         modifier = taskSheetModifier
             .border(
-                BorderStroke(1.dp, SolidColor(Color.Black)),
-                RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                BorderStroke(2.dp, SolidColor(Color.Black)),
+            )
+            .border(
+                BorderStroke(2.dp, SolidColor(Color.Black)),
+                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
             )
             .fillMaxHeight()
             .fillMaxWidth()
@@ -73,27 +80,31 @@ fun TaskSheet(
     ) {
         val hourHeight = 64.dp
 
+        var peekArrowModifier: Modifier by remember { mutableStateOf(Modifier) }
         //Peek Arrow
-        Box(modifier = Modifier
-            .height(48.dp)
-            .border(
-                BorderStroke(0.dp, Color.Transparent),
-                RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-            )
-            .fillMaxWidth()
-            .clickable {
-
-            }
+        CancelDropTarget(
+            highlightBottomBar = { peekArrowModifier = Modifier.border(16.dp, Color.Red) }
         ) {
-            Image(
-                painterResource(id = R.drawable.caret_down),
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .rotate(if (tasksSheetState.value == TasksSheetState.COLLAPSED) 180f else 0f),
-                contentDescription = "Task Sheet Peek Arrow"
-            )
-        }
+            Box(modifier = peekArrowModifier
+                .height(48.dp)
+//                .border(
+//                    BorderStroke(0.dp, Color.Transparent),
+//                    RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+//                )
+                .fillMaxWidth()
+                .clickable {
 
+                }
+            ) {
+                Image(
+                    painterResource(id = R.drawable.caret_down),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .rotate(if (tasksSheetState.value == TasksSheetState.COLLAPSED) 180f else 0f),
+                    contentDescription = "Task Sheet Peek Arrow"
+                )
+            }
+        }
 
         //projects
         Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {

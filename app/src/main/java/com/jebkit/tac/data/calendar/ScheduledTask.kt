@@ -5,9 +5,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
-import com.jebkit.tac.ui.theme.onSurfaceGray
 import com.google.api.services.calendar.model.Event
-import com.jebkit.tac.R
+import com.jebkit.tac.ui.theme.akiflow_lavender
 import kotlinx.serialization.Serializable
 import java.time.Duration
 import java.time.ZonedDateTime
@@ -51,7 +50,7 @@ data class ScheduledTask(
         ),
         duration = mutableIntStateOf(30),
         completed = mutableStateOf(scheduledTaskJson.completed),
-        color = mutableStateOf(onSurfaceGray)
+        color = mutableStateOf(akiflow_lavender)
     ) {
         duration.intValue = Duration.between(start.value, end.value).toMinutes().toInt()
     }
@@ -75,7 +74,7 @@ data class ScheduledTask(
         ),
         duration = mutableIntStateOf(30),
         completed = mutableStateOf(completed),
-        color = mutableStateOf(onSurfaceGray)
+        color = mutableStateOf(akiflow_lavender)
     ) {
         duration.intValue = Duration.between(start.value, end.value).toMinutes().toInt()
     }

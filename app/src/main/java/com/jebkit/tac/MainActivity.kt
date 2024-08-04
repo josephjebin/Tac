@@ -400,7 +400,7 @@ fun MyBottomBar(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.round_calendar_today_24),
-                tint = colorResource(id = R.color.akiflow_app_light_purple),
+                tint = colorResource(id = R.color.google_text_gray),
                 contentDescription = "Calendar button"
             )
         }
@@ -421,6 +421,7 @@ fun MyBottomBar(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.round_task_24),
+                tint = colorResource(id = R.color.google_text_gray),
                 contentDescription = "Tasks button"
             )
         }

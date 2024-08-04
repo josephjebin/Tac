@@ -29,7 +29,7 @@ import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.Plan
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.calendar.PlanComposable
-import com.jebkit.tac.ui.theme.onSurfaceGray
+import com.jebkit.tac.ui.theme.akiflow_lavender
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -64,7 +64,7 @@ internal class DragTargetInfo {
                 )
             ),
             duration = mutableIntStateOf(30),
-            color = mutableStateOf(onSurfaceGray)
+            color = mutableStateOf(akiflow_lavender)
         )
     )
     var draggableModifier: Modifier by mutableStateOf(Modifier)
@@ -176,7 +176,7 @@ fun DragTarget(
 }
 
 @Composable
-fun DropTarget(
+fun TimeDropTarget(
     index: Int,
     selectedDate: LocalDate,
     timeSlot: LocalTime,
@@ -229,5 +229,26 @@ fun DropTarget(
         content(
             dragInfo.isDragging && dragInfo.currentDropTarget == index,
         )
+    }
+}
+
+@Composable
+fun CancelDropTarget(
+    highlightBottomBar: () -> Unit,
+    content: @Composable() (BoxScope.() -> Unit)
+) {
+    val dragInfo = LocalDragTargetInfo.current
+    val topOfDraggable = dragInfo.topOfDraggable
+
+    Box(
+        modifier = Modifier.onGloballyPositioned {
+            it.boundsInWindow().let { rect ->
+                if (dragInfo.isDragging && rect.contains(topOfDraggable)) {
+                    highlightBottomBar()
+                }
+            }
+        }
+    ) {
+        content()
     }
 }

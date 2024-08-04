@@ -19,7 +19,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jebkit.tac.ui.theme.akiflow_lavender
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -37,13 +39,14 @@ fun PlanComposable(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(color, shape = RoundedCornerShape(4.dp))
-            .border(1.dp, Color.Black, shape = RoundedCornerShape(4.dp))
+            .background(color, shape = RoundedCornerShape(8.dp))
+            .border(1.dp, Color.Black, shape = RoundedCornerShape(8.dp))
             .padding(4.dp)
             .testTag("PlanComposable: $title")
     ) {
         Row(
-            modifier = Modifier.wrapContentHeight()
+            modifier = Modifier
+                .wrapContentHeight()
                 .padding(2.dp)
         ) {
             Text(
@@ -72,4 +75,16 @@ fun PlanComposable(
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun PlanComposablePreview() {
+    PlanComposable(
+        title = "Testing",
+        description = "test",
+        color = akiflow_lavender,
+        start = LocalTime.now(),
+        end = LocalTime.now().plusMinutes(30)
+    )
 }
