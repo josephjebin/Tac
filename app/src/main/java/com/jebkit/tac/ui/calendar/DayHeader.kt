@@ -2,8 +2,8 @@ package com.jebkit.tac.ui.calendar
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -36,89 +36,114 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.jebkit.tac.R
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DayHeader(selectedDate: LocalDate) {
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = colorResource(id = R.color.surface_dark_gray))
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedButton(
-                modifier = Modifier.size(50.dp),
-                shape = CircleShape,
-                border = BorderStroke(3.dp, Color.Black),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    backgroundColor = colorResource(id = R.color.akiflow_dark_purple)
-                ),
-                contentPadding = PaddingValues(0.dp),
-                onClick = { /*TODO*/ }
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = colorResource(id = R.color.surface_dark_gray))
+                    .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+//                    .border(2.dp, Color.Red),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.profile_picture_placeholder),
-                    tint = colorResource(id = R.color.surface_dark_gray),
-                    modifier = Modifier.size(60.dp),
-                    contentDescription = "profile"
-                )
-            }
-
-            Text(
-                text = "${selectedDate.dayOfWeek}, ${selectedDate.month} ${selectedDate.dayOfMonth}",
-                style = TextStyle(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            colorResource(id = R.color.akiflow_lavendar),
-                            colorResource(id = R.color.akiflow_app_light_purple)
+                Row {
+                    OutlinedButton(
+                        modifier = Modifier.size(40.dp),
+                        shape = CircleShape,
+                        border = BorderStroke(3.dp, Color.Black),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            backgroundColor = colorResource(id = R.color.akiflow_dark_purple)
+                        ),
+                        contentPadding = PaddingValues(0.dp),
+                        onClick = { /*TODO*/ }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.profile_picture_placeholder),
+                            tint = colorResource(id = R.color.surface_dark_gray),
+                            modifier = Modifier.size(60.dp),
+                            contentDescription = "profile"
                         )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Text(
+                        modifier = Modifier.align(Alignment.CenterVertically),
+                        text = "${selectedDate.dayOfWeek}, ${selectedDate.month} ${selectedDate.dayOfMonth}",
+                        style = TextStyle(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    colorResource(id = R.color.akiflow_lavendar),
+                                    colorResource(id = R.color.akiflow_app_light_purple)
+                                )
+                            )
+                        ),
+                        fontSize = 20.sp
                     )
-                )
-            )
+                }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.round_calendar_today_24),
-                    tint = colorResource(id = R.color.google_text_gray),
-                    contentDescription = ""
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                ExposedDropdownMenuBox(
-                    expanded = false,
-                    onExpandedChange = {},
-                    modifier = Modifier.width(40.dp)
-                ) {
-                    TextField(
-                        value = "1",
-                        onValueChange = {},
-                        singleLine = true,
-                        colors = TextFieldDefaults.textFieldColors(textColor = colorResource(id = R.color.google_text_gray))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(id = R.drawable.search_icon),
+                        tint = colorResource(id = R.color.google_text_gray),
+                        contentDescription = "search"
                     )
 
-                    ExposedDropdownMenu(expanded = false, onDismissRequest = { /*TODO*/ }) {
-                        DropdownMenuItem(onClick = { /*TODO*/ }) {
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Icon(
+                        painter = painterResource(id = R.drawable.round_calendar_today_24),
+                        tint = colorResource(id = R.color.google_text_gray),
+                        contentDescription = ""
+                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    ExposedDropdownMenuBox(
+                        expanded = false,
+                        onExpandedChange = {},
+                        modifier = Modifier
+                            .width(56.dp)
+                            .height(48.dp)
+                    ) {
+                        TextField(
+                            value = "1D",
+                            onValueChange = {},
+                            singleLine = true,
+                            colors = TextFieldDefaults.textFieldColors(textColor = colorResource(id = R.color.google_text_gray)),
+                            textStyle = TextStyle(textAlign = TextAlign.Center)
+                        )
+
+                        ExposedDropdownMenu(expanded = false, onDismissRequest = { /*TODO*/ }) {
+                            DropdownMenuItem(onClick = { /*TODO*/ }) {
+                            }
                         }
                     }
+
                 }
             }
+
+            Divider(
+                color = Color.Black,
+                modifier = Modifier
+                    .height(2.dp)
+                    .fillMaxWidth()
+            )
+
         }
-
-        Divider (
-            color = Color.Black,
-            modifier = Modifier
-                .height(1.dp)
-                .fillMaxWidth()
-        )
-
     }
 }
 
