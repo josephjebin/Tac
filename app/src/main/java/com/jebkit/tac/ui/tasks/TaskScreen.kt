@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.jebkit.tac.R
@@ -33,7 +34,7 @@ import java.time.ZonedDateTime
 
 @Composable
 fun TaskSheet(
-    tasksSheetState: MutableState<TasksSheetState>,
+    tasksSheetState: TasksSheetState,
     taskListDaos: List<TaskListDao>,
     taskDaos: List<TaskDao>,
     currentSelectedTaskListDao: TaskListDao?,
@@ -42,7 +43,7 @@ fun TaskSheet(
     onTaskCompleted: (TaskDao) -> Unit,
     onTaskDrag: () -> Unit
 ) {
-    val taskSheetModifier = when (tasksSheetState.value) {
+    val taskSheetModifier = when (tasksSheetState) {
         TasksSheetState.COLLAPSED -> {
             Modifier
                 .fillMaxWidth()
@@ -65,17 +66,14 @@ fun TaskSheet(
     Column(
         modifier = taskSheetModifier
             .border(
-                BorderStroke(2.dp, SolidColor(Color.Black)),
-            )
-            .border(
-                BorderStroke(2.dp, SolidColor(Color.Black)),
+                BorderStroke(2.dp, Color.Black),
                 RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
             )
             .fillMaxHeight()
             .fillMaxWidth()
             .background(
                 color = colorResource(id = R.color.surface_dark_gray),
-                RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
             )
     ) {
         val hourHeight = 64.dp
@@ -87,10 +85,6 @@ fun TaskSheet(
         ) {
             Box(modifier = peekArrowModifier
                 .height(48.dp)
-//                .border(
-//                    BorderStroke(0.dp, Color.Transparent),
-//                    RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-//                )
                 .fillMaxWidth()
                 .clickable {
 
@@ -100,7 +94,7 @@ fun TaskSheet(
                     painterResource(id = R.drawable.caret_down),
                     modifier = Modifier
                         .align(Alignment.TopCenter)
-                        .rotate(if (tasksSheetState.value == TasksSheetState.COLLAPSED) 180f else 0f),
+                        .rotate(if (tasksSheetState == TasksSheetState.COLLAPSED) 180f else 0f),
                     contentDescription = "Task Sheet Peek Arrow"
                 )
             }
@@ -220,5 +214,24 @@ fun TaskRow(
                 Text(text = "${taskDao.scheduledDuration.intValue} / ${taskDao.workedDuration.intValue} / ${taskDao.neededDuration.intValue}")
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun TaskSheetPreview() {
+    val tasksSheetState by remember {
+        mutableStateOf(TasksSheetState.PARTIALLY_EXPANDED)
+    }
+    TaskSheet(
+        tasksSheetState = tasksSheetState,
+        taskListDaos = listOf(),
+        taskDaos = listOf(),
+        currentSelectedTaskListDao = null,
+        onTaskListDaoSelected = {},
+        onTaskSelected = {},
+        onTaskCompleted = {}
+    ) {
+
     }
 }

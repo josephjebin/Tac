@@ -98,7 +98,7 @@ fun TasksAndCalendarScreen(
         RootDragInfoProvider {
             Column(
                 modifier = Modifier
-                    .background(color = colorResource(id = R.color.background_dark_gray))
+                    .background(color = Color.Black)
                     .padding(it),
                 verticalArrangement = Arrangement.Bottom
             ) {
@@ -128,7 +128,7 @@ fun TasksAndCalendarScreen(
 
                 //TASKS SHEET
                 TaskSheet(
-                    tasksSheetState = tasksSheetState,
+                    tasksSheetState = tasksSheetState.value,
                     taskListDaos = taskListDaos,
                     taskDaos = taskDaos,
                     currentSelectedTaskListDao = currentSelectedTaskListDao,
