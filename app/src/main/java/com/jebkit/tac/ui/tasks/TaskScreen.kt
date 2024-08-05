@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -117,7 +118,7 @@ fun TaskSheet(
                     backgroundColor = colorResource(id = R.color.surface_dark_gray),
                     border = BorderStroke(
                         2.dp,
-                        if(taskListDao == currentSelectedTaskListDao) colorResource(id = R.color.akiflow_app_light_purple)
+                        if (taskListDao == currentSelectedTaskListDao) colorResource(id = R.color.akiflow_app_light_purple)
                         else colorResource(id = R.color.google_text_white)
                     )
                 ) {
@@ -138,7 +139,8 @@ fun TaskSheet(
                 .verticalScroll(rememberScrollState())
         ) {
             taskDaos.forEachIndexed { index, taskDao ->
-                val eventDurationMinutes = taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
+                val eventDurationMinutes =
+                    taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
 
                 DragTarget(
@@ -169,7 +171,10 @@ fun TaskSheet(
                     )
                 }
 
-                if (index < taskDaos.lastIndex) Divider(color = colorResource(id = R.color.google_divider_gray), thickness = 1.dp)
+                if (index < taskDaos.lastIndex) Divider(
+                    color = colorResource(id = R.color.google_divider_gray),
+                    thickness = 1.dp
+                )
             }
 
         }
@@ -186,14 +191,13 @@ fun TaskRow(
         .fillMaxWidth()
         .height(54.dp)
         .clickable { onTaskSelected(taskDao) }
-        .border(1.dp, Color.Green)
     ) {
         IconButton(
             modifier = Modifier
                 .align(Alignment.CenterVertically),
             onClick = { onTaskCompleted(taskDao) }) {
             Icon(
-                painterResource(id = R.drawable.priority3_button), 
+                painterResource(id = R.drawable.priority3_button),
                 tint = colorResource(id = R.color.google_text_white),
                 contentDescription = ""
             )
@@ -212,53 +216,64 @@ fun TaskRow(
         )
 
         //due date and durations
-        Column(modifier = Modifier
-            .align(Alignment.CenterVertically)
-            .width(128.dp)
-            .padding(start = 8.dp)
-            .border(1.dp, Color.Red)
+        Column(
+            modifier = Modifier
+                .width(136.dp)
+                .fillMaxHeight()
+                .padding(start = 8.dp),
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
             //due date
             Row(
-
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     modifier = Modifier.size(18.dp),
                     painter = painterResource(id = R.drawable.round_calendar_today_24),
+                    tint = colorResource(id = R.color.googlew),
                     contentDescription = "Due date"
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = taskDao.due.value?.format(outputFormat) ?: "None")
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = taskDao.due.value?.format(outputFormat) ?: "None",
+                    textAlign = TextAlign.Center
+                )
             }
             //duration
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
                     modifier = Modifier.size(18.dp),
                     painter = painterResource(id = R.drawable.round_access_time_24),
                     contentDescription = "Duration"
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "${taskDao.scheduledDuration.intValue} / ${taskDao.workedDuration.intValue} / ${taskDao.neededDuration.intValue}")
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = "${taskDao.scheduledDuration.intValue} / ${taskDao.workedDuration.intValue} / ${taskDao.neededDuration.intValue}",
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
 }
-
-@Preview
-@Composable
-fun TaskSheetPreview() {
-    val tasksSheetState by remember {
-        mutableStateOf(TasksSheetState.PARTIALLY_EXPANDED)
-    }
-    TaskSheet(
-        tasksSheetState = tasksSheetState,
-        taskListDaos = dummyDataTaskListDaos(),
-        taskDaos = dummyDataTasksDaos(),
-        currentSelectedTaskListDao = dummyDataTaskListDaos()[0],
-        onTaskListDaoSelected = {},
-        onTaskSelected = {},
-        onTaskCompleted = {}
-    ) {
-
-    }
-}
+//
+//@Preview
+//@Composable
+//fun TaskSheetPreview() {
+//    val tasksSheetState by remember {
+//        mutableStateOf(TasksSheetState.PARTIALLY_EXPANDED)
+//    }
+//    TaskSheet(
+//        tasksSheetState = tasksSheetState,
+//        taskListDaos = dummyDataTaskListDaos(),
+//        taskDaos = dummyDataTasksDaos(),
+//        currentSelectedTaskListDao = dummyDataTaskListDaos()[0],
+//        onTaskListDaoSelected = {},
+//        onTaskSelected = {},
+//        onTaskCompleted = {}
+//    ) {}
+//}

@@ -125,6 +125,8 @@ fun dummyDataTasksDaos(): List<TaskDao> {
             ),
             deleted = mutableStateOf(false),
             taskListId = mutableStateOf("Career"),
+            scheduledDuration = mutableIntStateOf(120),
+            workedDuration = mutableIntStateOf(120),
             neededDuration = mutableIntStateOf(120)
         ),
         TaskDao(

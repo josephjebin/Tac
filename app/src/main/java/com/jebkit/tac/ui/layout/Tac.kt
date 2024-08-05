@@ -37,7 +37,7 @@ import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-val outputFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy")
+val outputFormat = DateTimeFormatter.ofPattern("MM - dd - yyyy")
 
 @Composable
 fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
