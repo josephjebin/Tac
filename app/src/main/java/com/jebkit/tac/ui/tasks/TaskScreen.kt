@@ -124,7 +124,8 @@ fun TaskSheet(
                 ) {
                     Text(
                         modifier = Modifier.padding(8.dp),
-                        color = colorResource(id = R.color.google_text_white),
+                        color = if (taskListDao == currentSelectedTaskListDao) colorResource(id = R.color.akiflow_app_light_purple)
+                        else colorResource(id = R.color.google_text_white),
                         text = taskListDao.title.value
                     )
                 }
