@@ -40,7 +40,6 @@ fun PlanComposable(
         modifier = modifier
             .fillMaxSize()
             .background(color, shape = RoundedCornerShape(8.dp))
-            .border(1.dp, Color.Black, shape = RoundedCornerShape(8.dp))
             .padding(4.dp)
             .testTag("PlanComposable: $title")
     ) {

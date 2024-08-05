@@ -59,7 +59,6 @@ fun DayHeader(selectedDate: LocalDate) {
                     .fillMaxWidth()
                     .background(color = colorResource(id = R.color.surface_dark_gray))
                     .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
-//                    .border(2.dp, Color.Red),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
