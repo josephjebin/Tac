@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -19,7 +18,7 @@ import androidx.compose.ui.unit.times
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.dragAndDrop.DragTarget
-import com.jebkit.tac.ui.dragAndDrop.DropTarget
+import com.jebkit.tac.ui.dragAndDrop.TimeDropTarget
 import com.jebkit.tac.ui.tasks.TasksSheetState
 import java.time.LocalDate
 import java.time.LocalTime
@@ -39,7 +38,8 @@ fun SingleDaySchedule(
     updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
+    //TODO: light and dark themes
+//    val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
 
     Layout(
         content = {
@@ -107,7 +107,7 @@ fun SingleDaySchedule(
             .drawBehind {
                 repeat(23) {
                     drawLine(
-                        dividerColor,
+                        Color(65, 66, 70),
                         start = Offset(0f, (it + 1) * hourHeight.toPx()),
                         end = Offset(size.width, (it + 1) * hourHeight.toPx()),
                         strokeWidth = 1.dp.toPx()
@@ -142,7 +142,7 @@ fun DropTargets(
     repeat(288) {
         val timeSlot: LocalTime = LocalTime.MIN.plusMinutes(it * 5L)
 
-        DropTarget(
+        TimeDropTarget(
             index = it,
             timeSlot = timeSlot,
             selectedDate = selectedDate,

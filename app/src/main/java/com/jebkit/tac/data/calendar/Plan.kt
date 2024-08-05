@@ -5,7 +5,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
-import com.jebkit.tac.ui.theme.onSurfaceGray
+import com.jebkit.tac.ui.theme.akiflow_lavender
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -19,5 +19,5 @@ abstract class Plan(
     open val start: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now()),
     open val end: MutableState<ZonedDateTime> = mutableStateOf(ZonedDateTime.now().plusMinutes(30)),
     open val duration: MutableIntState = mutableIntStateOf(30),
-    open val color: MutableState<Color> = mutableStateOf(onSurfaceGray)
+    open val color: MutableState<Color> = mutableStateOf(akiflow_lavender)
 )

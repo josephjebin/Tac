@@ -5,8 +5,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
-import com.jebkit.tac.ui.theme.onSurfaceGray
 import com.google.api.services.calendar.model.Event
+import com.jebkit.tac.ui.theme.akiflow_lavender
 import java.time.Duration
 import java.time.ZonedDateTime
 
@@ -37,7 +37,7 @@ data class EventDao(
         start = mutableStateOf(ZonedDateTime.parse(googleEvent.start.dateTime.toString(), googleCalendarDateTimeFormat)),
         end =  mutableStateOf(ZonedDateTime.parse(googleEvent.end.dateTime.toString(), googleCalendarDateTimeFormat)),
         duration = mutableIntStateOf(30),
-        color = mutableStateOf(onSurfaceGray)
+        color = mutableStateOf(akiflow_lavender)
     ) {
         duration.intValue = Duration.between(start.value, end.value).toMinutes().toInt()
     }

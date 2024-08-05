@@ -23,10 +23,10 @@ data class TaskDao(
     val due: MutableState<ZonedDateTime?> = mutableStateOf(null),
     val deleted: MutableState<Boolean> = mutableStateOf(false),
     val taskListId: MutableState<String>,
-    val associatedScheduledTaskIds: SnapshotStateList<String>,
+    val associatedScheduledTaskIds: SnapshotStateList<String> = mutableStateListOf(),
     val scheduledDuration: MutableIntState = mutableIntStateOf(0),
     val workedDuration: MutableIntState = mutableIntStateOf(0),
-    val neededDuration: MutableIntState,
+    val neededDuration: MutableIntState = mutableIntStateOf(30),
     val priority: Priority = Priority.Priority4,
     val color: MutableState<Color> = mutableStateOf(onSurfaceGray)
 ) {

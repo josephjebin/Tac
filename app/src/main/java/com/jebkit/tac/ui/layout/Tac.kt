@@ -1,5 +1,6 @@
 package com.jebkit.tac.ui.layout
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,8 +16,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jebkit.tac.MyBottomBar
+import com.jebkit.tac.R
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.tasks.TaskDao
@@ -31,11 +37,11 @@ import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-val outputFormat = DateTimeFormatter.ofPattern("MM-dd-yyyy")
+val outputFormat = DateTimeFormatter.ofPattern("MM - dd - yyyy")
 
 @Composable
 fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
-    Surface(color = MaterialTheme.colors.background) {
+    Surface(color = colorResource(id = R.color.background_dark_gray)) {
         val tasksAndCalendarState by tasksAndCalendarViewModel.uiState.collectAsState()
 
         TasksAndCalendarScreen(
@@ -70,7 +76,6 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
     }
 }
 
-
 @Composable
 fun TasksAndCalendarScreen(
     selectedDate: LocalDate,
@@ -92,7 +97,9 @@ fun TasksAndCalendarScreen(
     ) {
         RootDragInfoProvider {
             Column(
-                modifier = Modifier.padding(it),
+                modifier = Modifier
+                    .background(color = Color.Black)
+                    .padding(it),
                 verticalArrangement = Arrangement.Bottom
             ) {
                 //CALENDAR
@@ -102,6 +109,7 @@ fun TasksAndCalendarScreen(
                         modifier = Modifier
                             .weight(1.0f)
                             .fillMaxWidth()
+                            .background(color = colorResource(id = R.color.background_dark_gray))
                     ) {
                         Calendar(
                             verticalScrollState = verticalScrollState,
@@ -120,7 +128,7 @@ fun TasksAndCalendarScreen(
 
                 //TASKS SHEET
                 TaskSheet(
-                    tasksSheetState = tasksSheetState,
+                    tasksSheetState = tasksSheetState.value,
                     taskListDaos = taskListDaos,
                     taskDaos = taskDaos,
                     currentSelectedTaskListDao = currentSelectedTaskListDao,
@@ -134,4 +142,22 @@ fun TasksAndCalendarScreen(
         }
 
     }
+}
+
+@Preview
+@Composable
+fun TacPreview() {
+    TasksAndCalendarScreen(
+        selectedDate = LocalDate.now(),
+        eventDaos = listOf(),
+        scheduledTasks = listOf(),
+        addScheduledTask = {},
+        updateScheduledTaskTime = { ScheduledTask, ZonedDateTime -> },
+        updateEventDaoTime = { EventDao, ZonedDateTime -> },
+        taskListDaos = listOf(),
+        taskDaos = listOf(),
+        currentSelectedTaskListDao = null,
+        onTaskListDaoSelected = { (TaskListDao) ->  },
+        onTaskDaoSelected = { (TaskDao) ->  }
+    )
 }

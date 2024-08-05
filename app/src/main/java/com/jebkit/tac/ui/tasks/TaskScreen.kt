@@ -6,30 +6,38 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.jebkit.tac.R
 import com.jebkit.tac.data.calendar.ScheduledTask
+import com.jebkit.tac.data.dummyData.dummyDataTaskListDaos
+import com.jebkit.tac.data.dummyData.dummyDataTasksDaos
 import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskListDao
+import com.jebkit.tac.ui.dragAndDrop.CancelDropTarget
 import com.jebkit.tac.ui.dragAndDrop.DragTarget
 import com.jebkit.tac.ui.layout.outputFormat
-import com.jebkit.tac.ui.theme.accent_gray
 import java.time.ZonedDateTime
 
 @Composable
 fun TaskSheet(
-    tasksSheetState: MutableState<TasksSheetState>,
+    tasksSheetState: TasksSheetState,
     taskListDaos: List<TaskListDao>,
     taskDaos: List<TaskDao>,
     currentSelectedTaskListDao: TaskListDao?,
@@ -38,7 +46,7 @@ fun TaskSheet(
     onTaskCompleted: (TaskDao) -> Unit,
     onTaskDrag: () -> Unit
 ) {
-    val taskSheetModifier = when (tasksSheetState.value) {
+    val taskSheetModifier = when (tasksSheetState) {
         TasksSheetState.COLLAPSED -> {
             Modifier
                 .fillMaxWidth()
@@ -57,50 +65,69 @@ fun TaskSheet(
         }
     }
 
+
     Column(
         modifier = taskSheetModifier
             .border(
-                BorderStroke(1.dp, SolidColor(Color.Black)),
-                RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                BorderStroke(2.dp, Color.Black),
+                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
             )
             .fillMaxHeight()
             .fillMaxWidth()
-            .background(accent_gray, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+            .background(
+                color = colorResource(id = R.color.surface_dark_gray),
+                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+            )
     ) {
         val hourHeight = 64.dp
 
+        var peekArrowModifier: Modifier by remember { mutableStateOf(Modifier) }
         //Peek Arrow
-        Box(modifier = Modifier
-            .height(48.dp)
-            .border(
-                BorderStroke(0.dp, Color.Transparent),
-                RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-            )
-            .fillMaxWidth()
-            .clickable {
-
-            }
+        CancelDropTarget(
+            highlightBottomBar = { peekArrowModifier = Modifier.border(16.dp, Color.Red) }
         ) {
-            Image(
-                painterResource(id = R.drawable.caret_down),
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .rotate(if (tasksSheetState.value == TasksSheetState.COLLAPSED) 180f else 0f),
-                contentDescription = "Task Sheet Peek Arrow"
-            )
+            Box(modifier = peekArrowModifier
+                .height(48.dp)
+                .fillMaxWidth()
+                .clickable {
+
+                }
+            ) {
+                Image(
+                    painterResource(id = R.drawable.caret_down),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .rotate(if (tasksSheetState == TasksSheetState.COLLAPSED) 180f else 0f),
+                    contentDescription = "Task Sheet Peek Arrow"
+                )
+            }
         }
 
-
         //projects
-        Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+        Row(
+            modifier = Modifier
+                .horizontalScroll(rememberScrollState())
+                .padding(8.dp, 8.dp)
+        ) {
             taskListDaos.forEach { taskListDao ->
                 Card(
                     modifier = Modifier
-                        .padding(8.dp, 16.dp)
-                        .border(BorderStroke(1.dp, SolidColor(Color.Black)))
-                        .clickable { onTaskListDaoSelected(taskListDao) }
+                        .padding(8.dp, 0.dp)
+                        .clickable { onTaskListDaoSelected(taskListDao) },
+                    shape = RoundedCornerShape(8.dp),
+                    backgroundColor = colorResource(id = R.color.surface_dark_gray),
+                    border = BorderStroke(
+                        2.dp,
+                        if (taskListDao == currentSelectedTaskListDao) colorResource(id = R.color.akiflow_app_light_purple)
+                        else colorResource(id = R.color.google_text_white)
+                    )
                 ) {
-                    Text(modifier = Modifier.padding(8.dp), text = taskListDao.title.value)
+                    Text(
+                        modifier = Modifier.padding(8.dp),
+                        color = if (taskListDao == currentSelectedTaskListDao) colorResource(id = R.color.akiflow_app_light_purple)
+                        else colorResource(id = R.color.google_text_white),
+                        text = taskListDao.title.value
+                    )
                 }
             }
         }
@@ -113,7 +140,8 @@ fun TaskSheet(
                 .verticalScroll(rememberScrollState())
         ) {
             taskDaos.forEachIndexed { index, taskDao ->
-                val eventDurationMinutes = taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
+                val eventDurationMinutes =
+                    taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
 
                 DragTarget(
@@ -143,7 +171,11 @@ fun TaskSheet(
                         onTaskCompleted = onTaskCompleted
                     )
                 }
-                if (index < taskListDaos.lastIndex) Divider(color = Color.Black, thickness = 1.dp)
+
+                if (index < taskDaos.lastIndex) Divider(
+                    color = colorResource(id = R.color.google_text_gray),
+                    thickness = 1.dp
+                )
             }
 
         }
@@ -165,7 +197,11 @@ fun TaskRow(
             modifier = Modifier
                 .align(Alignment.CenterVertically),
             onClick = { onTaskCompleted(taskDao) }) {
-            Icon(painterResource(id = R.drawable.priority3_button), "")
+            Icon(
+                painterResource(id = R.drawable.priority3_button),
+                tint = colorResource(id = R.color.google_text_white),
+                contentDescription = ""
+            )
         }
 
         Spacer(modifier = Modifier.width(8.dp))
@@ -175,35 +211,73 @@ fun TaskRow(
                 .align(Alignment.CenterVertically)
                 .weight(1f)
                 .fillMaxWidth(),
+            color = colorResource(id = R.color.google_text_white),
             text = taskDao.title.value,
             overflow = TextOverflow.Ellipsis
         )
 
-        Column(modifier = Modifier
-            .align(Alignment.CenterVertically)
-            .width(128.dp)
-            .padding(start = 8.dp)
+        //due date and durations
+        Column(
+            modifier = Modifier
+                .width(136.dp)
+                .fillMaxHeight()
+                .padding(start = 8.dp),
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
             //due date
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
-                    modifier = Modifier.scale(.8f),
+                    modifier = Modifier.size(18.dp),
                     painter = painterResource(id = R.drawable.round_calendar_today_24),
+                    tint = colorResource(id = R.color.google_text_white),
                     contentDescription = "Due date"
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = taskDao.due.value?.format(outputFormat) ?: "None")
+
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = colorResource(id = R.color.google_text_white),
+                    text = taskDao.due.value?.format(outputFormat) ?: "None",
+                    textAlign = TextAlign.Center
+                )
             }
             //duration
-            Row {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
-                    modifier = Modifier.scale(.8f),
+                    modifier = Modifier.size(18.dp),
                     painter = painterResource(id = R.drawable.round_access_time_24),
+                    tint = colorResource(id = R.color.google_text_white),
                     contentDescription = "Duration"
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "${taskDao.scheduledDuration.intValue} / ${taskDao.workedDuration.intValue} / ${taskDao.neededDuration.intValue}")
+
+
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = colorResource(id = R.color.google_text_white),
+                    text = "${taskDao.scheduledDuration.intValue} / ${taskDao.workedDuration.intValue} / ${taskDao.neededDuration.intValue}",
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun TaskSheetPreview() {
+    val tasksSheetState by remember {
+        mutableStateOf(TasksSheetState.PARTIALLY_EXPANDED)
+    }
+    TaskSheet(
+        tasksSheetState = tasksSheetState,
+        taskListDaos = dummyDataTaskListDaos(),
+        taskDaos = dummyDataTasksDaos(),
+        currentSelectedTaskListDao = dummyDataTaskListDaos()[0],
+        onTaskListDaoSelected = {},
+        onTaskSelected = {},
+        onTaskCompleted = {}
+    ) {}
 }
