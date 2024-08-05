@@ -172,7 +172,7 @@ fun TaskSheet(
                 }
 
                 if (index < taskDaos.lastIndex) Divider(
-                    color = colorResource(id = R.color.google_divider_gray),
+                    color = colorResource(id = R.color.google_text_gray),
                     thickness = 1.dp
                 )
             }
@@ -230,12 +230,13 @@ fun TaskRow(
                 Icon(
                     modifier = Modifier.size(18.dp),
                     painter = painterResource(id = R.drawable.round_calendar_today_24),
-                    tint = colorResource(id = R.color.googlew),
+                    tint = colorResource(id = R.color.google_text_white),
                     contentDescription = "Due date"
                 )
+
                 Text(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
+                    color = colorResource(id = R.color.google_text_white),
                     text = taskDao.due.value?.format(outputFormat) ?: "None",
                     textAlign = TextAlign.Center
                 )
@@ -247,12 +248,14 @@ fun TaskRow(
                 Icon(
                     modifier = Modifier.size(18.dp),
                     painter = painterResource(id = R.drawable.round_access_time_24),
+                    tint = colorResource(id = R.color.google_text_white),
                     contentDescription = "Duration"
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+
+
                 Text(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
+                    color = colorResource(id = R.color.google_text_white),
                     text = "${taskDao.scheduledDuration.intValue} / ${taskDao.workedDuration.intValue} / ${taskDao.neededDuration.intValue}",
                     textAlign = TextAlign.Center
                 )
@@ -260,20 +263,20 @@ fun TaskRow(
         }
     }
 }
-//
-//@Preview
-//@Composable
-//fun TaskSheetPreview() {
-//    val tasksSheetState by remember {
-//        mutableStateOf(TasksSheetState.PARTIALLY_EXPANDED)
-//    }
-//    TaskSheet(
-//        tasksSheetState = tasksSheetState,
-//        taskListDaos = dummyDataTaskListDaos(),
-//        taskDaos = dummyDataTasksDaos(),
-//        currentSelectedTaskListDao = dummyDataTaskListDaos()[0],
-//        onTaskListDaoSelected = {},
-//        onTaskSelected = {},
-//        onTaskCompleted = {}
-//    ) {}
-//}
+
+@Preview
+@Composable
+fun TaskSheetPreview() {
+    val tasksSheetState by remember {
+        mutableStateOf(TasksSheetState.PARTIALLY_EXPANDED)
+    }
+    TaskSheet(
+        tasksSheetState = tasksSheetState,
+        taskListDaos = dummyDataTaskListDaos(),
+        taskDaos = dummyDataTasksDaos(),
+        currentSelectedTaskListDao = dummyDataTaskListDaos()[0],
+        onTaskListDaoSelected = {},
+        onTaskSelected = {},
+        onTaskCompleted = {}
+    ) {}
+}

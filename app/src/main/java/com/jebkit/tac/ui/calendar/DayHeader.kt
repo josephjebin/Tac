@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
@@ -47,7 +48,11 @@ import java.time.LocalDate
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DayHeader(selectedDate: LocalDate) {
-    Box(modifier = Modifier.fillMaxWidth()) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(58.dp)
+    ) {
         Column {
             Row(
                 modifier = Modifier
@@ -96,7 +101,7 @@ fun DayHeader(selectedDate: LocalDate) {
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(20.dp),
                         painter = painterResource(id = R.drawable.search_icon),
                         tint = colorResource(id = R.color.google_text_gray),
                         contentDescription = "search"

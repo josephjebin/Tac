@@ -99,7 +99,9 @@ fun ScheduleDraggable() {
                     scaleX = 1.0f
                     scaleY = 1.0f
                     translationX = 0.0f
-                    translationY = offset.y.minus(176f).minus(.5f * state.draggableHeight.toPx())
+//                    translationY = offset.y.minus(176f).minus(.5f * state.draggableHeight.toPx())
+                    translationY = offset.y.minus(58.dp.toPx())
+
                 }
             ) {
                 PlanComposable(
