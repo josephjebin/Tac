@@ -97,24 +97,28 @@ fun TasksAndCalendarScreen(
     onTaskDaoSelected: (TaskDao) -> Unit
 ) {
     val tasksSheetState = rememberSaveable { mutableStateOf(TasksSheetState.COLLAPSED) }
-    Scaffold(
-        topBar = { DayHeader(selectedDate) },
-        bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
-    ) {
-        val hourHeight = 64.dp
-        var minuteVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
-        Box {
-            Column {
-                Box(modifier = Modifier.height(hourHeight))
-                Box(modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
-                    minuteVerticalOffset = layoutCoordinates.positionInParent().y.div(60)
-                })
-            }
-        }
+    var minuteVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
+    var headerVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
 
-        RootDragInfoProvider(
-            minuteVerticalOffset = minuteVerticalOffset
+    RootDragInfoProvider(
+        minuteVerticalOffset = minuteVerticalOffset,
+        headerVerticalOffset = headerVerticalOffset
+    ) {
+        Scaffold(
+            topBar = { DayHeader(selectedDate) },
+            bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
         ) {
+            val hourHeight = 64.dp
+            //invisible boxes to calculate one hour's offset
+            Box {
+                Column {
+                    Box(modifier = Modifier.height(hourHeight))
+                    Box(modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
+                        minuteVerticalOffset = layoutCoordinates.positionInParent().y.div(60)
+                    })
+                }
+            }
+
             Column(
                 modifier = Modifier
                     .background(color = Color.Black)
@@ -132,6 +136,9 @@ fun TasksAndCalendarScreen(
                     ) {
                         Calendar(
                             hourHeight = hourHeight,
+                            updateHeaderVerticalOffset = { verticalOffset: Float ->
+                                headerVerticalOffset = verticalOffset
+                            },
                             verticalScrollState = verticalScrollState,
                             selectedDate = selectedDate,
                             eventDaos = eventDaos,
@@ -157,8 +164,9 @@ fun TasksAndCalendarScreen(
                     onTaskDrag = { tasksSheetState.value = TasksSheetState.COLLAPSED },
                 )
             }
-        }
 
+
+        }
     }
 }
 
@@ -175,7 +183,7 @@ fun TacPreview() {
         taskListDaos = listOf(),
         taskDaos = listOf(),
         currentSelectedTaskListDao = null,
-        onTaskListDaoSelected = { (TaskListDao) ->  },
-        onTaskDaoSelected = { (TaskDao) ->  }
+        onTaskListDaoSelected = { (TaskListDao) -> },
+        onTaskDaoSelected = { (TaskDao) -> }
     )
 }

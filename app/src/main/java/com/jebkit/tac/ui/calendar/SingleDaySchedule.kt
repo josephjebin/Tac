@@ -54,7 +54,6 @@ fun SingleDaySchedule(
                         dataToDrop = eventDao,
                         modifier = planComposableModifier,
                         draggableHeight = eventHeight,
-                        isRescheduling = true
                     )
                 }
 
@@ -71,7 +70,6 @@ fun SingleDaySchedule(
                         dataToDrop = scheduledTask,
                         modifier = planComposableModifier,
                         draggableHeight = taskHeight,
-                        isRescheduling = true
                     )
                 }
 

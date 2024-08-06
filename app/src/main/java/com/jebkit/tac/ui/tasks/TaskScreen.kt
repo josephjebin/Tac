@@ -158,7 +158,6 @@ fun TaskSheet(
                         duration = mutableIntStateOf(eventDurationMinutes),
                         color = taskDao.color
                     ),
-                    isRescheduling = false,
                     onTaskDrag = onTaskDrag,
                     draggableHeight = eventHeight
                 ) {
@@ -208,7 +207,7 @@ fun TaskRow(
                 .align(Alignment.CenterVertically)
                 .weight(1f)
                 .fillMaxWidth(),
-            color = colorResource(id = R.color.google_text_white),
+            color = colorResource(id = R.color.google_text_gray),
             text = taskDao.title.value,
             overflow = TextOverflow.Ellipsis
         )
