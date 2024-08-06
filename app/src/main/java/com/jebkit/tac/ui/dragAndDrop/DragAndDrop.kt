@@ -1,5 +1,6 @@
 package com.jebkit.tac.ui.dragAndDrop
 
+import android.text.Layout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -24,6 +25,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -51,9 +53,9 @@ internal class DragTargetInfo {
     var isRescheduling by mutableStateOf(true)
 
     //used for spawning the draggable at the right position
-    var composableStartOffset by mutableFloatStateOf(0f)
+    var composableStartOffset by mutableStateOf(Offset.Zero)
     //used for calculating change in time
-    var composableDragOffset by mutableFloatStateOf(0f)
+    var composableDragVerticalOffset by mutableFloatStateOf(0f)
     //we care about change in time by increments of 5 minutes because that's the precision used
     //for updating calendar events when dragging
     //e.g. if we dragged an event an hour up, that's 12 5-minute increments upwards,
@@ -128,25 +130,28 @@ fun RootDragInfoProvider(
 fun CalendarDraggable() {
     val state = LocalDragTargetInfo.current
     var bounds: Rect by remember { mutableStateOf(Rect(Offset.Zero, Offset.Zero)) }
+    var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
 
     Box(modifier = Modifier
         .fillMaxSize()
         .onGloballyPositioned {
             bounds = it.boundsInParent()
+            layoutCoordinates = it
 
         }
     ) {
         if (state.isDragging) {
 //            if(state.isPointerInCancelRegion) highlight border else
-            state.timeChangeInIncrementsOfFiveMinutes = (state.composableDragOffset / state.fiveMinuteVerticalOffset).roundToInt()
+            state.timeChangeInIncrementsOfFiveMinutes = (state.composableDragVerticalOffset / state.fiveMinuteVerticalOffset).roundToInt()
             Box(modifier = Modifier
                 .graphicsLayer {
-                    val offset = (state.composableStartOffset + state.composableDragOffset)
+//                    val offset = (state.composableStartOffset + state.composableDragOffset)
+                    val start = layoutCoordinates?.windowToLocal(state.composableStartOffset)
                     alpha = 1f
                     scaleX = 1.0f
                     scaleY = 1.0f
                     translationX = 0.0f
-                    translationY = offset
+                    translationY = start?.y?.plus(state.composableDragVerticalOffset) ?: 0f
                     //.minus(295)
 //                    translationY = offset.y.minus(176f).minus(.5f * state.draggableHeight.toPx())
                 }
@@ -196,7 +201,7 @@ fun CalendarDragTarget(
                     onTaskDrag()
                     currentState.dataToDrop = currentData
                     currentState.isRescheduling = true
-                    currentState.composableStartOffset = currentPosition.y
+                    currentState.composableStartOffset = currentPosition
 //                    currentState.draggableHeight = planComposableHeight
 //                    currentState.topOfDraggable = Offset(
 //                        (currentPosition + it).x,
@@ -208,15 +213,15 @@ fun CalendarDragTarget(
                     currentState.isDragging = true
                 }, onDrag = { change, dragAmount ->
                     change.consume()
-                    currentState.composableDragOffset += dragAmount.y
+                    currentState.composableDragVerticalOffset += dragAmount.y
 //                    currentState.topOfDraggable += Offset(dragAmount.x, dragAmount.y)
                 }, onDragEnd = {
                     currentState.isDragging = false
-                    currentState.composableDragOffset = 0f
+                    currentState.composableDragVerticalOffset = 0f
                     //logic to update event time
                 }, onDragCancel = {
                     currentState.isDragging = false
-                    currentState.composableDragOffset = 0f
+                    currentState.composableDragVerticalOffset = 0f
                 })
         }
     ) {
@@ -245,6 +250,8 @@ fun TaskRowDragTarget(
     var planComposableHeight by remember { mutableStateOf(0.dp) }
     var planComposableModifier: Modifier by remember { mutableStateOf(Modifier) }
 
+    var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
+
     currentData = dataToDrop
     planComposableHeight = draggableHeight
     planComposableModifier = Modifier
@@ -255,7 +262,7 @@ fun TaskRowDragTarget(
 
     Box(modifier = modifier
         .onGloballyPositioned {
-            currentPosition = it.localToRoot(Offset.Zero)
+            layoutCoordinates = it
         }
         .pointerInput(Unit) {
             detectDragGesturesAfterLongPress(
@@ -263,7 +270,9 @@ fun TaskRowDragTarget(
                     onTaskDrag()
                     currentState.dataToDrop = currentData
                     currentState.isRescheduling = false
-                    currentState.composableStartOffset = currentPosition.y.minus(currentState.headerVerticalOffset)
+//                    currentState.composableStartOffset = currentPosition.y.minus(currentState.headerVerticalOffset)
+//                    currentState.composableStartOffset = currentPosition.plus(it)
+                    currentState.composableStartOffset = layoutCoordinates?.localToWindow(it) ?: Offset.Zero
 //                    currentState.draggableHeight = planComposableHeight
 //                    currentState.topOfDraggable = Offset(
 //                        (currentPosition + it).x,
@@ -275,15 +284,15 @@ fun TaskRowDragTarget(
                     currentState.isDragging = true
                 }, onDrag = { change, dragAmount ->
                     change.consume()
-                    currentState.composableDragOffset += dragAmount.y
+                    currentState.composableDragVerticalOffset += dragAmount.y
 //                    currentState.topOfDraggable += Offset(dragAmount.x, dragAmount.y)
                 }, onDragEnd = {
                     currentState.isDragging = false
-                    currentState.composableDragOffset = 0f
+                    currentState.composableDragVerticalOffset = 0f
                     //logic to update event time
                 }, onDragCancel = {
                     currentState.isDragging = false
-                    currentState.composableDragOffset = 0f
+                    currentState.composableDragVerticalOffset = 0f
                 })
         }
     ) {
