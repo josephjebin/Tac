@@ -8,43 +8,63 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.jebkit.tac.data.calendar.EventDao
+import com.jebkit.tac.R
 import com.jebkit.tac.data.calendar.Plan
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.calendar.PlanComposable
 import com.jebkit.tac.ui.theme.akiflow_lavender
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import kotlin.math.roundToInt
 
 internal class DragTargetInfo {
+    var minuteVerticalOffset by mutableFloatStateOf(0f)
+    var fiveMinuteVerticalOffset by mutableFloatStateOf(0f)
+
     var isDragging: Boolean by mutableStateOf(false)
     var isRescheduling by mutableStateOf(true)
-    var dragPosition by mutableStateOf(Offset.Zero)
-    var dragOffset by mutableStateOf(Offset.Zero)
-    var draggableHeight by mutableStateOf(0.dp)
-    var topOfDraggable by mutableStateOf(Offset.Zero)
-    var currentDropTarget by mutableIntStateOf(-1)
-    var currentDropTargetTime: LocalTime by mutableStateOf(LocalTime.MIN)
+
+    //used for spawning the draggable at the right position
+    var composableStartOffset by mutableStateOf(Offset.Zero)
+    //used for calculating change in time
+    var composableDragOffset by mutableStateOf(Offset.Zero)
+    //we care about change in time by increments of 5 minutes because that's the precision used
+    //for updating calendar events when dragging
+    //e.g. if we dragged an event an hour up, that's 12 5-minute increments upwards,
+    //so timeChangeInIncrementsOfFiveMinutes would be -12
+    var timeChangeInIncrementsOfFiveMinutes by mutableIntStateOf(0)
+
+    //TODO: used for determining if user's pointer is in the cancel region when dragging
+    var pointerPosition by mutableStateOf(Offset.Zero)
+
+//    var draggableHeight by mutableStateOf(0.dp)
+//    var topOfDraggable by mutableStateOf(Offset.Zero)
+//    var currentDropTarget by mutableIntStateOf(-1)
+//    var currentDropTargetTime: LocalTime by mutableStateOf(LocalTime.MIN)
     var dataToDrop by mutableStateOf<Plan>(
         ScheduledTask(
             id = "defaultId",
@@ -74,40 +94,63 @@ internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
 
 @Composable
 fun RootDragInfoProvider(
+    minuteVerticalOffset: Float,
     content: @Composable() (BoxScope.() -> Unit)
 ) {
     val state = remember { DragTargetInfo() }
     CompositionLocalProvider(
         LocalDragTargetInfo provides state
     ) {
+        state.minuteVerticalOffset = minuteVerticalOffset
+        state.fiveMinuteVerticalOffset = 5 * minuteVerticalOffset
         Box()
         {
             content()
+
+            Box {
+                Text(
+                    text =
+                    """position: ${state.composableStartOffset}
+                    """.trimMargin(),
+                    color = colorResource(id = R.color.google_text_white)
+                )
+            }
         }
     }
 }
 
 @Composable
-fun ScheduleDraggable() {
+fun CalendarDraggable() {
     val state = LocalDragTargetInfo.current
-    Box(modifier = Modifier.fillMaxSize()) {
+    var bounds: Rect by remember { mutableStateOf(Rect(Offset.Zero, Offset.Zero)) }
+
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .onGloballyPositioned {
+            bounds = it.boundsInParent()
+        }
+    ) {
         if (state.isDragging) {
+//            if(state.isPointerInCancelRegion) highlight border else
+            state.timeChangeInIncrementsOfFiveMinutes = (state.composableDragOffset.y / state.fiveMinuteVerticalOffset).roundToInt()
             Box(modifier = Modifier
                 .graphicsLayer {
-                    val offset = (state.dragPosition + state.dragOffset)
+                    val offset = (state.composableStartOffset + state.composableDragOffset)
                     alpha = 1f
                     scaleX = 1.0f
                     scaleY = 1.0f
                     translationX = 0.0f
-                    translationY = offset.y.minus(176f).minus(.5f * state.draggableHeight.toPx())
+                    translationY = offset.y
+                    //.minus(295)
+//                    translationY = offset.y.minus(176f).minus(.5f * state.draggableHeight.toPx())
                 }
             ) {
                 PlanComposable(
                     title = state.dataToDrop.title.value,
                     description = state.dataToDrop.description.value,
                     color = state.dataToDrop.color.value,
-                    start = state.currentDropTargetTime,
-                    end = state.currentDropTargetTime.plusMinutes(state.dataToDrop.duration.intValue.toLong()),
+                    start = state.dataToDrop.start.value.toLocalTime().plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                    end = state.dataToDrop.end.value.toLocalTime().plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
                     modifier = state.draggableModifier
                 )
             }
@@ -116,13 +159,13 @@ fun ScheduleDraggable() {
 }
 
 @Composable
-fun DragTarget(
+fun CalendarDragTarget(
     dataToDrop: Plan,
     modifier: Modifier = Modifier,
     draggableHeight: Dp,
     isRescheduling: Boolean,
     onTaskDrag: (() -> Unit) = {},
-    content: @Composable () -> Unit
+//    content: @Composable () -> Unit
 ) {
     val currentState = LocalDragTargetInfo.current
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
@@ -140,7 +183,7 @@ fun DragTarget(
 
     Box(modifier = modifier
         .onGloballyPositioned {
-            currentPosition = it.localToWindow(Offset.Zero)
+            currentPosition = it.positionInParent()
         }
         .pointerInput(Unit) {
             detectDragGesturesAfterLongPress(
@@ -148,89 +191,108 @@ fun DragTarget(
                     onTaskDrag()
                     currentState.dataToDrop = currentData
                     currentState.isRescheduling = isRescheduling
-                    currentState.dragPosition = currentPosition + it
-                    currentState.draggableHeight = planComposableHeight
-                    currentState.topOfDraggable = Offset(
-                        (currentPosition + it).x,
-                        (currentPosition + it).y
-                            .minus(planComposableHeight.toPx() * .5f)
-                            .plus(29f)
-                    )
+                    currentState.composableStartOffset = currentPosition
+//                    currentState.draggableHeight = planComposableHeight
+//                    currentState.topOfDraggable = Offset(
+//                        (currentPosition + it).x,
+//                        (currentPosition + it).y
+//                            .minus(planComposableHeight.toPx() * .5f)
+//                            .plus(29f)
+//                    )
                     currentState.draggableModifier = planComposableModifier
                     currentState.isDragging = true
                 }, onDrag = { change, dragAmount ->
                     change.consume()
-                    currentState.dragOffset += Offset(dragAmount.x, dragAmount.y)
-                    currentState.topOfDraggable += Offset(dragAmount.x, dragAmount.y)
+                    currentState.composableDragOffset += Offset(dragAmount.x, dragAmount.y)
+//                    currentState.topOfDraggable += Offset(dragAmount.x, dragAmount.y)
                 }, onDragEnd = {
                     currentState.isDragging = false
-                    currentState.dragOffset = Offset.Zero
+                    currentState.composableDragOffset = Offset.Zero
+                    //logic to update event time
                 }, onDragCancel = {
                     currentState.isDragging = false
-                    currentState.dragOffset = Offset.Zero
+                    currentState.composableDragOffset = Offset.Zero
                 })
         }
     ) {
-        content()
+        PlanComposable(
+            title = dataToDrop.title.value,
+            description = dataToDrop.description.value,
+            color = dataToDrop.color.value,
+            start = dataToDrop.start.value.toLocalTime(),
+            end = dataToDrop.end.value.toLocalTime(),
+            modifier = planComposableModifier
+        )
     }
 }
 
 @Composable
-fun TimeDropTarget(
-    index: Int,
-    selectedDate: LocalDate,
-    timeSlot: LocalTime,
-    addScheduledTask: (ScheduledTask) -> Unit,
-    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
-    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
-    modifier: Modifier,
-    content: @Composable() (BoxScope.(isInBound: Boolean) -> Unit)
+fun TaskRowDragTarget(
+    dataToDrop: ScheduledTask,
+    modifier: Modifier = Modifier,
+    draggableHeight: Dp,
+    isRescheduling: Boolean,
+    onTaskDrag: (() -> Unit) = {},
+    content: @Composable () -> Unit
 ) {
-    val dragInfo = LocalDragTargetInfo.current
-    val topOfDraggable = dragInfo.topOfDraggable
-
-    Box(modifier = modifier.onGloballyPositioned {
-        it.boundsInWindow().let { rect ->
-            if (dragInfo.isDragging && rect.contains(topOfDraggable)) {
-                dragInfo.currentDropTarget = index
-                dragInfo.currentDropTargetTime = timeSlot
-            }
-        }
-    }) {
-        //user dropped payload in this drop target
-        if (dragInfo.currentDropTarget == index && !dragInfo.isDragging) {
-            if (dragInfo.isRescheduling) {
-                if (dragInfo.dataToDrop is ScheduledTask) {
-                    updateScheduledTaskTime(
-                        dragInfo.dataToDrop as ScheduledTask, ZonedDateTime.of(
-                        LocalDateTime.of(selectedDate, timeSlot),
-                        ZoneId.systemDefault()
-                    ))
-                } else {
-                    updateEventDaoTime(dragInfo.dataToDrop as EventDao, ZonedDateTime.of(
-                        LocalDateTime.of(selectedDate, timeSlot),
-                        ZoneId.systemDefault()
-                    ))
-                }
-            } else {
-                val scheduledTask = dragInfo.dataToDrop as ScheduledTask
-                scheduledTask.start.value = ZonedDateTime.of(
-                    LocalDateTime.of(selectedDate, timeSlot),
-                    ZoneId.systemDefault()
-                )
-                scheduledTask.end.value = scheduledTask.start.value.plusMinutes(scheduledTask.duration.intValue.toLong())
-                addScheduledTask(scheduledTask)
-            }
-
-            //after updating viewmodel, reset currentDropTarget to prevent repeated calls to viewmodel
-            dragInfo.currentDropTarget = -1
-        }
-
-        content(
-            dragInfo.isDragging && dragInfo.currentDropTarget == index,
-        )
-    }
+    content()
 }
+
+//@Composable
+//fun TimeDropTarget(
+//    index: Int,
+//    selectedDate: LocalDate,
+//    timeSlot: LocalTime,
+//    addScheduledTask: (ScheduledTask) -> Unit,
+//    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
+//    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
+//    modifier: Modifier,
+//    content: @Composable() (BoxScope.(isInBound: Boolean) -> Unit)
+//) {
+//    val dragInfo = LocalDragTargetInfo.current
+//    val topOfDraggable = dragInfo.topOfDraggable
+//
+//    Box(modifier = modifier.onGloballyPositioned {
+//        it.boundsInWindow().let { rect ->
+//            if (dragInfo.isDragging && rect.contains(topOfDraggable)) {
+////                dragInfo.dataToDrop.start.value = timeSlot
+//            }
+//        }
+//    }) {
+//        //user dropped payload in this drop target
+//        if (dragInfo.currentDropTarget == index && !dragInfo.isDragging) {
+//            if (dragInfo.isRescheduling) {
+//                if (dragInfo.dataToDrop is ScheduledTask) {
+//                    updateScheduledTaskTime(
+//                        dragInfo.dataToDrop as ScheduledTask, ZonedDateTime.of(
+//                        LocalDateTime.of(selectedDate, timeSlot),
+//                        ZoneId.systemDefault()
+//                    ))
+//                } else {
+//                    updateEventDaoTime(dragInfo.dataToDrop as EventDao, ZonedDateTime.of(
+//                        LocalDateTime.of(selectedDate, timeSlot),
+//                        ZoneId.systemDefault()
+//                    ))
+//                }
+//            } else {
+//                val scheduledTask = dragInfo.dataToDrop as ScheduledTask
+//                scheduledTask.start.value = ZonedDateTime.of(
+//                    LocalDateTime.of(selectedDate, timeSlot),
+//                    ZoneId.systemDefault()
+//                )
+//                scheduledTask.end.value = scheduledTask.start.value.plusMinutes(scheduledTask.duration.intValue.toLong())
+//                addScheduledTask(scheduledTask)
+//            }
+//
+//            //after updating viewmodel, reset currentDropTarget to prevent repeated calls to viewmodel
+//            dragInfo.currentDropTarget = -1
+//        }
+//
+//        content(
+//            dragInfo.isDragging && dragInfo.currentDropTarget == index,
+//        )
+//    }
+//}
 
 @Composable
 fun CancelDropTarget(
@@ -238,14 +300,14 @@ fun CancelDropTarget(
     content: @Composable() (BoxScope.() -> Unit)
 ) {
     val dragInfo = LocalDragTargetInfo.current
-    val topOfDraggable = dragInfo.topOfDraggable
+//    val topOfDraggable = dragInfo.topOfDraggable
 
     Box(
         modifier = Modifier.onGloballyPositioned {
             it.boundsInWindow().let { rect ->
-                if (dragInfo.isDragging && rect.contains(topOfDraggable)) {
-                    highlightBottomBar()
-                }
+//                if (dragInfo.isDragging && rect.contains(topOfDraggable)) {
+//                    highlightBottomBar()
+//                }
             }
         }
     ) {

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -14,9 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -31,7 +28,8 @@ import com.jebkit.tac.data.dummyData.dummyDataTasksDaos
 import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskListDao
 import com.jebkit.tac.ui.dragAndDrop.CancelDropTarget
-import com.jebkit.tac.ui.dragAndDrop.DragTarget
+import com.jebkit.tac.ui.dragAndDrop.CalendarDragTarget
+import com.jebkit.tac.ui.dragAndDrop.TaskRowDragTarget
 import com.jebkit.tac.ui.layout.outputFormat
 import java.time.ZonedDateTime
 
@@ -124,8 +122,7 @@ fun TaskSheet(
                 ) {
                     Text(
                         modifier = Modifier.padding(8.dp),
-                        color = if (taskListDao == currentSelectedTaskListDao) colorResource(id = R.color.akiflow_app_light_purple)
-                        else colorResource(id = R.color.google_text_white),
+                        color = colorResource(id = R.color.google_text_white),
                         text = taskListDao.title.value
                     )
                 }
@@ -144,7 +141,7 @@ fun TaskSheet(
                     taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
 
-                DragTarget(
+                TaskRowDragTarget(
                     dataToDrop = ScheduledTask(
                         //STUB
                         //dropping this on the calendar will trigger a call to calendar api
