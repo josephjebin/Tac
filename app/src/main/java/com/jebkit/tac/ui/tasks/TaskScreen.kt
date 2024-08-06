@@ -28,7 +28,6 @@ import com.jebkit.tac.data.dummyData.dummyDataTasksDaos
 import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskListDao
 import com.jebkit.tac.ui.dragAndDrop.CancelDropTarget
-import com.jebkit.tac.ui.dragAndDrop.CalendarDragTarget
 import com.jebkit.tac.ui.dragAndDrop.TaskRowDragTarget
 import com.jebkit.tac.ui.layout.outputFormat
 import java.time.ZonedDateTime
@@ -42,7 +41,7 @@ fun TaskSheet(
     onTaskListDaoSelected: (TaskListDao) -> Unit,
     onTaskSelected: (TaskDao) -> Unit,
     onTaskCompleted: (TaskDao) -> Unit,
-    onTaskDrag: () -> Unit
+    closeTaskSheet: () -> Unit
 ) {
     val taskSheetModifier = when (tasksSheetState) {
         TasksSheetState.COLLAPSED -> {
@@ -158,7 +157,7 @@ fun TaskSheet(
                         duration = mutableIntStateOf(eventDurationMinutes),
                         color = taskDao.color
                     ),
-                    onTaskDrag = onTaskDrag,
+                    onTaskDrag = closeTaskSheet,
                     draggableHeight = eventHeight
                 ) {
                     TaskRow(

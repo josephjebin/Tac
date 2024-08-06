@@ -7,12 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
-import com.jebkit.tac.ui.dragAndDrop.CalendarDraggable
+import com.jebkit.tac.ui.dragAndDrop.Draggable
 import com.jebkit.tac.ui.tasks.TasksSheetState
 import java.time.LocalDate
 import java.time.ZonedDateTime
@@ -57,8 +56,8 @@ fun Calendar(
                         .verticalScroll(verticalScrollState)
                 )
 
-                CalendarDraggable()
-
+                Draggable()
+//                CalendarDraggable()
             }
         }
     }

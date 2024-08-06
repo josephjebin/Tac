@@ -1,6 +1,5 @@
 package com.jebkit.tac.ui.dragAndDrop
 
-import android.text.Layout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -29,7 +28,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -50,12 +49,13 @@ internal class DragTargetInfo {
     var headerVerticalOffset by mutableFloatStateOf(0f)
 
     var isDragging: Boolean by mutableStateOf(false)
-    var isRescheduling by mutableStateOf(true)
 
     //used for spawning the draggable at the right position
     var composableStartOffset by mutableStateOf(Offset.Zero)
+
     //used for calculating change in time
     var composableDragVerticalOffset by mutableFloatStateOf(0f)
+
     //we care about change in time by increments of 5 minutes because that's the precision used
     //for updating calendar events when dragging
     //e.g. if we dragged an event an hour up, that's 12 5-minute increments upwards,
@@ -65,7 +65,7 @@ internal class DragTargetInfo {
     //TODO: used for determining if user's pointer is in the cancel region when dragging
     var pointerPosition by mutableStateOf(Offset.Zero)
 
-//    var draggableHeight by mutableStateOf(0.dp)
+    //    var draggableHeight by mutableStateOf(0.dp)
 //    var topOfDraggable by mutableStateOf(Offset.Zero)
 //    var currentDropTarget by mutableIntStateOf(-1)
 //    var currentDropTargetTime: LocalTime by mutableStateOf(LocalTime.MIN)
@@ -99,6 +99,7 @@ internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
 @Composable
 fun RootDragInfoProvider(
     minuteVerticalOffset: Float,
+    //TODO: remove since we covert offset to local
     headerVerticalOffset: Float,
     content: @Composable() (BoxScope.() -> Unit)
 ) {
@@ -117,7 +118,7 @@ fun RootDragInfoProvider(
             Box {
                 Text(
                     text =
-                    """position: ${state.composableStartOffset}
+                    """drag: ${state.composableDragVerticalOffset}
                     """.trimMargin(),
                     color = colorResource(id = R.color.google_text_white)
                 )
@@ -134,6 +135,7 @@ fun CalendarDraggable() {
 
     Box(modifier = Modifier
         .fillMaxSize()
+        .background(Color.Transparent)
         .onGloballyPositioned {
             bounds = it.boundsInParent()
             layoutCoordinates = it
@@ -142,16 +144,17 @@ fun CalendarDraggable() {
     ) {
         if (state.isDragging) {
 //            if(state.isPointerInCancelRegion) highlight border else
-            state.timeChangeInIncrementsOfFiveMinutes = (state.composableDragVerticalOffset / state.fiveMinuteVerticalOffset).roundToInt()
+            state.timeChangeInIncrementsOfFiveMinutes =
+                (state.composableDragVerticalOffset / state.fiveMinuteVerticalOffset).roundToInt()
             Box(modifier = Modifier
                 .graphicsLayer {
-//                    val offset = (state.composableStartOffset + state.composableDragOffset)
-                    val start = layoutCoordinates?.windowToLocal(state.composableStartOffset)
+                    val verticalOffset =
+                        (state.composableStartOffset.y.plus(state.composableDragVerticalOffset))
                     alpha = 1f
                     scaleX = 1.0f
                     scaleY = 1.0f
                     translationX = 0.0f
-                    translationY = start?.y?.plus(state.composableDragVerticalOffset) ?: 0f
+                    translationY = verticalOffset
                     //.minus(295)
 //                    translationY = offset.y.minus(176f).minus(.5f * state.draggableHeight.toPx())
                 }
@@ -160,8 +163,10 @@ fun CalendarDraggable() {
                     title = state.dataToDrop.title.value,
                     description = state.dataToDrop.description.value,
                     color = state.dataToDrop.color.value,
-                    start = state.dataToDrop.start.value.toLocalTime().plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
-                    end = state.dataToDrop.end.value.toLocalTime().plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                    start = state.dataToDrop.start.value.toLocalTime()
+                        .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                    end = state.dataToDrop.end.value.toLocalTime()
+                        .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
                     modifier = state.draggableModifier
                 )
             }
@@ -175,7 +180,6 @@ fun CalendarDragTarget(
     modifier: Modifier = Modifier,
     draggableHeight: Dp,
     onTaskDrag: (() -> Unit) = {},
-//    content: @Composable () -> Unit
 ) {
     val currentState = LocalDragTargetInfo.current
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
@@ -193,14 +197,13 @@ fun CalendarDragTarget(
 
     Box(modifier = modifier
         .onGloballyPositioned {
-            currentPosition = it.positionInParent()
+            currentPosition = it.positionInWindow()
         }
         .pointerInput(Unit) {
             detectDragGesturesAfterLongPress(
                 onDragStart = {
                     onTaskDrag()
                     currentState.dataToDrop = currentData
-                    currentState.isRescheduling = true
                     currentState.composableStartOffset = currentPosition
 //                    currentState.draggableHeight = planComposableHeight
 //                    currentState.topOfDraggable = Offset(
@@ -237,15 +240,59 @@ fun CalendarDragTarget(
 }
 
 @Composable
+fun Draggable() {
+    val state = LocalDragTargetInfo.current
+    var bounds: Rect by remember { mutableStateOf(Rect(Offset.Zero, Offset.Zero)) }
+    var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
+
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.Transparent)
+        .onGloballyPositioned {
+            bounds = it.boundsInParent()
+            layoutCoordinates = it
+
+        }
+    ) {
+        if(state.isDragging) {
+//            if(state.isPointerInCancelRegion) highlight border else
+            state.timeChangeInIncrementsOfFiveMinutes =
+                (state.composableDragVerticalOffset / state.fiveMinuteVerticalOffset).roundToInt()
+            Box(modifier = Modifier
+                .graphicsLayer {
+                    val offset = layoutCoordinates?.windowToLocal(state.composableStartOffset)
+                    alpha = 1f
+                    scaleX = 1.0f
+                    scaleY = 1.0f
+                    translationX = 0.0f
+                    translationY = offset?.y?.plus(state.composableDragVerticalOffset) ?: 0f
+                }
+            ) {
+                PlanComposable(
+                    title = state.dataToDrop.title.value,
+                    description = state.dataToDrop.description.value,
+                    color = state.dataToDrop.color.value,
+                    start = state.dataToDrop.start.value.toLocalTime()
+                        .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                    end = state.dataToDrop.end.value.toLocalTime()
+                        .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                    modifier = state.draggableModifier
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun TaskRowDragTarget(
     dataToDrop: ScheduledTask,
+    //TODO: do we really need to pass modifier around like this?
     modifier: Modifier = Modifier,
     draggableHeight: Dp,
     onTaskDrag: (() -> Unit) = {},
     content: @Composable () -> Unit
 ) {
     val currentState = LocalDragTargetInfo.current
-    var currentPosition by remember { mutableStateOf(Offset.Zero) }
     var currentData by remember { mutableStateOf(dataToDrop) }
     var planComposableHeight by remember { mutableStateOf(0.dp) }
     var planComposableModifier: Modifier by remember { mutableStateOf(Modifier) }
@@ -269,23 +316,13 @@ fun TaskRowDragTarget(
                 onDragStart = {
                     onTaskDrag()
                     currentState.dataToDrop = currentData
-                    currentState.isRescheduling = false
-//                    currentState.composableStartOffset = currentPosition.y.minus(currentState.headerVerticalOffset)
-//                    currentState.composableStartOffset = currentPosition.plus(it)
-                    currentState.composableStartOffset = layoutCoordinates?.localToWindow(it) ?: Offset.Zero
-//                    currentState.draggableHeight = planComposableHeight
-//                    currentState.topOfDraggable = Offset(
-//                        (currentPosition + it).x,
-//                        (currentPosition + it).y
-//                            .minus(planComposableHeight.toPx() * .5f)
-//                            .plus(29f)
-//                    )
+                    currentState.composableStartOffset =
+                        layoutCoordinates?.localToWindow(it) ?: Offset.Zero
                     currentState.draggableModifier = planComposableModifier
                     currentState.isDragging = true
                 }, onDrag = { change, dragAmount ->
                     change.consume()
                     currentState.composableDragVerticalOffset += dragAmount.y
-//                    currentState.topOfDraggable += Offset(dragAmount.x, dragAmount.y)
                 }, onDragEnd = {
                     currentState.isDragging = false
                     currentState.composableDragVerticalOffset = 0f

@@ -94,7 +94,7 @@ fun DayHeader(selectedDate: LocalDate) {
                                 )
                             )
                         ),
-                        fontSize = 20.sp
+                        fontSize = 18.sp
                     )
                 }
 
