@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.jebkit.tac.R
+import com.jebkit.tac.constants.Constants.Companion.hourHeight
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.dummyData.dummyDataTaskListDaos
 import com.jebkit.tac.data.dummyData.dummyDataTasksDaos
@@ -76,8 +77,6 @@ fun TaskSheet(
                 RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
             )
     ) {
-        val hourHeight = 64.dp
-
         var peekArrowModifier: Modifier by remember { mutableStateOf(Modifier) }
         //Peek Arrow
         CancelDropTarget(
@@ -157,7 +156,7 @@ fun TaskSheet(
                         duration = mutableIntStateOf(eventDurationMinutes),
                         color = taskDao.color
                     ),
-                    onTaskDrag = closeTaskSheet,
+                    closeTaskSheet = closeTaskSheet,
                     draggableHeight = eventHeight
                 ) {
                     TaskRow(

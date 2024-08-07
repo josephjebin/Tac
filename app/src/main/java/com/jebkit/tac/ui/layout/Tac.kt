@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jebkit.tac.MyBottomBar
 import com.jebkit.tac.R
+import com.jebkit.tac.constants.Constants.Companion.hourHeight
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.tasks.TaskDao
@@ -98,16 +99,17 @@ fun TasksAndCalendarScreen(
     val tasksSheetState = rememberSaveable { mutableStateOf(TasksSheetState.COLLAPSED) }
     var minuteVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
     var headerVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
+    val calendarScrollState = rememberScrollState()
 
     RootDragInfoProvider(
         minuteVerticalOffset = minuteVerticalOffset,
-        headerVerticalOffset = headerVerticalOffset
+        headerVerticalOffset = headerVerticalOffset,
+        calendarScrollState = calendarScrollState
     ) {
         Scaffold(
             topBar = { DayHeader(selectedDate) },
             bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
         ) {
-            val hourHeight = 64.dp
             //invisible boxes to calculate one hour's offset
             Box {
                 Column {
@@ -125,7 +127,6 @@ fun TasksAndCalendarScreen(
                 verticalArrangement = Arrangement.Bottom
             ) {
                 //CALENDAR
-                val verticalScrollState = rememberScrollState()
                 if (tasksSheetState.value != TasksSheetState.EXPANDED) {
                     Box(
                         modifier = Modifier
@@ -138,7 +139,7 @@ fun TasksAndCalendarScreen(
                             updateHeaderVerticalOffset = { verticalOffset: Float ->
                                 headerVerticalOffset = verticalOffset
                             },
-                            verticalScrollState = verticalScrollState,
+                            verticalScrollState = calendarScrollState,
                             selectedDate = selectedDate,
                             eventDaos = eventDaos,
                             scheduledTasks = scheduledTasks,

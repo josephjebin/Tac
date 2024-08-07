@@ -1,6 +1,7 @@
 package com.jebkit.tac.ui.dragAndDrop
 
 import android.util.Log
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -34,6 +35,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.jebkit.tac.R
+import com.jebkit.tac.constants.Constants.Companion.hourHeight
 import com.jebkit.tac.data.calendar.Plan
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.calendar.PlanComposable
@@ -62,6 +64,8 @@ internal class DragTargetInfo {
     //e.g. if we dragged an event an hour up, that's 12 5-minute increments upwards,
     //so timeChangeInIncrementsOfFiveMinutes would be -12
     var timeChangeInIncrementsOfFiveMinutes by mutableIntStateOf(0)
+
+    var calendarScrollState: ScrollState? by mutableStateOf(null)
 
     //TODO: used for determining if user's pointer is in the cancel region when dragging
     var pointerPosition by mutableStateOf(Offset.Zero)
@@ -102,6 +106,7 @@ fun RootDragInfoProvider(
     minuteVerticalOffset: Float,
     //TODO: remove since we covert offset to local
     headerVerticalOffset: Float,
+    calendarScrollState: ScrollState,
     content: @Composable() (BoxScope.() -> Unit)
 ) {
     val state = remember { DragTargetInfo() }
@@ -111,6 +116,7 @@ fun RootDragInfoProvider(
         state.minuteVerticalOffset = minuteVerticalOffset
         state.fiveMinuteVerticalOffset = 5 * minuteVerticalOffset
         state.headerVerticalOffset = headerVerticalOffset
+        state.calendarScrollState = calendarScrollState
 
         Box()
         {
@@ -147,10 +153,10 @@ fun CalendarDraggable() {
 //            if(state.isPointerInCancelRegion) highlight border else
             state.timeChangeInIncrementsOfFiveMinutes =
                 (state.composableDragVerticalOffset / state.fiveMinuteVerticalOffset).roundToInt()
+            val verticalOffset =
+                (state.composableStartOffset.y.plus(state.composableDragVerticalOffset))
             Box(modifier = Modifier
                 .graphicsLayer {
-                    val verticalOffset =
-                        (state.composableStartOffset.y.plus(state.composableDragVerticalOffset))
                     alpha = 1f
                     scaleX = 1.0f
                     scaleY = 1.0f
@@ -290,7 +296,7 @@ fun TaskRowDragTarget(
     //TODO: do we really need to pass modifier around like this?
     modifier: Modifier = Modifier,
     draggableHeight: Dp,
-    onTaskDrag: (() -> Unit) = {},
+    closeTaskSheet: (() -> Unit) = {},
     content: @Composable () -> Unit
 ) {
     val state = LocalDragTargetInfo.current
@@ -314,11 +320,16 @@ fun TaskRowDragTarget(
         .pointerInput(Unit) {
             detectDragGesturesAfterLongPress(
                 onDragStart = {
-                    onTaskDrag()
-                    Log.e("DRAG", "" +
-                            "duration: ${currentData.duration}" +
-                            ", div by 2: ${currentData.duration.intValue.div(2)}" +
-                            ", minuteOffset: ${state.minuteVerticalOffset}")
+                    val dpPerMinute: Dp = hourHeight / 60
+                    val amountScrolledInMinutes = (state.calendarScrollState?.value?.toDp())?.div(dpPerMinute)
+
+                    closeTaskSheet()
+                    Log.e(
+                        "DRAG", "" +
+                                "duration: ${currentData.duration}" +
+                                ", div by 2: ${currentData.duration.intValue.div(2)}" +
+                                ", minuteOffset: ${state.minuteVerticalOffset}"
+                    )
                     state.dataToDrop = currentData
                     state.composableStartOffset =
                         layoutCoordinates
@@ -326,7 +337,9 @@ fun TaskRowDragTarget(
                             ?.minus(
                                 Offset(
                                     x = 0f,
-                                    y = currentData.duration.intValue.div(2).times(state.minuteVerticalOffset)
+                                    y = currentData.duration.intValue
+                                        .div(2)
+                                        .times(state.minuteVerticalOffset)
                                 )
                             ) ?: Offset.Zero
                     state.draggableModifier = planComposableModifier
