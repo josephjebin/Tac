@@ -1,5 +1,6 @@
 package com.jebkit.tac.ui.dragAndDrop
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -292,11 +293,10 @@ fun TaskRowDragTarget(
     onTaskDrag: (() -> Unit) = {},
     content: @Composable () -> Unit
 ) {
-    val currentState = LocalDragTargetInfo.current
+    val state = LocalDragTargetInfo.current
     var currentData by remember { mutableStateOf(dataToDrop) }
     var planComposableHeight by remember { mutableStateOf(0.dp) }
     var planComposableModifier: Modifier by remember { mutableStateOf(Modifier) }
-
     var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
 
     currentData = dataToDrop
@@ -315,21 +315,32 @@ fun TaskRowDragTarget(
             detectDragGesturesAfterLongPress(
                 onDragStart = {
                     onTaskDrag()
-                    currentState.dataToDrop = currentData
-                    currentState.composableStartOffset =
-                        layoutCoordinates?.localToWindow(it) ?: Offset.Zero
-                    currentState.draggableModifier = planComposableModifier
-                    currentState.isDragging = true
+                    Log.e("DRAG", "" +
+                            "duration: ${currentData.duration}" +
+                            ", div by 2: ${currentData.duration.intValue.div(2)}" +
+                            ", minuteOffset: ${state.minuteVerticalOffset}")
+                    state.dataToDrop = currentData
+                    state.composableStartOffset =
+                        layoutCoordinates
+                            ?.localToWindow(it)
+                            ?.minus(
+                                Offset(
+                                    x = 0f,
+                                    y = currentData.duration.intValue.div(2).times(state.minuteVerticalOffset)
+                                )
+                            ) ?: Offset.Zero
+                    state.draggableModifier = planComposableModifier
+                    state.isDragging = true
                 }, onDrag = { change, dragAmount ->
                     change.consume()
-                    currentState.composableDragVerticalOffset += dragAmount.y
+                    state.composableDragVerticalOffset += dragAmount.y
                 }, onDragEnd = {
-                    currentState.isDragging = false
-                    currentState.composableDragVerticalOffset = 0f
+                    state.isDragging = false
+                    state.composableDragVerticalOffset = 0f
                     //logic to update event time
                 }, onDragCancel = {
-                    currentState.isDragging = false
-                    currentState.composableDragVerticalOffset = 0f
+                    state.isDragging = false
+                    state.composableDragVerticalOffset = 0f
                 })
         }
     ) {
