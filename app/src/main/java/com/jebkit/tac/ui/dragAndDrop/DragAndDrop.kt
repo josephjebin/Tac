@@ -1,7 +1,5 @@
 package com.jebkit.tac.ui.dragAndDrop
 
-import android.icu.util.TimeZone
-import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -37,7 +35,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.jebkit.tac.R
 import com.jebkit.tac.constants.Constants.Companion.dpPerMinute
-import com.jebkit.tac.constants.Constants.Companion.hourHeight
 import com.jebkit.tac.data.calendar.Plan
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.calendar.PlanComposable
@@ -55,7 +52,7 @@ internal class DragTargetInfo {
     var headerVerticalOffset by mutableFloatStateOf(0f)
 
     var isDragging: Boolean by mutableStateOf(false)
-    var dragFromTaskSheetStarted by mutableStateOf(false)
+    var dragStarted by mutableStateOf(false)
 
     //used for spawning the draggable at the right position
     var composableStartOffset by mutableStateOf(Offset.Zero)
@@ -289,8 +286,13 @@ fun Draggable() {
                     modifier = state.draggableModifier
                 )
             }
-        } else if (state.dragFromTaskSheetStarted) {
+        } else if (state.dragStarted) {
+            val halfComposableHeightOffset = state.duration.intValue
+                .div(2)
+                .times(state.minuteVerticalOffset)
 
+
+            state.isDragging = true
         }
     }
 }
@@ -332,9 +334,7 @@ fun TaskRowDragTarget(
                         (state.calendarScrollState?.value?.toDp())?.div(dpPerMinute)
 
                     val pointerWindowOffset = layoutCoordinates?.localToWindow(it)
-                    val halfComposableHeightOffset = currentData.duration.intValue
-                        .div(2)
-                        .times(state.minuteVerticalOffset)
+
                     val composableWindowOffset = pointerWindowOffset!!.minus(
                         Offset(
                             x = 0f,
@@ -360,9 +360,8 @@ fun TaskRowDragTarget(
 //                                )
 //                            ) ?: Offset.Zero
                     state.composableStartOffset = composableWindowOffset
-                    state.dragFromTaskSheetStarted = true
+                    state.dragStarted = true
                 }, onDrag = { change, dragAmount ->
-                    state.isDragging = true
                     change.consume()
                     state.composableDragVerticalOffset += dragAmount.y
                 }, onDragEnd = {
