@@ -78,7 +78,7 @@ class TasksAndCalendarViewModel(
                     )
                 })
             }.also {
-                _uiState.value.currentSelectedTaskListDao.value =
+                if(_uiState.value.taskListDaos.values.isNotEmpty()) _uiState.value.currentSelectedTaskListDao.value =
                     _uiState.value.taskListDaos.values.toList()[0]
             }
 

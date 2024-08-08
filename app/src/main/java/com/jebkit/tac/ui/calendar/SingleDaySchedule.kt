@@ -1,7 +1,5 @@
 package com.jebkit.tac.ui.calendar
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
@@ -17,25 +15,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
-import com.jebkit.tac.ui.dragAndDrop.DragTarget
-import com.jebkit.tac.ui.dragAndDrop.TimeDropTarget
-import com.jebkit.tac.ui.tasks.TasksSheetState
-import java.time.LocalDate
+import com.jebkit.tac.ui.dragAndDrop.CalendarDragTarget
 import java.time.LocalTime
-import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 @Composable
 fun SingleDaySchedule(
-    selectedDate: LocalDate,
     eventDaos: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
     hourHeight: Dp,
-    tasksSheetState: TasksSheetState,
-    addScheduledTask: (ScheduledTask) -> Unit,
-    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
-    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     //TODO: light and dark themes
@@ -52,20 +41,11 @@ fun SingleDaySchedule(
                         .height(eventHeight)
                         .fillMaxWidth()
 
-                    DragTarget(
+                    CalendarDragTarget(
                         dataToDrop = eventDao,
                         modifier = planComposableModifier,
                         draggableHeight = eventHeight,
-                        isRescheduling = true
-                    ) {
-                        PlanComposable(
-                            title = eventDao.title.value,
-                            description = eventDao.description.value,
-                            color = eventDao.color.value,
-                            start = eventDao.start.value.toLocalTime(),
-                            end = eventDao.end.value.toLocalTime()
-                        )
-                    }
+                    )
                 }
 
             scheduledTasks
@@ -77,31 +57,12 @@ fun SingleDaySchedule(
                         .height(taskHeight)
                         .fillMaxWidth()
 
-                    DragTarget(
+                    CalendarDragTarget(
                         dataToDrop = scheduledTask,
                         modifier = planComposableModifier,
                         draggableHeight = taskHeight,
-                        isRescheduling = true
-                    ) {
-                        PlanComposable(
-                            title = scheduledTask.title.value,
-                            description = scheduledTask.description.value,
-                            color = scheduledTask.color.value,
-                            start = scheduledTask.start.value.toLocalTime(),
-                            end = scheduledTask.end.value.toLocalTime()
-                        )
-                    }
+                    )
                 }
-
-            if (tasksSheetState == TasksSheetState.COLLAPSED) {
-                DropTargets(
-                    fiveMinuteHeight = hourHeight / 12,
-                    selectedDate = selectedDate,
-                    addScheduledTask = addScheduledTask,
-                    updateScheduledTaskTime = updateScheduledTaskTime,
-                    updateEventDaoTime = updateEventDaoTime
-                )
-            }
         },
         modifier = modifier
             .drawBehind {
@@ -127,37 +88,6 @@ fun SingleDaySchedule(
                 val placeable = measurable.measure(constraints.copy())
                 placeable.place(0, eventY)
             }
-        }
-    }
-}
-
-@Composable
-fun DropTargets(
-    fiveMinuteHeight: Dp,
-    selectedDate: LocalDate,
-    addScheduledTask: (ScheduledTask) -> Unit,
-    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
-    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit
-) {
-    repeat(288) {
-        val timeSlot: LocalTime = LocalTime.MIN.plusMinutes(it * 5L)
-
-        TimeDropTarget(
-            index = it,
-            timeSlot = timeSlot,
-            selectedDate = selectedDate,
-            addScheduledTask = addScheduledTask,
-            updateScheduledTaskTime = updateScheduledTaskTime,
-            updateEventDaoTime = updateEventDaoTime,
-            modifier = Modifier
-                .startData(timeSlot)
-        ) { isCurrentDropTarget ->
-            Box(
-                modifier = Modifier
-                    .height(fiveMinuteHeight)
-                    .fillMaxWidth()
-                    .background(if (isCurrentDropTarget) Color.LightGray else Color.Transparent)
-            )
         }
     }
 }

@@ -68,15 +68,15 @@ fun DayHeader(selectedDate: LocalDate) {
                         shape = CircleShape,
                         border = BorderStroke(3.dp, Color.Black),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            backgroundColor = colorResource(id = R.color.akiflow_dark_purple)
+                            backgroundColor = colorResource(id = R.color.google_divider_gray)
                         ),
                         contentPadding = PaddingValues(0.dp),
                         onClick = { /*TODO*/ }
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.profile_picture_placeholder),
-                            tint = colorResource(id = R.color.surface_dark_gray),
-                            modifier = Modifier.size(60.dp),
+                            painter = painterResource(id = R.drawable.profile_pic_placeholder),
+                            tint = colorResource(id = R.color.akiflow_dark_purple),
+                            modifier = Modifier.size(40.dp),
                             contentDescription = "profile"
                         )
                     }
@@ -94,7 +94,7 @@ fun DayHeader(selectedDate: LocalDate) {
                                 )
                             )
                         ),
-                        fontSize = 20.sp
+                        fontSize = 18.sp
                     )
                 }
 

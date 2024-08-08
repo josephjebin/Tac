@@ -5,24 +5,29 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jebkit.tac.MyBottomBar
 import com.jebkit.tac.R
+import com.jebkit.tac.constants.Constants.Companion.hourHeight
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.tasks.TaskDao
@@ -48,17 +53,17 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
             selectedDate = tasksAndCalendarState.minSelectedDate.value,
             eventDaos = tasksAndCalendarState.eventDaos.values.toList(),
             scheduledTasks = tasksAndCalendarState.scheduledTasks.values.toList(),
-            addScheduledTask = { scheduledTask: ScheduledTask ->
-                tasksAndCalendarViewModel.addScheduledTask(
-                    scheduledTask
-                )
-            },
-            updateScheduledTaskTime = { scheduledTask: ScheduledTask, newStartTime: ZonedDateTime ->
-                tasksAndCalendarViewModel.updateScheduledTaskStartTime(scheduledTask, newStartTime)
-            },
-            updateEventDaoTime = { eventDao: EventDao, newStartTime: ZonedDateTime ->
-                tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
-            },
+//            addScheduledTask = { scheduledTask: ScheduledTask ->
+//                tasksAndCalendarViewModel.addScheduledTask(
+//                    scheduledTask
+//                )
+//            },
+//            updateScheduledTaskTime = { scheduledTask: ScheduledTask, newStartTime: ZonedDateTime ->
+//                tasksAndCalendarViewModel.updateScheduledTaskStartTime(scheduledTask, newStartTime)
+//            },
+//            updateEventDaoTime = { eventDao: EventDao, newStartTime: ZonedDateTime ->
+//                tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
+//            },
             taskListDaos = tasksAndCalendarState.taskListDaos.values.toList(),
             taskDaos = tasksAndCalendarState.taskDaos.values.toList()
                 .filter { taskDao ->
@@ -81,9 +86,6 @@ fun TasksAndCalendarScreen(
     selectedDate: LocalDate,
     eventDaos: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
-    addScheduledTask: (ScheduledTask) -> Unit,
-    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
-    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     taskListDaos: List<TaskListDao>,
     taskDaos: List<TaskDao>,
     currentSelectedTaskListDao: TaskListDao?,
@@ -91,11 +93,27 @@ fun TasksAndCalendarScreen(
     onTaskDaoSelected: (TaskDao) -> Unit
 ) {
     val tasksSheetState = rememberSaveable { mutableStateOf(TasksSheetState.COLLAPSED) }
-    Scaffold(
-        topBar = { DayHeader(selectedDate) },
-        bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
+    var minuteVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
+    val calendarScrollState = rememberScrollState()
+
+    RootDragInfoProvider(
+        verticalOffsetPerMinute = minuteVerticalOffset,
+        calendarScrollState = calendarScrollState
     ) {
-        RootDragInfoProvider {
+        Scaffold(
+            topBar = { DayHeader(selectedDate) },
+            bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
+        ) {
+            //invisible boxes to calculate one hour's offset
+            Box {
+                Column {
+                    Box(modifier = Modifier.height(hourHeight))
+                    Box(modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
+                        minuteVerticalOffset = layoutCoordinates.positionInParent().y.div(60)
+                    })
+                }
+            }
+
             Column(
                 modifier = Modifier
                     .background(color = Color.Black)
@@ -103,7 +121,6 @@ fun TasksAndCalendarScreen(
                 verticalArrangement = Arrangement.Bottom
             ) {
                 //CALENDAR
-                val verticalScrollState = rememberScrollState()
                 if (tasksSheetState.value != TasksSheetState.EXPANDED) {
                     Box(
                         modifier = Modifier
@@ -112,17 +129,12 @@ fun TasksAndCalendarScreen(
                             .background(color = colorResource(id = R.color.background_dark_gray))
                     ) {
                         Calendar(
-                            verticalScrollState = verticalScrollState,
+                            hourHeight = hourHeight,
+                            verticalScrollState = calendarScrollState,
                             selectedDate = selectedDate,
                             eventDaos = eventDaos,
-                            scheduledTasks = scheduledTasks,
-                            tasksSheetState = tasksSheetState.value,
-                            addScheduledTask = addScheduledTask,
-                            updateScheduledTaskTime = updateScheduledTaskTime,
-                            updateEventDaoTime = updateEventDaoTime,
+                            scheduledTasks = scheduledTasks
                         )
-
-
                     }
                 }
 
@@ -136,11 +148,12 @@ fun TasksAndCalendarScreen(
                     onTaskSelected = onTaskDaoSelected,
                     onTaskCompleted = { taskDao: TaskDao ->
                     },
-                    onTaskDrag = { tasksSheetState.value = TasksSheetState.COLLAPSED },
+                    closeTaskSheet = { tasksSheetState.value = TasksSheetState.COLLAPSED },
                 )
             }
-        }
 
+
+        }
     }
 }
 
@@ -151,13 +164,10 @@ fun TacPreview() {
         selectedDate = LocalDate.now(),
         eventDaos = listOf(),
         scheduledTasks = listOf(),
-        addScheduledTask = {},
-        updateScheduledTaskTime = { ScheduledTask, ZonedDateTime -> },
-        updateEventDaoTime = { EventDao, ZonedDateTime -> },
         taskListDaos = listOf(),
         taskDaos = listOf(),
         currentSelectedTaskListDao = null,
-        onTaskListDaoSelected = { (TaskListDao) ->  },
-        onTaskDaoSelected = { (TaskDao) ->  }
+        onTaskListDaoSelected = { (TaskListDao) -> },
+        onTaskDaoSelected = { (TaskDao) -> }
     )
 }

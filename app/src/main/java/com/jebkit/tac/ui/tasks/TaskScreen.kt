@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -14,9 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -25,13 +22,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.jebkit.tac.R
+import com.jebkit.tac.constants.Constants.Companion.hourHeight
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.dummyData.dummyDataTaskListDaos
 import com.jebkit.tac.data.dummyData.dummyDataTasksDaos
 import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskListDao
-import com.jebkit.tac.ui.dragAndDrop.CancelDropTarget
-import com.jebkit.tac.ui.dragAndDrop.DragTarget
+import com.jebkit.tac.ui.dragAndDrop.TaskRowDragTarget
 import com.jebkit.tac.ui.layout.outputFormat
 import java.time.ZonedDateTime
 
@@ -44,7 +41,7 @@ fun TaskSheet(
     onTaskListDaoSelected: (TaskListDao) -> Unit,
     onTaskSelected: (TaskDao) -> Unit,
     onTaskCompleted: (TaskDao) -> Unit,
-    onTaskDrag: () -> Unit
+    closeTaskSheet: () -> Unit
 ) {
     val taskSheetModifier = when (tasksSheetState) {
         TasksSheetState.COLLAPSED -> {
@@ -79,28 +76,22 @@ fun TaskSheet(
                 RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
             )
     ) {
-        val hourHeight = 64.dp
-
         var peekArrowModifier: Modifier by remember { mutableStateOf(Modifier) }
         //Peek Arrow
-        CancelDropTarget(
-            highlightBottomBar = { peekArrowModifier = Modifier.border(16.dp, Color.Red) }
-        ) {
-            Box(modifier = peekArrowModifier
-                .height(48.dp)
-                .fillMaxWidth()
-                .clickable {
+        Box(modifier = peekArrowModifier
+            .height(48.dp)
+            .fillMaxWidth()
+            .clickable {
 
-                }
-            ) {
-                Image(
-                    painterResource(id = R.drawable.caret_down),
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .rotate(if (tasksSheetState == TasksSheetState.COLLAPSED) 180f else 0f),
-                    contentDescription = "Task Sheet Peek Arrow"
-                )
             }
+        ) {
+            Image(
+                painterResource(id = R.drawable.caret_down),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .rotate(if (tasksSheetState == TasksSheetState.COLLAPSED) 180f else 0f),
+                contentDescription = "Task Sheet Peek Arrow"
+            )
         }
 
         //projects
@@ -124,8 +115,7 @@ fun TaskSheet(
                 ) {
                     Text(
                         modifier = Modifier.padding(8.dp),
-                        color = if (taskListDao == currentSelectedTaskListDao) colorResource(id = R.color.akiflow_app_light_purple)
-                        else colorResource(id = R.color.google_text_white),
+                        color = colorResource(id = R.color.google_text_white),
                         text = taskListDao.title.value
                     )
                 }
@@ -144,7 +134,7 @@ fun TaskSheet(
                     taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
 
-                DragTarget(
+                TaskRowDragTarget(
                     dataToDrop = ScheduledTask(
                         //STUB
                         //dropping this on the calendar will trigger a call to calendar api
@@ -161,8 +151,7 @@ fun TaskSheet(
                         duration = mutableIntStateOf(eventDurationMinutes),
                         color = taskDao.color
                     ),
-                    isRescheduling = false,
-                    onTaskDrag = onTaskDrag,
+                    closeTaskSheet = closeTaskSheet,
                     draggableHeight = eventHeight
                 ) {
                     TaskRow(
@@ -211,7 +200,7 @@ fun TaskRow(
                 .align(Alignment.CenterVertically)
                 .weight(1f)
                 .fillMaxWidth(),
-            color = colorResource(id = R.color.google_text_white),
+            color = colorResource(id = R.color.google_text_gray),
             text = taskDao.title.value,
             overflow = TextOverflow.Ellipsis
         )
