@@ -41,10 +41,11 @@ fun SingleDaySchedule(
                         .height(eventHeight)
                         .fillMaxWidth()
 
+                    //must pass modifier to drag target because it's used to pass start data to the layout
                     CalendarDragTarget(
-                        dataToDrop = eventDao,
                         modifier = planComposableModifier,
-//                        draggableHeight = eventHeight,
+                        dataToDrop = eventDao,
+                        draggableHeight = eventHeight,
                     )
                 }
 
@@ -57,10 +58,11 @@ fun SingleDaySchedule(
                         .height(taskHeight)
                         .fillMaxWidth()
 
+                    //must pass modifier to drag target because it's used to pass start data to the layout
                     CalendarDragTarget(
                         dataToDrop = scheduledTask,
                         modifier = planComposableModifier,
-//                        draggableHeight = taskHeight,
+                        draggableHeight = taskHeight,
                     )
                 }
         },
