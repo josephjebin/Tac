@@ -27,8 +27,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInParent
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
@@ -147,7 +145,7 @@ fun CalendarDragTarget(
         .border(1.dp, Color.Blue)
 
     Box(modifier = modifier
-        .onGloballyPositioned {
+        .onPlaced {
             layoutCoordinates = it
             currentPosition = it.positionInWindow()
         }
@@ -315,7 +313,7 @@ fun TaskRowDragTarget(
         .border(1.dp, Color.Blue)
 
     Box(modifier = modifier
-        .onGloballyPositioned {
+        .onPlaced {
             layoutCoordinates = it
         }
         .pointerInput(Unit) {
