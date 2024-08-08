@@ -36,7 +36,6 @@ import java.time.ZonedDateTime
 @Composable
 fun TaskSheet(
     tasksSheetState: TasksSheetState,
-    isDragging: Boolean,
     taskListDaos: List<TaskListDao>,
     taskDaos: List<TaskDao>,
     currentSelectedTaskListDao: TaskListDao?,
@@ -45,7 +44,7 @@ fun TaskSheet(
     onTaskCompleted: (TaskDao) -> Unit,
     closeTaskSheet: () -> Unit
 ) {
-    var taskSheetModifier = when (tasksSheetState) {
+    val taskSheetModifier = when (tasksSheetState) {
         TasksSheetState.COLLAPSED -> {
             Modifier
                 .fillMaxWidth()
@@ -64,48 +63,36 @@ fun TaskSheet(
         }
     }
 
-    if(!isDragging) taskSheetModifier = taskSheetModifier.border(
-        BorderStroke(2.dp, Color.Black),
-        RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
-    )
-
     Column(
         modifier = taskSheetModifier
             .fillMaxHeight()
             .fillMaxWidth()
+            .border(
+                BorderStroke(2.dp, Color.Black),
+                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+            )
             .background(
                 color = colorResource(id = R.color.surface_dark_gray),
                 RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
             )
     ) {
-        if(isDragging) {
-            Divider(
-                color = Color.Black,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(2.dp)
-            )
+        //Peek Arrow
+        Box(modifier = Modifier
+            .height(taskSheetPeekHeight)
+            .fillMaxWidth()
+            .clickable {
 
-            Box(modifier = Modifier.fillMaxHeight())
-        }
-        else {
-            //Peek Arrow
-            Box(modifier = Modifier
-                .height(taskSheetPeekHeight)
-                .fillMaxWidth()
-                .clickable {
-
-                }
-            ) {
-                Image(
-                    painterResource(id = R.drawable.caret_down),
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .rotate(if (tasksSheetState == TasksSheetState.COLLAPSED) 180f else 0f),
-                    contentDescription = "Task Sheet Peek Arrow"
-                )
             }
+        ) {
+            Image(
+                painterResource(id = R.drawable.caret_down),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .rotate(if (tasksSheetState == TasksSheetState.COLLAPSED) 180f else 0f),
+                contentDescription = "Task Sheet Peek Arrow"
+            )
         }
+
 
         //projects
         Row(
@@ -276,7 +263,6 @@ fun TaskSheetPreview_Dragging() {
     }
     TaskSheet(
         tasksSheetState = tasksSheetState,
-        isDragging = true,
         taskListDaos = dummyDataTaskListDaos(),
         taskDaos = dummyDataTasksDaos(),
         currentSelectedTaskListDao = dummyDataTaskListDaos()[0],
@@ -294,7 +280,6 @@ fun TaskSheetPreview_NotDragging() {
     }
     TaskSheet(
         tasksSheetState = tasksSheetState,
-        isDragging = false,
         taskListDaos = dummyDataTaskListDaos(),
         taskDaos = dummyDataTasksDaos(),
         currentSelectedTaskListDao = dummyDataTaskListDaos()[0],

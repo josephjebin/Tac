@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -27,6 +28,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jebkit.tac.MyBottomBar
 import com.jebkit.tac.R
@@ -111,7 +113,6 @@ fun TasksAndCalendarScreen(
             bottomBar = {
                 MyBottomBar(
                     tasksSheetState = tasksSheetState,
-                    isDragging = isDragging
                 )
             }
         ) {
@@ -152,7 +153,6 @@ fun TasksAndCalendarScreen(
                 //TASKS SHEET
                 TaskSheet(
                     tasksSheetState = tasksSheetState.value,
-                    isDragging = isDragging,
                     taskListDaos = taskListDaos,
                     taskDaos = taskDaos,
                     currentSelectedTaskListDao = currentSelectedTaskListDao,
@@ -173,10 +173,20 @@ fun TasksAndCalendarScreen(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
+                    .height(96.dp)
+                    .background(colorResource(id = R.color.surface_dark_gray))
             ) {
-                Text(
-                    text = "DRAG AREA WHOOOO"
-                )
+                Column {
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(2.dp),
+                        color = Color.Black
+                    )
+                    Text(
+                        text = "DRAG AREA WHOOOO"
+                    )
+                }
             }
         }
     }

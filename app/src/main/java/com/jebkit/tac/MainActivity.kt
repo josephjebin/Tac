@@ -383,7 +383,6 @@ fun retrievePermissions(context: Context): Array<String?> {
 @Composable
 fun MyBottomBar(
     tasksSheetState: MutableState<TasksSheetState>,
-    isDragging: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -391,53 +390,51 @@ fun MyBottomBar(
             .height(48.dp)
             .background(colorResource(R.color.surface_dark_gray))
     ) {
-        if (!isDragging) {
-            Log.e("BOTTOM", "should be showing bar")
-            //CALENDAR BUTTON
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .weight(1.0f)
-                    .height(48.dp)
-                    .clickable {
-                        tasksSheetState.value = COLLAPSED
-                    }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.round_calendar_today_24),
-                    tint = colorResource(id = R.color.google_text_gray),
-                    contentDescription = "Calendar button"
-                )
-            }
-
-            Divider(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(2.dp),
-                color = Color.Black,
-                thickness = 2.dp
+        //CALENDAR BUTTON
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .weight(1.0f)
+                .height(48.dp)
+                .clickable {
+                    tasksSheetState.value = COLLAPSED
+                }
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.round_calendar_today_24),
+                tint = colorResource(id = R.color.google_text_gray),
+                contentDescription = "Calendar button"
             )
-
-            //TO-DO LIST BUTTON
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .weight(1.0f)
-                    .height(48.dp)
-                    .clickable {
-                        if (tasksSheetState.value == COLLAPSED || tasksSheetState.value == PARTIALLY_EXPANDED)
-                            tasksSheetState.value = EXPANDED
-                        else
-                            tasksSheetState.value = PARTIALLY_EXPANDED
-                    }
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.round_task_24),
-                    tint = colorResource(id = R.color.google_text_gray),
-                    contentDescription = "Tasks button"
-                )
-            }
         }
+
+        Divider(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(2.dp),
+            color = Color.Black,
+            thickness = 2.dp
+        )
+
+        //TO-DO LIST BUTTON
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .weight(1.0f)
+                .height(48.dp)
+                .clickable {
+                    if (tasksSheetState.value == COLLAPSED || tasksSheetState.value == PARTIALLY_EXPANDED)
+                        tasksSheetState.value = EXPANDED
+                    else
+                        tasksSheetState.value = PARTIALLY_EXPANDED
+                }
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.round_task_24),
+                tint = colorResource(id = R.color.google_text_gray),
+                contentDescription = "Tasks button"
+            )
+        }
+
     }
 }
 
@@ -445,6 +442,8 @@ fun MyBottomBar(
 @Composable
 fun MyBottomBarPreview() {
     TacTheme() {
-        MyBottomBar(tasksSheetState = remember { mutableStateOf(TasksSheetState.COLLAPSED) }, isDragging = false)
+        MyBottomBar(
+            tasksSheetState = remember { mutableStateOf(COLLAPSED) }
+        )
     }
 }
