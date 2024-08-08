@@ -110,6 +110,7 @@ fun RootDragInfoProvider(
     verticalOffsetPerMinute: Float,
     calendarScrollState: ScrollState,
     updateIsDragging: (Boolean) -> Unit,
+    updateIsDraggingInsideCancelRegion: (Boolean) -> Unit,
     content: @Composable() (BoxScope.() -> Unit)
 ) {
     val state = remember { DragTargetInfo() }
@@ -121,6 +122,8 @@ fun RootDragInfoProvider(
         state.calendarScrollState = calendarScrollState
 
         updateIsDragging(state.isDragging)
+        updateIsDraggingInsideCancelRegion(state.draggingInsideCancelBoundary)
+
         Box(
             modifier = Modifier.onPlaced {
                 val bottomOfScreen = it.boundsInWindow().bottom
@@ -228,7 +231,6 @@ fun Draggable() {
             if(state.windowPointerOffset.y + state.dragVerticalOffset >= state.dragCancelBoundaryOffset) {
                 //communicate up to highlight drag cancel area
                 state.draggingInsideCancelBoundary = true
-                Log.e("DND", "went out!")
             } else {
                 //communicate up to stop highlighting drag cancel area
                 state.draggingInsideCancelBoundary = false
