@@ -53,17 +53,17 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
             selectedDate = tasksAndCalendarState.minSelectedDate.value,
             eventDaos = tasksAndCalendarState.eventDaos.values.toList(),
             scheduledTasks = tasksAndCalendarState.scheduledTasks.values.toList(),
-            addScheduledTask = { scheduledTask: ScheduledTask ->
-                tasksAndCalendarViewModel.addScheduledTask(
-                    scheduledTask
-                )
-            },
-            updateScheduledTaskTime = { scheduledTask: ScheduledTask, newStartTime: ZonedDateTime ->
-                tasksAndCalendarViewModel.updateScheduledTaskStartTime(scheduledTask, newStartTime)
-            },
-            updateEventDaoTime = { eventDao: EventDao, newStartTime: ZonedDateTime ->
-                tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
-            },
+//            addScheduledTask = { scheduledTask: ScheduledTask ->
+//                tasksAndCalendarViewModel.addScheduledTask(
+//                    scheduledTask
+//                )
+//            },
+//            updateScheduledTaskTime = { scheduledTask: ScheduledTask, newStartTime: ZonedDateTime ->
+//                tasksAndCalendarViewModel.updateScheduledTaskStartTime(scheduledTask, newStartTime)
+//            },
+//            updateEventDaoTime = { eventDao: EventDao, newStartTime: ZonedDateTime ->
+//                tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
+//            },
             taskListDaos = tasksAndCalendarState.taskListDaos.values.toList(),
             taskDaos = tasksAndCalendarState.taskDaos.values.toList()
                 .filter { taskDao ->
@@ -86,9 +86,6 @@ fun TasksAndCalendarScreen(
     selectedDate: LocalDate,
     eventDaos: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
-    addScheduledTask: (ScheduledTask) -> Unit,
-    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
-    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     taskListDaos: List<TaskListDao>,
     taskDaos: List<TaskDao>,
     currentSelectedTaskListDao: TaskListDao?,
@@ -136,11 +133,7 @@ fun TasksAndCalendarScreen(
                             verticalScrollState = calendarScrollState,
                             selectedDate = selectedDate,
                             eventDaos = eventDaos,
-                            scheduledTasks = scheduledTasks,
-                            tasksSheetState = tasksSheetState.value,
-                            addScheduledTask = addScheduledTask,
-                            updateScheduledTaskTime = updateScheduledTaskTime,
-                            updateEventDaoTime = updateEventDaoTime,
+                            scheduledTasks = scheduledTasks
                         )
                     }
                 }
@@ -171,9 +164,6 @@ fun TacPreview() {
         selectedDate = LocalDate.now(),
         eventDaos = listOf(),
         scheduledTasks = listOf(),
-        addScheduledTask = {},
-        updateScheduledTaskTime = { ScheduledTask, ZonedDateTime -> },
-        updateEventDaoTime = { EventDao, ZonedDateTime -> },
         taskListDaos = listOf(),
         taskDaos = listOf(),
         currentSelectedTaskListDao = null,

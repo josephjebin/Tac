@@ -20,11 +20,7 @@ fun Calendar(
     verticalScrollState: ScrollState,
     selectedDate: LocalDate,
     eventDaos: List<EventDao>,
-    scheduledTasks: List<ScheduledTask>,
-    tasksSheetState: TasksSheetState,
-    addScheduledTask: (ScheduledTask) -> Unit,
-    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
-    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit
+    scheduledTasks: List<ScheduledTask>
 ) {
     Box{
         Row {
@@ -36,14 +32,9 @@ fun Calendar(
 
             Box(modifier = Modifier) {
                 SingleDaySchedule(
-                    selectedDate = selectedDate,
                     eventDaos = eventDaos.filter { eventDao -> eventDao.start.value.toLocalDate() == selectedDate || eventDao.end.value.toLocalDate() == selectedDate },
                     scheduledTasks = scheduledTasks.filter { scheduledTask -> scheduledTask.start.value.toLocalDate() == selectedDate || scheduledTask.end.value.toLocalDate() == selectedDate },
                     hourHeight = hourHeight,
-                    tasksSheetState = tasksSheetState,
-                    addScheduledTask = addScheduledTask,
-                    updateScheduledTaskTime = updateScheduledTaskTime,
-                    updateEventDaoTime = updateEventDaoTime,
                     modifier = Modifier
                         .verticalScroll(verticalScrollState)
                 )
