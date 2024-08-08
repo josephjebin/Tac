@@ -160,11 +160,6 @@ fun CalendarDragTarget(
     currentData = dataToDrop
     composableHeight = draggableHeight
     planComposableModifier = modifier
-//    planComposableHeight = draggableHeight
-//    planComposableModifier = modifier
-//        .height(planComposableHeight)
-//        .fillMaxWidth()
-//        .background(Color.Transparent)
 
     Box(modifier = planComposableModifier
         .onPlaced {
@@ -346,10 +341,6 @@ fun TaskRowDragTarget(
 
     currentData = dataToDrop
     composableHeight = draggableHeight
-//    planComposableModifier = Modifier
-//        .height(planComposableHeight)
-//        .fillMaxWidth()
-//        .background(Color.Transparent)
 
     Box(modifier = Modifier
         .onPlaced {

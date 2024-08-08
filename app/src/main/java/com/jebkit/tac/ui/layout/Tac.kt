@@ -121,11 +121,7 @@ fun TasksAndCalendarScreen(
     ) {
         Scaffold(
             topBar = { DayHeader(selectedDate) },
-            bottomBar = {
-                MyBottomBar(
-                    tasksSheetState = tasksSheetState,
-                )
-            }
+            bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
         ) {
             //invisible boxes to calculate one hour's offset
             Box {
