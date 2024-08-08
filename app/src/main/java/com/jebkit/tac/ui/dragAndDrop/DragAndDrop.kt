@@ -1,5 +1,6 @@
 package com.jebkit.tac.ui.dragAndDrop
 
+import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,11 +30,13 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.jebkit.tac.R
+import com.jebkit.tac.constants.Constants.Companion.dpPerMinute
 import com.jebkit.tac.data.calendar.Plan
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.calendar.PlanComposable
@@ -274,7 +277,7 @@ fun Draggable() {
 
     Box(modifier = Modifier
         .fillMaxSize()
-        .onGloballyPositioned {
+        .onPlaced {
             layoutCoordinates = it
             bounds = it.boundsInParent()
         }
@@ -312,8 +315,15 @@ fun Draggable() {
                         .div(2)
                         .times(state.minuteVerticalOffset)
                 )
-                composableStartOffset = layoutCoordinates?.windowToLocal(state.windowPointerOffset)
-                    ?.minus(halfComposableHeightOffset) ?: Offset.Zero
+                composableStartOffset = layoutCoordinates!!.windowToLocal(state.windowPointerOffset)
+                    .minus(halfComposableHeightOffset)
+                Log.e("DND", "root offset: ${layoutCoordinates!!.localToRoot(composableStartOffset)}")
+                state.dataToDrop.start.value = ZonedDateTime.of(
+                        state.dataToDrop.start.value.toLocalDate(),
+                        composableStartOffset.toLocalTime(minuteVerticalOffset = state.minuteVerticalOffset, state.calendarScrollState!!.value.toDp()),
+                        ZoneId.systemDefault()
+                    )
+
                 state.dragStartedFromTaskSheet = false
                 state.isDragging = true
             })
@@ -481,6 +491,7 @@ fun CancelDropTarget(
     }
 }
 
-fun Offset.toLocalTime(minuteVerticalOffset: Float): LocalTime {
-    return LocalTime.MIN.plusMinutes(this.y.div(minuteVerticalOffset).toLong())
+fun Offset.toLocalTime(minuteVerticalOffset: Float, scroll: Dp): LocalTime {
+    val minutesScrolled = scroll.div(dpPerMinute)
+    return LocalTime.MIN.plusMinutes(this.y.div(minuteVerticalOffset).toLong()).plusMinutes(minutesScrolled.toLong())
 }
