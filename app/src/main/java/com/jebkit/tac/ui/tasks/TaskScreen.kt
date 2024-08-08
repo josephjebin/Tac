@@ -36,6 +36,7 @@ import java.time.ZonedDateTime
 @Composable
 fun TaskSheet(
     tasksSheetState: TasksSheetState,
+    isDragging: Boolean,
     taskListDaos: List<TaskListDao>,
     taskDaos: List<TaskDao>,
     currentSelectedTaskListDao: TaskListDao?,
@@ -44,7 +45,7 @@ fun TaskSheet(
     onTaskCompleted: (TaskDao) -> Unit,
     closeTaskSheet: () -> Unit
 ) {
-    val taskSheetModifier = when (tasksSheetState) {
+    var taskSheetModifier = when (tasksSheetState) {
         TasksSheetState.COLLAPSED -> {
             Modifier
                 .fillMaxWidth()
@@ -63,13 +64,13 @@ fun TaskSheet(
         }
     }
 
+    if(!isDragging) taskSheetModifier = taskSheetModifier.border(
+        BorderStroke(2.dp, Color.Black),
+        RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+    )
 
     Column(
         modifier = taskSheetModifier
-            .border(
-                BorderStroke(2.dp, Color.Black),
-                RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
-            )
             .fillMaxHeight()
             .fillMaxWidth()
             .background(
@@ -77,22 +78,33 @@ fun TaskSheet(
                 RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
             )
     ) {
-        var peekArrowModifier: Modifier by remember { mutableStateOf(Modifier) }
-        //Peek Arrow
-        Box(modifier = peekArrowModifier
-            .height(taskSheetPeekHeight)
-            .fillMaxWidth()
-            .clickable {
-
-            }
-        ) {
-            Image(
-                painterResource(id = R.drawable.caret_down),
+        if(isDragging) {
+            Divider(
+                color = Color.Black,
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .rotate(if (tasksSheetState == TasksSheetState.COLLAPSED) 180f else 0f),
-                contentDescription = "Task Sheet Peek Arrow"
+                    .fillMaxWidth()
+                    .height(2.dp)
             )
+
+            Box(modifier = Modifier.fillMaxHeight())
+        }
+        else {
+            //Peek Arrow
+            Box(modifier = Modifier
+                .height(taskSheetPeekHeight)
+                .fillMaxWidth()
+                .clickable {
+
+                }
+            ) {
+                Image(
+                    painterResource(id = R.drawable.caret_down),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .rotate(if (tasksSheetState == TasksSheetState.COLLAPSED) 180f else 0f),
+                    contentDescription = "Task Sheet Peek Arrow"
+                )
+            }
         }
 
         //projects
@@ -131,8 +143,9 @@ fun TaskSheet(
                 .verticalScroll(rememberScrollState())
         ) {
             taskDaos.forEachIndexed { index, taskDao ->
-                val eventDurationMinutes =
-                    taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
+                //TODO: revert back to commented line when we have the ability to modify duration
+                val eventDurationMinutes = taskDao.neededDuration.intValue
+//                    taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
 
                 TaskRowDragTarget(
@@ -257,12 +270,31 @@ fun TaskRow(
 
 @Preview
 @Composable
-fun TaskSheetPreview() {
+fun TaskSheetPreview_Dragging() {
+    val tasksSheetState by remember {
+        mutableStateOf(TasksSheetState.COLLAPSED)
+    }
+    TaskSheet(
+        tasksSheetState = tasksSheetState,
+        isDragging = true,
+        taskListDaos = dummyDataTaskListDaos(),
+        taskDaos = dummyDataTasksDaos(),
+        currentSelectedTaskListDao = dummyDataTaskListDaos()[0],
+        onTaskListDaoSelected = {},
+        onTaskSelected = {},
+        onTaskCompleted = {}
+    ) {}
+}
+
+@Preview
+@Composable
+fun TaskSheetPreview_NotDragging() {
     val tasksSheetState by remember {
         mutableStateOf(TasksSheetState.PARTIALLY_EXPANDED)
     }
     TaskSheet(
         tasksSheetState = tasksSheetState,
+        isDragging = false,
         taskListDaos = dummyDataTaskListDaos(),
         taskDaos = dummyDataTasksDaos(),
         currentSelectedTaskListDao = dummyDataTaskListDaos()[0],

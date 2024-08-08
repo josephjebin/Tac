@@ -24,6 +24,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -117,7 +118,10 @@ class MainActivity : ComponentActivity() {
                     )
                 } else {
                     val calendarViewModelFactory =
-                        CalendarViewModelFactory(googleAuthViewModel.googleAccountCredential, userRecoverableLauncher)
+                        CalendarViewModelFactory(
+                            googleAuthViewModel.googleAccountCredential,
+                            userRecoverableLauncher
+                        )
                     val tasksAndCalendarViewModel = ViewModelProvider(
                         viewModelStore, calendarViewModelFactory
                     )[TasksAndCalendarViewModel::class.java]
@@ -223,7 +227,6 @@ class MainActivity : ComponentActivity() {
 //            }
 //        }
 //    }
-
 
 
 @Composable
@@ -379,7 +382,8 @@ fun retrievePermissions(context: Context): Array<String?> {
 
 @Composable
 fun MyBottomBar(
-    tasksSheetState: MutableState<TasksSheetState>
+    tasksSheetState: MutableState<TasksSheetState>,
+    isDragging: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -387,51 +391,60 @@ fun MyBottomBar(
             .height(48.dp)
             .background(colorResource(R.color.surface_dark_gray))
     ) {
-        //CALENDAR BUTTON
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .weight(1.0f)
-                .height(48.dp)
-                .border(1.dp, Color.Black)
-                .clickable {
-                    tasksSheetState.value = COLLAPSED
-                }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.round_calendar_today_24),
-                tint = colorResource(id = R.color.google_text_gray),
-                contentDescription = "Calendar button"
-            )
-        }
+        if (!isDragging) {
+            Log.e("BOTTOM", "should be showing bar")
+            //CALENDAR BUTTON
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .weight(1.0f)
+                    .height(48.dp)
+                    .clickable {
+                        tasksSheetState.value = COLLAPSED
+                    }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.round_calendar_today_24),
+                    tint = colorResource(id = R.color.google_text_gray),
+                    contentDescription = "Calendar button"
+                )
+            }
 
-        //TO-DO LIST BUTTON
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .weight(1.0f)
-                .height(48.dp)
-                .border(1.dp, Color.Black)
-                .clickable {
-                    if (tasksSheetState.value == COLLAPSED || tasksSheetState.value == PARTIALLY_EXPANDED)
-                        tasksSheetState.value = EXPANDED
-                    else
-                        tasksSheetState.value = PARTIALLY_EXPANDED
-                }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.round_task_24),
-                tint = colorResource(id = R.color.google_text_gray),
-                contentDescription = "Tasks button"
+            Divider(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(2.dp),
+                color = Color.Black,
+                thickness = 2.dp
             )
+
+            //TO-DO LIST BUTTON
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .weight(1.0f)
+                    .height(48.dp)
+                    .clickable {
+                        if (tasksSheetState.value == COLLAPSED || tasksSheetState.value == PARTIALLY_EXPANDED)
+                            tasksSheetState.value = EXPANDED
+                        else
+                            tasksSheetState.value = PARTIALLY_EXPANDED
+                    }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.round_task_24),
+                    tint = colorResource(id = R.color.google_text_gray),
+                    contentDescription = "Tasks button"
+                )
+            }
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
+fun MyBottomBarPreview() {
     TacTheme() {
-        Tac()
+        MyBottomBar(tasksSheetState = remember { mutableStateOf(TasksSheetState.COLLAPSED) }, isDragging = false)
     }
 }

@@ -58,6 +58,7 @@ internal class DragTargetInfo {
     //TODO: used for determining if user's pointer is in the cancel region when dragging
     var windowPointerOffset by mutableStateOf(Offset.Zero)
     var dragCancelBoundaryOffset by mutableFloatStateOf(0f)
+    var draggingInsideCancelBoundary by mutableStateOf(false)
 
     //need to maintain top of draggable instead of just deriving it from pointer offset since
     //clicking and dragging from the calendar should just lift the draggable and is independent of
@@ -108,6 +109,7 @@ internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
 fun RootDragInfoProvider(
     verticalOffsetPerMinute: Float,
     calendarScrollState: ScrollState,
+    updateIsDragging: (Boolean) -> Unit,
     content: @Composable() (BoxScope.() -> Unit)
 ) {
     val state = remember { DragTargetInfo() }
@@ -118,6 +120,7 @@ fun RootDragInfoProvider(
         state.verticalOffsetPerFiveMinutes = 5 * verticalOffsetPerMinute
         state.calendarScrollState = calendarScrollState
 
+        updateIsDragging(state.isDragging)
         Box(
             modifier = Modifier.onPlaced {
                 val bottomOfScreen = it.boundsInWindow().bottom
@@ -170,19 +173,25 @@ fun CalendarDragTarget(
                     currentState.windowPointerOffset = layoutCoordinates!!.localToWindow(it)
                     currentState.draggableModifier = planComposableModifier
                     currentState.dragStartedFromCalendar = true
-                }, onDrag = { change, dragAmount ->
+                },
+                onDrag = { change, dragAmount ->
                     change.consume()
                     currentState.dragVerticalOffset += dragAmount.y
-                }, onDragEnd = {
+                },
+                onDragEnd = {
                     currentState.isDragging = false
                     currentState.dragStartedFromCalendar = false
                     currentState.dragVerticalOffset = 0f
-                    //logic to update event time
-                }, onDragCancel = {
+                    //if pointer was not in cancel area
+                        // logic to update event time in viewmodel
+                        // logic to update event time in google
+                },
+                onDragCancel = {
                     currentState.isDragging = false
                     currentState.dragStartedFromCalendar = false
                     currentState.dragVerticalOffset = 0f
-                })
+                }
+            )
         }
     ) {
         PlanComposable(
@@ -215,10 +224,14 @@ fun Draggable() {
         val density: Density = LocalDensity.current
 
         if (state.isDragging) {
-//            TODO - cancel area: if(state.isPointerInCancelRegion) highlight border else
+            //communicate up to show drag cancel area
             if(state.windowPointerOffset.y + state.dragVerticalOffset >= state.dragCancelBoundaryOffset) {
+                //communicate up to highlight drag cancel area
+                state.draggingInsideCancelBoundary = true
                 Log.e("DND", "went out!")
             } else {
+                //communicate up to stop highlighting drag cancel area
+                state.draggingInsideCancelBoundary = false
                 state.timeChangeInIncrementsOfFiveMinutes =
                     (state.dragVerticalOffset / state.verticalOffsetPerFiveMinutes).roundToInt()
                 Box(modifier = Modifier
@@ -346,8 +359,9 @@ fun TaskRowDragTarget(
                 }, onDragEnd = {
                     state.isDragging = false
                     state.dragStartedFromTaskSheet = false
+                    //if pointer was not in cancel area
+                        //logic to add scheduled task
                     state.dragVerticalOffset = 0f
-                    //logic to update event time
                 }, onDragCancel = {
                     state.isDragging = false
                     state.dragStartedFromTaskSheet = false

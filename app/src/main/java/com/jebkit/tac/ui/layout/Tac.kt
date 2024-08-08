@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -96,16 +98,20 @@ fun TasksAndCalendarScreen(
     val tasksSheetState = rememberSaveable { mutableStateOf(TasksSheetState.COLLAPSED) }
     var minuteVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
     val calendarScrollState = rememberScrollState()
+    var isDragging by remember { mutableStateOf(false) }
+    var isDraggingInsideCancelRegion by remember { mutableStateOf(false) }
 
     RootDragInfoProvider(
         verticalOffsetPerMinute = minuteVerticalOffset,
-        calendarScrollState = calendarScrollState
+        calendarScrollState = calendarScrollState,
+        updateIsDragging = { boolean: Boolean -> isDragging = boolean }
     ) {
         Scaffold(
             topBar = { DayHeader(selectedDate) },
             bottomBar = {
                 MyBottomBar(
-                    tasksSheetState = tasksSheetState
+                    tasksSheetState = tasksSheetState,
+                    isDragging = isDragging
                 )
             }
         ) {
@@ -146,6 +152,7 @@ fun TasksAndCalendarScreen(
                 //TASKS SHEET
                 TaskSheet(
                     tasksSheetState = tasksSheetState.value,
+                    isDragging = isDragging,
                     taskListDaos = taskListDaos,
                     taskDaos = taskDaos,
                     currentSelectedTaskListDao = currentSelectedTaskListDao,
@@ -158,6 +165,19 @@ fun TasksAndCalendarScreen(
             }
 
 
+        }
+
+        //Drag Cancel Region
+        if(isDragging) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "DRAG AREA WHOOOO"
+                )
+            }
         }
     }
 }
