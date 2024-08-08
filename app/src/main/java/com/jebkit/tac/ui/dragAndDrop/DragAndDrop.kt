@@ -200,6 +200,7 @@ fun CalendarDragTarget(
         }
     ) {
         PlanComposable(
+            isScheduledTask = false,
             title = dataToDrop.title.value,
             description = dataToDrop.description.value,
             color = dataToDrop.color.value,
@@ -250,6 +251,7 @@ fun Draggable() {
                     }
                 ) {
                     PlanComposable(
+                        isScheduledTask = state.dataToDrop is ScheduledTask,
                         title = state.dataToDrop.title.value,
                         description = state.dataToDrop.description.value,
                         color = state.dataToDrop.color.value,
