@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -32,10 +31,10 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.jebkit.tac.R
 import com.jebkit.tac.constants.Constants.Companion.dpPerMinute
 import com.jebkit.tac.data.calendar.Plan
 import com.jebkit.tac.data.calendar.ScheduledTask
@@ -48,7 +47,7 @@ import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 
 internal class DragTargetInfo {
-    var minuteVerticalOffset by mutableFloatStateOf(0f)
+    var verticalOffsetPerMinute by mutableFloatStateOf(0f)
     var fiveMinuteVerticalOffset by mutableFloatStateOf(0f)
 
     //TODO: delete - don't need
@@ -77,16 +76,8 @@ internal class DragTargetInfo {
     //so timeChangeInIncrementsOfFiveMinutes would be -12
     var timeChangeInIncrementsOfFiveMinutes by mutableIntStateOf(0)
 
-
-
-    //TODO: delete - we use offset from parent instead
     var calendarScrollState: ScrollState? by mutableStateOf(null)
 
-
-    //    var draggableHeight by mutableStateOf(0.dp)
-//    var topOfDraggable by mutableStateOf(Offset.Zero)
-//    var currentDropTarget by mutableIntStateOf(-1)
-//    var currentDropTargetTime: LocalTime by mutableStateOf(LocalTime.MIN)
     var dataToDrop by mutableStateOf<Plan>(
         ScheduledTask(
             id = "defaultId",
@@ -126,7 +117,7 @@ fun RootDragInfoProvider(
     CompositionLocalProvider(
         LocalDragTargetInfo provides state
     ) {
-        state.minuteVerticalOffset = minuteVerticalOffset
+        state.verticalOffsetPerMinute = minuteVerticalOffset
         state.fiveMinuteVerticalOffset = 5 * minuteVerticalOffset
         state.headerVerticalOffset = headerVerticalOffset
         state.calendarScrollState = calendarScrollState
@@ -134,67 +125,19 @@ fun RootDragInfoProvider(
         Box()
         {
             content()
-
-            Box {
-                Text(
-                    text =
-                    """windowPointerOffset: ${state.windowPointerOffset},
-                        |dragVerticalOffset: ${state.dragVerticalOffset},
-                        |topOfDraggableOffset: ${state.topOfDraggableOffset} 
-                    """.trimMargin(),
-                    color = colorResource(id = R.color.google_text_white)
-                )
-            }
+//            Box {
+//                Text(
+//                    text =
+//                    """windowPointerOffset: ${state.windowPointerOffset},
+//                        |dragVerticalOffset: ${state.dragVerticalOffset},
+//                        |topOfDraggableOffset: ${state.topOfDraggableOffset}
+//                    """.trimMargin(),
+//                    color = colorResource(id = R.color.google_text_white)
+//                )
+//            }
         }
     }
 }
-
-//@Composable
-//fun CalendarDraggable() {
-//    val state = LocalDragTargetInfo.current
-//    var bounds: Rect by remember { mutableStateOf(Rect(Offset.Zero, Offset.Zero)) }
-//    var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
-//
-//    Box(modifier = Modifier
-//        .fillMaxSize()
-//        .background(Color.Transparent)
-//        .onGloballyPositioned {
-//            bounds = it.boundsInParent()
-//            layoutCoordinates = it
-//
-//        }
-//    ) {
-//        if (state.isDragging) {
-////            if(state.isPointerInCancelRegion) highlight border else
-//            state.timeChangeInIncrementsOfFiveMinutes =
-//                (state.dragVerticalOffset / state.fiveMinuteVerticalOffset).roundToInt()
-//            val verticalOffset =
-//                (state.composableStartOffset.y.plus(state.dragVerticalOffset))
-//            Box(modifier = Modifier
-//                .graphicsLayer {
-//                    alpha = 1f
-//                    scaleX = 1.0f
-//                    scaleY = 1.0f
-//                    translationX = 0.0f
-//                    translationY = verticalOffset
-//                    //.minus(295)
-////                    translationY = offset.y.minus(176f).minus(.5f * state.draggableHeight.toPx())
-//                }
-//            ) {
-//                PlanComposable(
-//                    title = state.dataToDrop.title.value,
-//                    description = state.dataToDrop.description.value,
-//                    color = state.dataToDrop.color.value,
-//                    start = state.dataToDrop.start.value.toLocalTime()
-//                        .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
-//                    end = state.dataToDrop.end.value.toLocalTime()
-//                        .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
-//                    modifier = state.draggableModifier
-//                )
-//            }
-//        }
-//    }
-//}
 
 @Composable
 fun CalendarDragTarget(
@@ -230,19 +173,11 @@ fun CalendarDragTarget(
                     currentState.dataToDrop = currentData
                     currentState.topOfDraggableOffset = currentPosition
                     currentState.windowPointerOffset = layoutCoordinates!!.localToWindow(it)
-//                    currentState.draggableHeight = planComposableHeight
-//                    currentState.topOfDraggable = Offset(
-//                        (currentPosition + it).x,
-//                        (currentPosition + it).y
-//                            .minus(planComposableHeight.toPx() * .5f)
-//                            .plus(29f)
-//                    )
                     currentState.draggableModifier = planComposableModifier
                     currentState.dragStartedFromCalendar = true
                 }, onDrag = { change, dragAmount ->
                     change.consume()
                     currentState.dragVerticalOffset += dragAmount.y
-//                    currentState.topOfDraggable += Offset(dragAmount.x, dragAmount.y)
                 }, onDragEnd = {
                     currentState.isDragging = false
                     currentState.dragStartedFromCalendar = false
@@ -272,7 +207,6 @@ fun Draggable() {
     var bounds: Rect by remember { mutableStateOf(Rect(Offset.Zero, Offset.Zero)) }
     var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     //used for spawning the draggable at the right position
-    //TODO: move to draggable
     var composableStartOffset by remember { mutableStateOf(Offset.Zero) }
 
     Box(modifier = Modifier
@@ -283,6 +217,8 @@ fun Draggable() {
         }
         .background(Color.Transparent)
     ) {
+        val density : Density = LocalDensity.current
+
 //            if(state.isPointerInCancelRegion) highlight border else
         if (state.isDragging) {
             state.timeChangeInIncrementsOfFiveMinutes =
@@ -309,20 +245,48 @@ fun Draggable() {
             }
         } else if (state.dragStartedFromTaskSheet) {
             //LOL put all the code inside the graphics layer to guarantee layout coordinates isn't null
-            Box(modifier = Modifier.graphicsLayer {
+            Box(modifier = Modifier.onPlaced {
                 val halfComposableHeightOffset = Offset(
                     x = 0f, y = state.dataToDrop.duration.intValue
                         .div(2)
-                        .times(state.minuteVerticalOffset)
+                        .times(state.verticalOffsetPerMinute)
                 )
                 composableStartOffset = layoutCoordinates!!.windowToLocal(state.windowPointerOffset)
                     .minus(halfComposableHeightOffset)
-                Log.e("DND", "root offset: ${layoutCoordinates!!.localToRoot(composableStartOffset)}")
+                Log.e(
+                    "DND",
+                    "root offset: ${layoutCoordinates!!.localToRoot(composableStartOffset)}"
+                )
+                //need to calculate minutes, so that we can spawn the composable at an increment of 5 mins
+                //float because scroll might not result in a flat minute
+                var minutesUntilTopOfComposable: Float = composableStartOffset.toMinutes(
+                    minuteVerticalOffset = state.verticalOffsetPerMinute,
+                    with(density){ state.calendarScrollState!!.value.toDp() }
+                )
+
+                //e.g. 62.5 mins til top of composable --> we'll shift the composable down 2.5 mins
+                //(by adding 2.5 mins) to spawn the composable at 65 mins
+                //e.g. 50.00 mins --> perfectly divisible by 5, so no subtracting necessary
+                    //in this case, minutes to subtract would be 0
+                if(minutesUntilTopOfComposable.roundToInt() % 5 < 2) {
+                    val minutesToSubtract = minutesUntilTopOfComposable.mod(5f)
+                    minutesUntilTopOfComposable -= minutesToSubtract
+                    val offsetToSubtract = minutesToSubtract.times(state.verticalOffsetPerMinute)
+                    composableStartOffset -= Offset(x = 0f, y = offsetToSubtract)
+                }
+                else {
+                    val minutesToAdd = minutesUntilTopOfComposable.mod(5f)
+                    minutesUntilTopOfComposable += minutesToAdd
+                    val offsetToAdd = minutesToAdd.times(state.verticalOffsetPerMinute)
+                    composableStartOffset += Offset(x = 0f, y = offsetToAdd)
+                }
+
+
                 state.dataToDrop.start.value = ZonedDateTime.of(
-                        state.dataToDrop.start.value.toLocalDate(),
-                        composableStartOffset.toLocalTime(minuteVerticalOffset = state.minuteVerticalOffset, state.calendarScrollState!!.value.toDp()),
-                        ZoneId.systemDefault()
-                    )
+                    state.dataToDrop.start.value.toLocalDate(),
+                    LocalTime.MIN.plusMinutes(minutesUntilTopOfComposable.toLong()),
+                    ZoneId.systemDefault()
+                )
 
                 state.dragStartedFromTaskSheet = false
                 state.isDragging = true
@@ -330,7 +294,8 @@ fun Draggable() {
         } else if (state.dragStartedFromCalendar) {
             //LOL put all the code inside the graphics layer to guarantee layout coordinates isn't null
             Box(modifier = Modifier.graphicsLayer {
-                composableStartOffset = layoutCoordinates!!.windowToLocal(state.topOfDraggableOffset)
+                composableStartOffset =
+                    layoutCoordinates!!.windowToLocal(state.topOfDraggableOffset)
                 state.dragStartedFromCalendar = false
                 state.isDragging = true
             })
@@ -371,29 +336,7 @@ fun TaskRowDragTarget(
                     closeTaskSheet()
                     state.dataToDrop = currentData
                     state.draggableModifier = planComposableModifier
-//                    val amountScrolledInMinutes =
-//                        (state.calendarScrollState?.value?.toDp())?.div(dpPerMinute)
-
                     state.windowPointerOffset = layoutCoordinates!!.localToWindow(it)
-
-//                    val startTime = composableScheduleOffset.toLocalTime(state.minuteVerticalOffset)
-//                    state.dataToDrop.start.value = ZonedDateTime.of(
-//                        state.dataToDrop.start.value.toLocalDate(),
-//                        startTime,
-//                        ZoneId.systemDefault()
-//                    )
-
-//                    state.composableStartOffset =
-//                        layoutCoordinates
-//                            ?.localToWindow(it)
-//                            ?.minus(
-//                                Offset(
-//                                    x = 0f,
-//                                    y = currentData.duration.intValue
-//                                        .div(2)
-//                                        .times(state.minuteVerticalOffset)
-//                                )
-//                            ) ?: Offset.Zero
                     state.dragStartedFromTaskSheet = true
                 }, onDrag = { change, dragAmount ->
                     change.consume()
@@ -413,62 +356,6 @@ fun TaskRowDragTarget(
         content()
     }
 }
-
-//@Composable
-//fun TimeDropTarget(
-//    index: Int,
-//    selectedDate: LocalDate,
-//    timeSlot: LocalTime,
-//    addScheduledTask: (ScheduledTask) -> Unit,
-//    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
-//    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
-//    modifier: Modifier,
-//    content: @Composable() (BoxScope.(isInBound: Boolean) -> Unit)
-//) {
-//    val dragInfo = LocalDragTargetInfo.current
-//    val topOfDraggable = dragInfo.topOfDraggable
-//
-//    Box(modifier = modifier.onGloballyPositioned {
-//        it.boundsInWindow().let { rect ->
-//            if (dragInfo.isDragging && rect.contains(topOfDraggable)) {
-////                dragInfo.dataToDrop.start.value = timeSlot
-//            }
-//        }
-//    }) {
-//        //user dropped payload in this drop target
-//        if (dragInfo.currentDropTarget == index && !dragInfo.isDragging) {
-//            if (dragInfo.isRescheduling) {
-//                if (dragInfo.dataToDrop is ScheduledTask) {
-//                    updateScheduledTaskTime(
-//                        dragInfo.dataToDrop as ScheduledTask, ZonedDateTime.of(
-//                        LocalDateTime.of(selectedDate, timeSlot),
-//                        ZoneId.systemDefault()
-//                    ))
-//                } else {
-//                    updateEventDaoTime(dragInfo.dataToDrop as EventDao, ZonedDateTime.of(
-//                        LocalDateTime.of(selectedDate, timeSlot),
-//                        ZoneId.systemDefault()
-//                    ))
-//                }
-//            } else {
-//                val scheduledTask = dragInfo.dataToDrop as ScheduledTask
-//                scheduledTask.start.value = ZonedDateTime.of(
-//                    LocalDateTime.of(selectedDate, timeSlot),
-//                    ZoneId.systemDefault()
-//                )
-//                scheduledTask.end.value = scheduledTask.start.value.plusMinutes(scheduledTask.duration.intValue.toLong())
-//                addScheduledTask(scheduledTask)
-//            }
-//
-//            //after updating viewmodel, reset currentDropTarget to prevent repeated calls to viewmodel
-//            dragInfo.currentDropTarget = -1
-//        }
-//
-//        content(
-//            dragInfo.isDragging && dragInfo.currentDropTarget == index,
-//        )
-//    }
-//}
 
 @Composable
 fun CancelDropTarget(
@@ -491,7 +378,9 @@ fun CancelDropTarget(
     }
 }
 
-fun Offset.toLocalTime(minuteVerticalOffset: Float, scroll: Dp): LocalTime {
-    val minutesScrolled = scroll.div(dpPerMinute)
-    return LocalTime.MIN.plusMinutes(this.y.div(minuteVerticalOffset).toLong()).plusMinutes(minutesScrolled.toLong())
+fun Offset.toMinutes(minuteVerticalOffset: Float, dpScrolled: Dp): Float {
+    val minutesScrolled = dpScrolled.div(dpPerMinute)
+    //this.y is the offset from the top of the schedule to the composable
+    //offset / (offset / min) --> offset * (min / offset) --> offset cancels, resulting in minutes
+    return this.y.div(minuteVerticalOffset).plus(minutesScrolled)
 }
