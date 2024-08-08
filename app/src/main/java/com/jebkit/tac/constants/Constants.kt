@@ -7,6 +7,7 @@ class Constants {
     companion object {
         val hourHeight = 64.dp
         val dpPerMinute: Dp = hourHeight / 60
+        val taskSheetPeekHeight = 48.dp
         val JSON_HEADER = "(Tac data:\n"
     }
 }

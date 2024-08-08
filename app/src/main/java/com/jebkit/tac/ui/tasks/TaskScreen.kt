@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.jebkit.tac.R
 import com.jebkit.tac.constants.Constants.Companion.hourHeight
+import com.jebkit.tac.constants.Constants.Companion.taskSheetPeekHeight
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.dummyData.dummyDataTaskListDaos
 import com.jebkit.tac.data.dummyData.dummyDataTasksDaos
@@ -47,7 +48,7 @@ fun TaskSheet(
         TasksSheetState.COLLAPSED -> {
             Modifier
                 .fillMaxWidth()
-                .height(48.dp)
+                .height(taskSheetPeekHeight)
         }
 
         TasksSheetState.PARTIALLY_EXPANDED -> {
@@ -62,24 +63,22 @@ fun TaskSheet(
         }
     }
 
-
     Column(
         modifier = taskSheetModifier
+            .fillMaxHeight()
+            .fillMaxWidth()
             .border(
                 BorderStroke(2.dp, Color.Black),
                 RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
             )
-            .fillMaxHeight()
-            .fillMaxWidth()
             .background(
                 color = colorResource(id = R.color.surface_dark_gray),
                 RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
             )
     ) {
-        var peekArrowModifier: Modifier by remember { mutableStateOf(Modifier) }
         //Peek Arrow
-        Box(modifier = peekArrowModifier
-            .height(48.dp)
+        Box(modifier = Modifier
+            .height(taskSheetPeekHeight)
             .fillMaxWidth()
             .clickable {
 
@@ -93,6 +92,7 @@ fun TaskSheet(
                 contentDescription = "Task Sheet Peek Arrow"
             )
         }
+
 
         //projects
         Row(
@@ -130,8 +130,9 @@ fun TaskSheet(
                 .verticalScroll(rememberScrollState())
         ) {
             taskDaos.forEachIndexed { index, taskDao ->
-                val eventDurationMinutes =
-                    taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
+                //TODO: revert back to commented line when we have the ability to modify duration
+                val eventDurationMinutes = taskDao.neededDuration.intValue
+//                    taskDao.neededDuration.intValue - taskDao.scheduledDuration.intValue
                 val eventHeight = ((eventDurationMinutes / 60f) * hourHeight)
 
                 TaskRowDragTarget(
@@ -256,7 +257,24 @@ fun TaskRow(
 
 @Preview
 @Composable
-fun TaskSheetPreview() {
+fun TaskSheetPreview_Dragging() {
+    val tasksSheetState by remember {
+        mutableStateOf(TasksSheetState.COLLAPSED)
+    }
+    TaskSheet(
+        tasksSheetState = tasksSheetState,
+        taskListDaos = dummyDataTaskListDaos(),
+        taskDaos = dummyDataTasksDaos(),
+        currentSelectedTaskListDao = dummyDataTaskListDaos()[0],
+        onTaskListDaoSelected = {},
+        onTaskSelected = {},
+        onTaskCompleted = {}
+    ) {}
+}
+
+@Preview
+@Composable
+fun TaskSheetPreview_NotDragging() {
     val tasksSheetState by remember {
         mutableStateOf(TasksSheetState.PARTIALLY_EXPANDED)
     }

@@ -24,6 +24,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -117,7 +118,10 @@ class MainActivity : ComponentActivity() {
                     )
                 } else {
                     val calendarViewModelFactory =
-                        CalendarViewModelFactory(googleAuthViewModel.googleAccountCredential, userRecoverableLauncher)
+                        CalendarViewModelFactory(
+                            googleAuthViewModel.googleAccountCredential,
+                            userRecoverableLauncher
+                        )
                     val tasksAndCalendarViewModel = ViewModelProvider(
                         viewModelStore, calendarViewModelFactory
                     )[TasksAndCalendarViewModel::class.java]
@@ -223,7 +227,6 @@ class MainActivity : ComponentActivity() {
 //            }
 //        }
 //    }
-
 
 
 @Composable
@@ -379,7 +382,7 @@ fun retrievePermissions(context: Context): Array<String?> {
 
 @Composable
 fun MyBottomBar(
-    tasksSheetState: MutableState<TasksSheetState>
+    tasksSheetState: MutableState<TasksSheetState>,
 ) {
     Row(
         modifier = Modifier
@@ -393,7 +396,6 @@ fun MyBottomBar(
             modifier = Modifier
                 .weight(1.0f)
                 .height(48.dp)
-                .border(1.dp, Color.Black)
                 .clickable {
                     tasksSheetState.value = COLLAPSED
                 }
@@ -405,13 +407,20 @@ fun MyBottomBar(
             )
         }
 
+        Divider(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(2.dp),
+            color = Color.Black,
+            thickness = 2.dp
+        )
+
         //TO-DO LIST BUTTON
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .weight(1.0f)
                 .height(48.dp)
-                .border(1.dp, Color.Black)
                 .clickable {
                     if (tasksSheetState.value == COLLAPSED || tasksSheetState.value == PARTIALLY_EXPANDED)
                         tasksSheetState.value = EXPANDED
@@ -425,13 +434,16 @@ fun MyBottomBar(
                 contentDescription = "Tasks button"
             )
         }
+
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
+fun MyBottomBarPreview() {
     TacTheme() {
-        Tac()
+        MyBottomBar(
+            tasksSheetState = remember { mutableStateOf(COLLAPSED) }
+        )
     }
 }

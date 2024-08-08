@@ -1,15 +1,21 @@
 package com.jebkit.tac.ui.layout
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,12 +24,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jebkit.tac.MyBottomBar
 import com.jebkit.tac.R
@@ -38,6 +51,8 @@ import com.jebkit.tac.ui.calendar.DayHeader
 import com.jebkit.tac.ui.dragAndDrop.RootDragInfoProvider
 import com.jebkit.tac.ui.tasks.TaskSheet
 import com.jebkit.tac.ui.tasks.TasksSheetState
+import com.jebkit.tac.ui.theme.google_divider_gray
+import com.jebkit.tac.ui.theme.google_highlighted_border
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -95,10 +110,14 @@ fun TasksAndCalendarScreen(
     val tasksSheetState = rememberSaveable { mutableStateOf(TasksSheetState.COLLAPSED) }
     var minuteVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
     val calendarScrollState = rememberScrollState()
+    var isDragging by remember { mutableStateOf(false) }
+    var isDraggingInsideCancelRegion by remember { mutableStateOf(false) }
 
     RootDragInfoProvider(
         verticalOffsetPerMinute = minuteVerticalOffset,
-        calendarScrollState = calendarScrollState
+        calendarScrollState = calendarScrollState,
+        updateIsDragging = { boolean: Boolean -> isDragging = boolean },
+        updateIsDraggingInsideCancelRegion = { boolean: Boolean -> isDraggingInsideCancelRegion = boolean }
     ) {
         Scaffold(
             topBar = { DayHeader(selectedDate) },
@@ -153,6 +172,46 @@ fun TasksAndCalendarScreen(
             }
 
 
+        }
+
+        //Drag Cancel Region
+        if (isDragging) {
+            val stroke = Stroke(
+                width = 4f,
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 10f), 0f)
+            )
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .height(96.dp)
+                    .background(colorResource(id = R.color.surface_dark_gray))
+                    .drawBehind {
+                        drawRoundRect(
+                            color = if (isDraggingInsideCancelRegion) google_highlighted_border else google_divider_gray,
+                            style = stroke
+                        )
+                    }
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                        .background(
+                            color = if(isDraggingInsideCancelRegion) google_highlighted_border else colorResource(id = R.color.google_text_gray)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .wrapContentHeight(),
+                        text = "Drop here to cancel",
+                        textAlign = TextAlign.Center, 
+                    )
+                }
+            }
         }
     }
 }

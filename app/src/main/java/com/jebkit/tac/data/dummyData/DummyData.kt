@@ -124,7 +124,7 @@ fun dummyDataTasksDaos(): List<TaskDao> {
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("Career"),
+            taskListId = mutableStateOf("careerTaskListDaoId"),
             scheduledDuration = mutableIntStateOf(120),
             workedDuration = mutableIntStateOf(120),
             neededDuration = mutableIntStateOf(120)
@@ -138,7 +138,7 @@ fun dummyDataTasksDaos(): List<TaskDao> {
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("Career"),
+            taskListId = mutableStateOf("careerTaskListDaoId"),
             neededDuration = mutableIntStateOf(45)
         ),
         TaskDao(
@@ -150,7 +150,7 @@ fun dummyDataTasksDaos(): List<TaskDao> {
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("Career"),
+            taskListId = mutableStateOf("careerTaskListDaoId"),
             neededDuration = mutableIntStateOf(45)
         ),
         TaskDao(
@@ -162,7 +162,7 @@ fun dummyDataTasksDaos(): List<TaskDao> {
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("Finance"),
+            taskListId = mutableStateOf("financeTaskListDaoId"),
             neededDuration = mutableIntStateOf(45)
         ),
         TaskDao(
@@ -174,8 +174,8 @@ fun dummyDataTasksDaos(): List<TaskDao> {
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("Finance"),
-            neededDuration = mutableIntStateOf(45)
+            taskListId = mutableStateOf("financeTaskListDaoId"),
+            neededDuration = mutableIntStateOf(180)
         ),
         TaskDao(
             id = "6",
@@ -186,7 +186,7 @@ fun dummyDataTasksDaos(): List<TaskDao> {
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("Finance"),
+            taskListId = mutableStateOf("financeTaskListDaoId"),
             neededDuration = mutableIntStateOf(45)
         ),
         TaskDao(
@@ -198,7 +198,7 @@ fun dummyDataTasksDaos(): List<TaskDao> {
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("Fitness"),
+            taskListId = mutableStateOf("fitnessTaskListDaoId"),
             neededDuration = mutableIntStateOf(45)
         ),
         TaskDao(
@@ -210,7 +210,7 @@ fun dummyDataTasksDaos(): List<TaskDao> {
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("Fitness"),
+            taskListId = mutableStateOf("fitnessTaskListDaoId"),
             neededDuration = mutableIntStateOf(45)
         ),
         TaskDao(
@@ -222,7 +222,7 @@ fun dummyDataTasksDaos(): List<TaskDao> {
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("Fitness"),
+            taskListId = mutableStateOf("fitnessTaskListDaoId"),
             neededDuration = mutableIntStateOf(45)
         )
     )
