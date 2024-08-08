@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.*
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.jebkit.tac.data.calendar.EventDao
@@ -19,7 +17,6 @@ import java.time.ZonedDateTime
 @Composable
 fun Calendar(
     hourHeight: Dp = 64.dp,
-    updateHeaderVerticalOffset: (Float) -> Unit,
     verticalScrollState: ScrollState,
     selectedDate: LocalDate,
     eventDaos: List<EventDao>,
@@ -29,12 +26,7 @@ fun Calendar(
     updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
     updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .onGloballyPositioned {
-                updateHeaderVerticalOffset(it.localToWindow(Offset.Zero).y)
-            }
-    ) {
+    Box{
         Row {
             HoursSidebar(
                 hourHeight = hourHeight,

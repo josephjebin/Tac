@@ -48,7 +48,7 @@ import kotlin.math.roundToInt
 
 internal class DragTargetInfo {
     var verticalOffsetPerMinute by mutableFloatStateOf(0f)
-    var fiveMinuteVerticalOffset by mutableFloatStateOf(0f)
+    var verticalOffsetPerFiveMinutes by mutableFloatStateOf(0f)
 
     //TODO: delete - don't need
     var headerVerticalOffset by mutableFloatStateOf(0f)
@@ -107,9 +107,7 @@ internal val LocalDragTargetInfo = compositionLocalOf { DragTargetInfo() }
 
 @Composable
 fun RootDragInfoProvider(
-    minuteVerticalOffset: Float,
-    //TODO: remove since we covert offset to local
-    headerVerticalOffset: Float,
+    verticalOffsetPerMinute: Float,
     calendarScrollState: ScrollState,
     content: @Composable() (BoxScope.() -> Unit)
 ) {
@@ -117,24 +115,13 @@ fun RootDragInfoProvider(
     CompositionLocalProvider(
         LocalDragTargetInfo provides state
     ) {
-        state.verticalOffsetPerMinute = minuteVerticalOffset
-        state.fiveMinuteVerticalOffset = 5 * minuteVerticalOffset
-        state.headerVerticalOffset = headerVerticalOffset
+        state.verticalOffsetPerMinute = verticalOffsetPerMinute
+        state.verticalOffsetPerFiveMinutes = 5 * verticalOffsetPerMinute
         state.calendarScrollState = calendarScrollState
 
         Box()
         {
             content()
-//            Box {
-//                Text(
-//                    text =
-//                    """windowPointerOffset: ${state.windowPointerOffset},
-//                        |dragVerticalOffset: ${state.dragVerticalOffset},
-//                        |topOfDraggableOffset: ${state.topOfDraggableOffset}
-//                    """.trimMargin(),
-//                    color = colorResource(id = R.color.google_text_white)
-//                )
-//            }
         }
     }
 }
@@ -217,12 +204,12 @@ fun Draggable() {
         }
         .background(Color.Transparent)
     ) {
-        val density : Density = LocalDensity.current
+        val density: Density = LocalDensity.current
 
-//            if(state.isPointerInCancelRegion) highlight border else
+//            TODO - cancel area: if(state.isPointerInCancelRegion) highlight border else
         if (state.isDragging) {
             state.timeChangeInIncrementsOfFiveMinutes =
-                (state.dragVerticalOffset / state.fiveMinuteVerticalOffset).roundToInt()
+                (state.dragVerticalOffset / state.verticalOffsetPerFiveMinutes).roundToInt()
             Box(modifier = Modifier
                 .graphicsLayer {
                     alpha = 1f
@@ -261,20 +248,19 @@ fun Draggable() {
                 //float because scroll might not result in a flat minute
                 var minutesUntilTopOfComposable: Float = composableStartOffset.toMinutes(
                     minuteVerticalOffset = state.verticalOffsetPerMinute,
-                    with(density){ state.calendarScrollState!!.value.toDp() }
+                    with(density) { state.calendarScrollState!!.value.toDp() }
                 )
 
                 //e.g. 62.5 mins til top of composable --> we'll shift the composable down 2.5 mins
                 //(by adding 2.5 mins) to spawn the composable at 65 mins
                 //e.g. 50.00 mins --> perfectly divisible by 5, so no subtracting necessary
-                    //in this case, minutes to subtract would be 0
-                if(minutesUntilTopOfComposable.roundToInt() % 5 < 2) {
+                //in this case, minutes to subtract would be 0
+                if (minutesUntilTopOfComposable.roundToInt() % 5 < 2) {
                     val minutesToSubtract = minutesUntilTopOfComposable.mod(5f)
                     minutesUntilTopOfComposable -= minutesToSubtract
                     val offsetToSubtract = minutesToSubtract.times(state.verticalOffsetPerMinute)
                     composableStartOffset -= Offset(x = 0f, y = offsetToSubtract)
-                }
-                else {
+                } else {
                     val minutesToAdd = minutesUntilTopOfComposable.mod(5f)
                     minutesUntilTopOfComposable += minutesToAdd
                     val offsetToAdd = minutesToAdd.times(state.verticalOffsetPerMinute)
@@ -288,12 +274,15 @@ fun Draggable() {
                     ZoneId.systemDefault()
                 )
 
+                state.dataToDrop.end.value =
+                    state.dataToDrop.start.value.plusMinutes(state.dataToDrop.duration.intValue.toLong())
+
                 state.dragStartedFromTaskSheet = false
                 state.isDragging = true
             })
         } else if (state.dragStartedFromCalendar) {
             //LOL put all the code inside the graphics layer to guarantee layout coordinates isn't null
-            Box(modifier = Modifier.graphicsLayer {
+            Box(modifier = Modifier.onPlaced {
                 composableStartOffset =
                     layoutCoordinates!!.windowToLocal(state.topOfDraggableOffset)
                 state.dragStartedFromCalendar = false
@@ -380,7 +369,7 @@ fun CancelDropTarget(
 
 fun Offset.toMinutes(minuteVerticalOffset: Float, dpScrolled: Dp): Float {
     val minutesScrolled = dpScrolled.div(dpPerMinute)
-    //this.y is the offset from the top of the schedule to the composable
-    //offset / (offset / min) --> offset * (min / offset) --> offset cancels, resulting in minutes
+    //this.y is the offset from the top of the schedule (even after scrolling) to the composable
+    //offset / (offset / min) --> offset * (min / offset) --> offsets cancel, resulting in minutes
     return this.y.div(minuteVerticalOffset).plus(minutesScrolled)
 }

@@ -24,7 +24,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jebkit.tac.MyBottomBar
 import com.jebkit.tac.R
@@ -98,12 +97,10 @@ fun TasksAndCalendarScreen(
 ) {
     val tasksSheetState = rememberSaveable { mutableStateOf(TasksSheetState.COLLAPSED) }
     var minuteVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
-    var headerVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
     val calendarScrollState = rememberScrollState()
 
     RootDragInfoProvider(
-        minuteVerticalOffset = minuteVerticalOffset,
-        headerVerticalOffset = headerVerticalOffset,
+        verticalOffsetPerMinute = minuteVerticalOffset,
         calendarScrollState = calendarScrollState
     ) {
         Scaffold(
@@ -136,9 +133,6 @@ fun TasksAndCalendarScreen(
                     ) {
                         Calendar(
                             hourHeight = hourHeight,
-                            updateHeaderVerticalOffset = { verticalOffset: Float ->
-                                headerVerticalOffset = verticalOffset
-                            },
                             verticalScrollState = calendarScrollState,
                             selectedDate = selectedDate,
                             eventDaos = eventDaos,
