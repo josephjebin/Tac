@@ -28,7 +28,6 @@ import com.jebkit.tac.data.dummyData.dummyDataTaskListDaos
 import com.jebkit.tac.data.dummyData.dummyDataTasksDaos
 import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskListDao
-import com.jebkit.tac.ui.dragAndDrop.CancelDropTarget
 import com.jebkit.tac.ui.dragAndDrop.TaskRowDragTarget
 import com.jebkit.tac.ui.layout.outputFormat
 import java.time.ZonedDateTime
@@ -79,24 +78,20 @@ fun TaskSheet(
     ) {
         var peekArrowModifier: Modifier by remember { mutableStateOf(Modifier) }
         //Peek Arrow
-        CancelDropTarget(
-            highlightBottomBar = { peekArrowModifier = Modifier.border(16.dp, Color.Red) }
-        ) {
-            Box(modifier = peekArrowModifier
-                .height(48.dp)
-                .fillMaxWidth()
-                .clickable {
+        Box(modifier = peekArrowModifier
+            .height(48.dp)
+            .fillMaxWidth()
+            .clickable {
 
-                }
-            ) {
-                Image(
-                    painterResource(id = R.drawable.caret_down),
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .rotate(if (tasksSheetState == TasksSheetState.COLLAPSED) 180f else 0f),
-                    contentDescription = "Task Sheet Peek Arrow"
-                )
             }
+        ) {
+            Image(
+                painterResource(id = R.drawable.caret_down),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .rotate(if (tasksSheetState == TasksSheetState.COLLAPSED) 180f else 0f),
+                contentDescription = "Task Sheet Peek Arrow"
+            )
         }
 
         //projects

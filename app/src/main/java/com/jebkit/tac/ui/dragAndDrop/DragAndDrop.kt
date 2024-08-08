@@ -50,9 +50,6 @@ internal class DragTargetInfo {
     var verticalOffsetPerMinute by mutableFloatStateOf(0f)
     var verticalOffsetPerFiveMinutes by mutableFloatStateOf(0f)
 
-    //TODO: delete - don't need
-    var headerVerticalOffset by mutableFloatStateOf(0f)
-
     var dragStartedFromTaskSheet by mutableStateOf(false)
     var dragStartedFromCalendar by mutableStateOf(false)
 
@@ -126,6 +123,7 @@ fun RootDragInfoProvider(
     }
 }
 
+//TODO - combine drag targets
 @Composable
 fun CalendarDragTarget(
     dataToDrop: Plan,
@@ -206,8 +204,8 @@ fun Draggable() {
     ) {
         val density: Density = LocalDensity.current
 
-//            TODO - cancel area: if(state.isPointerInCancelRegion) highlight border else
         if (state.isDragging) {
+//            TODO - cancel area: if(state.isPointerInCancelRegion) highlight border else
             state.timeChangeInIncrementsOfFiveMinutes =
                 (state.dragVerticalOffset / state.verticalOffsetPerFiveMinutes).roundToInt()
             Box(modifier = Modifier
@@ -231,7 +229,7 @@ fun Draggable() {
                 )
             }
         } else if (state.dragStartedFromTaskSheet) {
-            //LOL put all the code inside the graphics layer to guarantee layout coordinates isn't null
+            //LOL put all the code inside this modifier to guarantee layout coordinates aren't null
             Box(modifier = Modifier.onPlaced {
                 val halfComposableHeightOffset = Offset(
                     x = 0f, y = state.dataToDrop.duration.intValue
@@ -251,6 +249,7 @@ fun Draggable() {
                     with(density) { state.calendarScrollState!!.value.toDp() }
                 )
 
+                //TODO: sometimes, coercing the time doesn't work, so this needs to be improved and tested
                 //e.g. 62.5 mins til top of composable --> we'll shift the composable down 2.5 mins
                 //(by adding 2.5 mins) to spawn the composable at 65 mins
                 //e.g. 50.00 mins --> perfectly divisible by 5, so no subtracting necessary
@@ -281,7 +280,7 @@ fun Draggable() {
                 state.isDragging = true
             })
         } else if (state.dragStartedFromCalendar) {
-            //LOL put all the code inside the graphics layer to guarantee layout coordinates isn't null
+            //LOL put all the code inside this modifier to guarantee layout coordinates aren't null
             Box(modifier = Modifier.onPlaced {
                 composableStartOffset =
                     layoutCoordinates!!.windowToLocal(state.topOfDraggableOffset)
@@ -340,27 +339,6 @@ fun TaskRowDragTarget(
                     state.dragStartedFromTaskSheet = false
                     state.dragVerticalOffset = 0f
                 })
-        }
-    ) {
-        content()
-    }
-}
-
-@Composable
-fun CancelDropTarget(
-    highlightBottomBar: () -> Unit,
-    content: @Composable() (BoxScope.() -> Unit)
-) {
-    val dragInfo = LocalDragTargetInfo.current
-//    val topOfDraggable = dragInfo.topOfDraggable
-
-    Box(
-        modifier = Modifier.onGloballyPositioned {
-            it.boundsInWindow().let { rect ->
-//                if (dragInfo.isDragging && rect.contains(topOfDraggable)) {
-//                    highlightBottomBar()
-//                }
-            }
         }
     ) {
         content()
