@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
@@ -42,6 +43,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import kotlin.math.pow
 import kotlin.math.roundToInt
 
 internal class DragTargetInfo {
@@ -55,6 +57,7 @@ internal class DragTargetInfo {
 
     //TODO: used for determining if user's pointer is in the cancel region when dragging
     var windowPointerOffset by mutableStateOf(Offset.Zero)
+    var dragCancelBoundaryOffset by mutableFloatStateOf(0f)
 
     //need to maintain top of draggable instead of just deriving it from pointer offset since
     //clicking and dragging from the calendar should just lift the draggable and is independent of
@@ -72,6 +75,7 @@ internal class DragTargetInfo {
     var timeChangeInIncrementsOfFiveMinutes by mutableIntStateOf(0)
 
     var calendarScrollState: ScrollState? by mutableStateOf(null)
+
 
     var dataToDrop by mutableStateOf<Plan>(
         ScheduledTask(
@@ -114,7 +118,15 @@ fun RootDragInfoProvider(
         state.verticalOffsetPerFiveMinutes = 5 * verticalOffsetPerMinute
         state.calendarScrollState = calendarScrollState
 
-        Box()
+        Box(
+            modifier = Modifier.onPlaced {
+                val bottomOfScreen = it.boundsInWindow().bottom
+                val dpPerOffset = dpPerMinute.div(state.verticalOffsetPerMinute)
+                //96.dp because both app bar and tasks sheet peek height are 48.dp
+                val offsetPerCancelArea = dpPerOffset.div(96.dp).pow(-1)
+                state.dragCancelBoundaryOffset = bottomOfScreen.minus(offsetPerCancelArea)
+            }
+        )
         {
             content()
         }
@@ -204,27 +216,31 @@ fun Draggable() {
 
         if (state.isDragging) {
 //            TODO - cancel area: if(state.isPointerInCancelRegion) highlight border else
-            state.timeChangeInIncrementsOfFiveMinutes =
-                (state.dragVerticalOffset / state.verticalOffsetPerFiveMinutes).roundToInt()
-            Box(modifier = Modifier
-                .graphicsLayer {
-                    alpha = 1f
-                    scaleX = 1.0f
-                    scaleY = 1.0f
-                    translationX = 0.0f
-                    translationY = composableStartOffset.y.plus(state.dragVerticalOffset)
+            if(state.windowPointerOffset.y + state.dragVerticalOffset >= state.dragCancelBoundaryOffset) {
+                Log.e("DND", "went out!")
+            } else {
+                state.timeChangeInIncrementsOfFiveMinutes =
+                    (state.dragVerticalOffset / state.verticalOffsetPerFiveMinutes).roundToInt()
+                Box(modifier = Modifier
+                    .graphicsLayer {
+                        alpha = 1f
+                        scaleX = 1.0f
+                        scaleY = 1.0f
+                        translationX = 0.0f
+                        translationY = composableStartOffset.y.plus(state.dragVerticalOffset)
+                    }
+                ) {
+                    PlanComposable(
+                        title = state.dataToDrop.title.value,
+                        description = state.dataToDrop.description.value,
+                        color = state.dataToDrop.color.value,
+                        start = state.dataToDrop.start.value.toLocalTime()
+                            .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                        end = state.dataToDrop.end.value.toLocalTime()
+                            .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                        modifier = state.draggableModifier
+                    )
                 }
-            ) {
-                PlanComposable(
-                    title = state.dataToDrop.title.value,
-                    description = state.dataToDrop.description.value,
-                    color = state.dataToDrop.color.value,
-                    start = state.dataToDrop.start.value.toLocalTime()
-                        .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
-                    end = state.dataToDrop.end.value.toLocalTime()
-                        .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
-                    modifier = state.draggableModifier
-                )
             }
         } else if (state.dragStartedFromTaskSheet) {
             //LOL put all the code inside this modifier to guarantee layout coordinates aren't null

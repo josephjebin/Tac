@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
@@ -102,7 +103,11 @@ fun TasksAndCalendarScreen(
     ) {
         Scaffold(
             topBar = { DayHeader(selectedDate) },
-            bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) }
+            bottomBar = {
+                MyBottomBar(
+                    tasksSheetState = tasksSheetState
+                )
+            }
         ) {
             //invisible boxes to calculate one hour's offset
             Box {

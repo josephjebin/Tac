@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.jebkit.tac.R
 import com.jebkit.tac.constants.Constants.Companion.hourHeight
+import com.jebkit.tac.constants.Constants.Companion.taskSheetPeekHeight
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.dummyData.dummyDataTaskListDaos
 import com.jebkit.tac.data.dummyData.dummyDataTasksDaos
@@ -47,7 +48,7 @@ fun TaskSheet(
         TasksSheetState.COLLAPSED -> {
             Modifier
                 .fillMaxWidth()
-                .height(48.dp)
+                .height(taskSheetPeekHeight)
         }
 
         TasksSheetState.PARTIALLY_EXPANDED -> {
@@ -79,7 +80,7 @@ fun TaskSheet(
         var peekArrowModifier: Modifier by remember { mutableStateOf(Modifier) }
         //Peek Arrow
         Box(modifier = peekArrowModifier
-            .height(48.dp)
+            .height(taskSheetPeekHeight)
             .fillMaxWidth()
             .clickable {
 
