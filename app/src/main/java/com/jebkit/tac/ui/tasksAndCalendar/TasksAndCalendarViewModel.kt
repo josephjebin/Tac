@@ -14,6 +14,8 @@ import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.GoogleCalendarService
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.data.calendar.ScheduledTaskJson
+import com.jebkit.tac.data.dummyData.dummyDataTaskListDaos
+import com.jebkit.tac.data.dummyData.dummyDataTasksDaos
 import com.jebkit.tac.data.tasks.GoogleTasksService
 import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskJson
@@ -48,6 +50,12 @@ class TasksAndCalendarViewModel(
     init {
         viewModelScope.launch {
             refresh()
+            dummyDataTaskListDaos().forEach {
+                _uiState.value.taskListDaos[it.id] = it
+            }
+            dummyDataTasksDaos().forEach { taskDao ->
+                _uiState.value.taskDaos[taskDao.id] = taskDao
+            }
         }
     }
 

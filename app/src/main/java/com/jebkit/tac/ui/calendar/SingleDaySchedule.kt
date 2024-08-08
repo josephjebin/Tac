@@ -44,7 +44,7 @@ fun SingleDaySchedule(
                     CalendarDragTarget(
                         dataToDrop = eventDao,
                         modifier = planComposableModifier,
-                        draggableHeight = eventHeight,
+//                        draggableHeight = eventHeight,
                     )
                 }
 
@@ -60,7 +60,7 @@ fun SingleDaySchedule(
                     CalendarDragTarget(
                         dataToDrop = scheduledTask,
                         modifier = planComposableModifier,
-                        draggableHeight = taskHeight,
+//                        draggableHeight = taskHeight,
                     )
                 }
         },

@@ -144,23 +144,22 @@ fun RootDragInfoProvider(
 fun CalendarDragTarget(
     dataToDrop: Plan,
     modifier: Modifier = Modifier,
-    draggableHeight: Dp,
+//    draggableHeight: Dp,
     onTaskDrag: (() -> Unit) = {},
 ) {
     val currentState = LocalDragTargetInfo.current
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
     var currentData by remember { mutableStateOf(dataToDrop) }
-    var planComposableHeight by remember { mutableStateOf(0.dp) }
-    var planComposableModifier: Modifier by remember { mutableStateOf(Modifier) }
+//    var planComposableHeight by remember { mutableStateOf(0.dp) }
+    var planComposableModifier: Modifier by remember { mutableStateOf(modifier) }
     var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
 
     currentData = dataToDrop
-    planComposableHeight = draggableHeight
-    planComposableModifier = Modifier
-        .height(planComposableHeight)
-        .fillMaxWidth()
-        .background(Color.Transparent)
-        .border(1.dp, Color.Blue)
+//    planComposableHeight = draggableHeight
+    planComposableModifier = modifier
+//        .height(planComposableHeight)
+//        .fillMaxWidth()
+//        .background(Color.Transparent)
 
     Box(modifier = modifier
         .onPlaced {
@@ -323,8 +322,6 @@ fun Draggable() {
 @Composable
 fun TaskRowDragTarget(
     dataToDrop: ScheduledTask,
-    //TODO: do we really need to pass modifier around like this?
-    modifier: Modifier = Modifier,
     draggableHeight: Dp,
     closeTaskSheet: (() -> Unit) = {},
     content: @Composable () -> Unit
@@ -341,9 +338,8 @@ fun TaskRowDragTarget(
         .height(planComposableHeight)
         .fillMaxWidth()
         .background(Color.Transparent)
-        .border(1.dp, Color.Blue)
 
-    Box(modifier = modifier
+    Box(modifier = Modifier
         .onPlaced {
             layoutCoordinates = it
         }

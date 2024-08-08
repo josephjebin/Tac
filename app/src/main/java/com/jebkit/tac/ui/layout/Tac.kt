@@ -203,12 +203,12 @@ fun TasksAndCalendarScreen(
                         .padding(16.dp)
                         .background(
                             color = if(isDraggingInsideCancelRegion) google_highlighted_border else colorResource(id = R.color.google_text_gray)
-                        )
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .align(Alignment.Center),
+                            .fillMaxSize(),
                         text = "Drop here to cancel",
                         textAlign = TextAlign.Center, 
                     )
