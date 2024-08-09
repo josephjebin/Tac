@@ -50,6 +50,7 @@ import com.jebkit.tac.ui.tasks.TasksSheetState
 import com.jebkit.tac.ui.theme.google_divider_gray
 import com.jebkit.tac.ui.theme.google_highlighted_border
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 val outputFormat = DateTimeFormatter.ofPattern("MM - dd - yyyy")
@@ -62,18 +63,23 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
         TasksAndCalendarScreen(
             selectedDate = tasksAndCalendarState.minSelectedDate.value,
             eventDaos = tasksAndCalendarState.eventDaos.values.toList(),
+            updateEventDaoTime = { eventDao: EventDao, newStartTime: ZonedDateTime ->
+                tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
+            },
             scheduledTasks = tasksAndCalendarState.scheduledTasks.values.toList(),
-//            addScheduledTask = { scheduledTask: ScheduledTask ->
-//                tasksAndCalendarViewModel.addScheduledTask(
-//                    scheduledTask
-//                )
-//            },
-//            updateScheduledTaskTime = { scheduledTask: ScheduledTask, newStartTime: ZonedDateTime ->
-//                tasksAndCalendarViewModel.updateScheduledTaskStartTime(scheduledTask, newStartTime)
-//            },
-//            updateEventDaoTime = { eventDao: EventDao, newStartTime: ZonedDateTime ->
-//                tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
-//            },
+            addScheduledTask = { scheduledTask: ScheduledTask ->
+                tasksAndCalendarViewModel.addScheduledTask(
+                    scheduledTask
+                )
+            },
+            updateScheduledTaskTime = { scheduledTask: ScheduledTask, newStartTime: ZonedDateTime ->
+                tasksAndCalendarViewModel.updateScheduledTaskStartTime(scheduledTask, newStartTime)
+            },
+            toggleScheduledTaskCompletion = { scheduledTask: ScheduledTask ->
+                tasksAndCalendarViewModel.toggleScheduledTaskCompletion(
+                    scheduledTask
+                )
+            },
             taskListDaos = tasksAndCalendarState.taskListDaos.values.toList(),
             taskDaos = tasksAndCalendarState.taskDaos.values.toList()
                 .filter { taskDao ->
@@ -85,8 +91,7 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
             },
             onTaskDaoSelected = {
                 //TODO
-            },
-            toggleScheduledTaskCompletion = { scheduledTask: ScheduledTask -> tasksAndCalendarViewModel.toggleScheduledTaskCompletion(scheduledTask) }
+            }
         )
 
     }
@@ -96,13 +101,16 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
 fun TasksAndCalendarScreen(
     selectedDate: LocalDate,
     eventDaos: List<EventDao>,
+    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     scheduledTasks: List<ScheduledTask>,
+    addScheduledTask: (ScheduledTask) -> Unit,
+    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
+    toggleScheduledTaskCompletion: (ScheduledTask) -> Unit,
     taskListDaos: List<TaskListDao>,
     taskDaos: List<TaskDao>,
     currentSelectedTaskListDao: TaskListDao?,
     onTaskListDaoSelected: (TaskListDao) -> Unit,
     onTaskDaoSelected: (TaskDao) -> Unit,
-    toggleScheduledTaskCompletion: (ScheduledTask) -> Unit
 ) {
     val tasksSheetState = rememberSaveable { mutableStateOf(TasksSheetState.COLLAPSED) }
     var minuteVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
@@ -151,7 +159,9 @@ fun TasksAndCalendarScreen(
                             verticalScrollState = calendarScrollState,
                             selectedDate = selectedDate,
                             eventDaos = eventDaos,
+                            updateEventDaoTime = updateEventDaoTime,
                             scheduledTasks = scheduledTasks,
+                            updateScheduledTaskTime = updateScheduledTaskTime,
                             toggleScheduledTaskCompletion = toggleScheduledTaskCompletion
                         )
                     }
@@ -168,6 +178,7 @@ fun TasksAndCalendarScreen(
                     onTaskCompleted = { taskDao: TaskDao ->
                     },
                     closeTaskSheet = { tasksSheetState.value = TasksSheetState.COLLAPSED },
+                    addScheduledTask = addScheduledTask
                 )
             }
 
@@ -224,12 +235,15 @@ fun TacPreview() {
     TasksAndCalendarScreen(
         selectedDate = LocalDate.now(),
         eventDaos = listOf(),
+        updateEventDaoTime = { _, _ -> },
         scheduledTasks = listOf(),
+        addScheduledTask = {_ ->},
+        toggleScheduledTaskCompletion = {},
+        updateScheduledTaskTime = {_, _ -> },
         taskListDaos = listOf(),
         taskDaos = listOf(),
         currentSelectedTaskListDao = null,
         onTaskListDaoSelected = { (TaskListDao) -> },
         onTaskDaoSelected = { (TaskDao) -> },
-        toggleScheduledTaskCompletion = {}
     )
 }

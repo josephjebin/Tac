@@ -246,7 +246,9 @@ class TasksAndCalendarViewModel(
                     event.setStart(startTime.toEventDateTime())
                     event.setEnd(newEndTime.toEventDateTime())
                     val response = googleCalendarService.updateEvent(event)
-                    if (response != null) _uiState.value.googleEvents[eventDao.id] = response
+                    if (response != null) {
+                        _uiState.value.googleEvents[eventDao.id] = response
+                    }
                     else {
                         Log.e(
                             TAG,

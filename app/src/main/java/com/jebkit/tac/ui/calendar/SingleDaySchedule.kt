@@ -18,6 +18,7 @@ import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.dragAndDrop.EventDragTarget
 import com.jebkit.tac.ui.dragAndDrop.ScheduledTaskDragTarget
 import java.time.LocalTime
+import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
@@ -26,7 +27,9 @@ fun SingleDaySchedule(
     modifier: Modifier = Modifier,
     hourHeight: Dp,
     eventDaos: List<EventDao>,
+    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     scheduledTasks: List<ScheduledTask>,
+    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
     toggleScheduledTaskCompletion: (ScheduledTask) -> Unit
 ) {
     //TODO: light and dark themes
@@ -48,6 +51,7 @@ fun SingleDaySchedule(
                         modifier = planComposableModifier,
                         dataToDrop = eventDao,
                         draggableHeight = eventHeight,
+                        updateEventDaoTime = updateEventDaoTime
                     )
                 }
 
@@ -64,6 +68,7 @@ fun SingleDaySchedule(
                     ScheduledTaskDragTarget(
                         dataToDrop = scheduledTask,
                         modifier = planComposableModifier,
+                        updateScheduledTaskTime = updateScheduledTaskTime,
                         draggableHeight = taskHeight,
                         toggleScheduledTaskCompletion = toggleScheduledTaskCompletion
                     )

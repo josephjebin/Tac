@@ -42,7 +42,8 @@ fun TaskSheet(
     onTaskListDaoSelected: (TaskListDao) -> Unit,
     onTaskSelected: (TaskDao) -> Unit,
     onTaskCompleted: (TaskDao) -> Unit,
-    closeTaskSheet: () -> Unit
+    closeTaskSheet: () -> Unit,
+    addScheduledTask: (ScheduledTask) -> Unit,
 ) {
     val taskSheetModifier = when (tasksSheetState) {
         TasksSheetState.COLLAPSED -> {
@@ -145,6 +146,7 @@ fun TaskSheet(
                         title = taskDao.title,
                         parentTaskId = taskDao.id,
                         description = taskDao.notes,
+                        //TODO: replace with current sele
                         //STUB
                         start = mutableStateOf(ZonedDateTime.now()),
                         //STUB
@@ -152,8 +154,9 @@ fun TaskSheet(
                         duration = mutableIntStateOf(eventDurationMinutes),
                         color = taskDao.color
                     ),
+                    draggableHeight = eventHeight,
                     closeTaskSheet = closeTaskSheet,
-                    draggableHeight = eventHeight
+                    addScheduledTask = addScheduledTask
                 ) {
                     TaskRow(
                         taskDao = taskDao,
@@ -268,7 +271,8 @@ fun TaskSheetPreview_Dragging() {
         currentSelectedTaskListDao = dummyDataTaskListDaos()[0],
         onTaskListDaoSelected = {},
         onTaskSelected = {},
-        onTaskCompleted = {}
+        onTaskCompleted = {},
+        closeTaskSheet = {}
     ) {}
 }
 
@@ -285,6 +289,7 @@ fun TaskSheetPreview_NotDragging() {
         currentSelectedTaskListDao = dummyDataTaskListDaos()[0],
         onTaskListDaoSelected = {},
         onTaskSelected = {},
-        onTaskCompleted = {}
+        onTaskCompleted = {},
+        closeTaskSheet = {}
     ) {}
 }
