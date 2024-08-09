@@ -146,7 +146,6 @@ fun TaskSheet(
                         title = taskDao.title,
                         parentTaskId = taskDao.id,
                         description = taskDao.notes,
-                        //TODO: replace with current sele
                         //STUB
                         start = mutableStateOf(ZonedDateTime.now()),
                         //STUB

@@ -80,14 +80,16 @@ fun EventComposable(
 
 @Composable
 fun ScheduledTaskComposable(
+    modifier: Modifier = Modifier,
     title: String,
     isCompleted: Boolean,
-    toggleScheduledTaskCompletion: () -> Unit,
+    //toggleScheduledTaskCompletion has a default value to let draggable spawn this composable
+    //it's fine cuz a user can't click the checkbox while dragging
+    toggleScheduledTaskCompletion: () -> Unit = {},
     description: String?,
     color: Color,
     start: LocalTime,
-    end: LocalTime,
-    modifier: Modifier = Modifier
+    end: LocalTime
 ) {
     val EventTimeFormatter = DateTimeFormatter.ofPattern("h:mm a")
     Row(

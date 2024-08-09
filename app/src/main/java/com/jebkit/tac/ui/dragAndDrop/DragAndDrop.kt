@@ -146,15 +146,14 @@ fun EventDragTarget(
     val state = LocalDragTargetInfo.current
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
     var currentData by remember { mutableStateOf(dataToDrop) }
-    val composableHeight by remember { mutableStateOf(draggableHeight) }
-//    var planComposableModifier: Modifier by remember { mutableStateOf(modifier) }
+    var composableHeight by remember { mutableStateOf(draggableHeight) }
     var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
-    //made this whole variable just to trigger alpha changes for this single plan composable
     var thisTargetIsBeingDragged by remember { mutableStateOf(false) }
 
+    //these 2 lines reassign the data, and they're essential
+    //without them, Compose uses previous values
     currentData = dataToDrop
-//    composableHeight = draggableHeight
-//    planComposableModifier = modifier
+    composableHeight = draggableHeight
 
     Box(modifier = modifier
         .onPlaced {
@@ -189,9 +188,6 @@ fun EventDragTarget(
                 state.isDragging = false
                 state.dragStartedFromCalendar = false
                 thisTargetIsBeingDragged = false
-                //if pointer was not in cancel area
-                // logic to update event time in viewmodel
-                // logic to update event time in google
                 state.dragVerticalOffset = 0f
             }, onDragCancel = {
                 state.isDragging = false
@@ -215,24 +211,25 @@ fun EventDragTarget(
 
 @Composable
 fun ScheduledTaskDragTarget(
-    modifier: Modifier, dataToDrop: ScheduledTask, draggableHeight: Dp,
+    modifier: Modifier,
+    dataToDrop: ScheduledTask,
+    draggableHeight: Dp,
     updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
     toggleScheduledTaskCompletion: (ScheduledTask) -> Unit
 ) {
     val state = LocalDragTargetInfo.current
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
-    val currentData by remember { mutableStateOf(dataToDrop) }
-    val composableHeight by remember { mutableStateOf(draggableHeight) }
-    val planComposableModifier: Modifier by remember { mutableStateOf(modifier) }
+    var currentData by remember { mutableStateOf(dataToDrop) }
+    var composableHeight by remember { mutableStateOf(draggableHeight) }
     var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
-    //made this whole variable just to trigger alpha changes for this single plan composable
     var thisTargetIsBeingDragged by remember { mutableStateOf(false) }
 
-//    currentData = dataToDrop
-//    composableHeight = draggableHeight
-//    planComposableModifier = modifier
+    //these 2 lines reassign the data, and they're essential
+    //without them, Compose uses previous values
+    currentData = dataToDrop
+    composableHeight = draggableHeight
 
-    Box(modifier = planComposableModifier
+    Box(modifier = modifier
         .onPlaced {
             layoutCoordinates = it
             currentPosition = it.positionInWindow()
@@ -266,9 +263,6 @@ fun ScheduledTaskDragTarget(
                 state.dragStartedFromCalendar = false
                 thisTargetIsBeingDragged = false
                 state.dragVerticalOffset = 0f
-                //if pointer was not in cancel area
-                // logic to update event time in viewmodel
-                // logic to update event time in google
             }, onDragCancel = {
                 state.isDragging = false
                 state.dragStartedFromCalendar = false
@@ -284,7 +278,7 @@ fun ScheduledTaskDragTarget(
             color = currentData.color.value,
             start = currentData.start.value.toLocalTime(),
             end = currentData.end.value.toLocalTime(),
-            modifier = planComposableModifier
+            modifier = modifier
                 .padding(2.dp)
                 .alpha(if (thisTargetIsBeingDragged) .4f else 1f)
         )
@@ -315,7 +309,6 @@ fun TaskRowDragTarget(
             detectDragGesturesAfterLongPress(onDragStart = {
                 closeTaskSheet()
                 state.dataToDrop = currentData
-//                    state.draggableModifier = planComposableModifier
                 state.windowPointerOffset = layoutCoordinates!!.localToWindow(it)
                 state.composableHeight = composableHeight
                 state.dragStartedFromTaskSheet = true
@@ -346,10 +339,7 @@ fun TaskRowDragTarget(
 }
 
 @Composable
-fun Draggable(
-    //draggable doesn't need this since a user won't be able to click the checkbox while dragging
-    toggleScheduledTaskCompletion: () -> Unit = {}
-) {
+fun Draggable() {
     val state = LocalDragTargetInfo.current
     var bounds: Rect by remember { mutableStateOf(Rect(Offset.Zero, Offset.Zero)) }
     var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
@@ -386,7 +376,6 @@ fun Draggable(
                         ScheduledTaskComposable(
                             title = state.dataToDrop.title.value,
                             isCompleted = (state.dataToDrop as ScheduledTask).completed.value,
-                            toggleScheduledTaskCompletion = toggleScheduledTaskCompletion,
                             description = state.dataToDrop.description.value,
                             color = state.dataToDrop.color.value,
                             start = state.dataToDrop.start.value.toLocalTime()
