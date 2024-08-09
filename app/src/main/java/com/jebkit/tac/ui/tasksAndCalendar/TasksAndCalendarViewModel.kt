@@ -370,6 +370,20 @@ class TasksAndCalendarViewModel(
         }
     }
 
+    fun toggleScheduledTaskCompletion(scheduledTask: ScheduledTask) {
+        val parentTask = _uiState.value.taskDaos[scheduledTask.parentTaskId]
+        if(parentTask != null) {
+            //if currently marked as completed
+            if (scheduledTask.completed.value) {
+                parentTask.workedDuration.intValue -= scheduledTask.duration.intValue
+            } else {
+                parentTask.workedDuration.intValue += scheduledTask.duration.intValue
+            }
+        }
+
+        scheduledTask.completed.value = !scheduledTask.completed.value
+    }
+
     fun deleteScheduledTask(scheduledTaskId: String) {
         //TODO: remove scheduled task durations from parent task
         _uiState.value.scheduledTasks.remove(scheduledTaskId)

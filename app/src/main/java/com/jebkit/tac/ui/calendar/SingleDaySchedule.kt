@@ -15,17 +15,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
-import com.jebkit.tac.ui.dragAndDrop.CalendarDragTarget
+import com.jebkit.tac.ui.dragAndDrop.EventDragTarget
+import com.jebkit.tac.ui.dragAndDrop.ScheduledTaskDragTarget
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 import kotlin.math.roundToInt
 
 @Composable
 fun SingleDaySchedule(
+    modifier: Modifier = Modifier,
+    hourHeight: Dp,
     eventDaos: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
-    hourHeight: Dp,
-    modifier: Modifier = Modifier,
+    setScheduledTaskCompletion: (ScheduledTask) -> Unit
 ) {
     //TODO: light and dark themes
 //    val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
@@ -42,7 +44,7 @@ fun SingleDaySchedule(
                         .fillMaxWidth()
 
                     //must pass modifier to drag target because it's used to pass start data to the layout
-                    CalendarDragTarget(
+                    EventDragTarget(
                         modifier = planComposableModifier,
                         dataToDrop = eventDao,
                         draggableHeight = eventHeight,
@@ -59,10 +61,11 @@ fun SingleDaySchedule(
                         .fillMaxWidth()
 
                     //must pass modifier to drag target because it's used to pass start data to the layout
-                    CalendarDragTarget(
+                    ScheduledTaskDragTarget(
                         dataToDrop = scheduledTask,
                         modifier = planComposableModifier,
                         draggableHeight = taskHeight,
+                        setScheduledTaskCompletion = setScheduledTaskCompletion
                     )
                 }
         },

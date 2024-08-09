@@ -1,16 +1,12 @@
 package com.jebkit.tac.ui.calendar
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,14 +28,66 @@ import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun PlanComposable(
-    isScheduledTask: Boolean,
+fun EventComposable(
     title: String,
     description: String?,
     color: Color,
     start: LocalTime,
     end: LocalTime,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
+) {
+    val EventTimeFormatter = DateTimeFormatter.ofPattern("h:mm a")
+
+    Column(
+        modifier = modifier
+            .background(color, shape = RoundedCornerShape(8.dp))
+            .testTag("PlanComposable: $title")
+            .padding(4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .wrapContentHeight()
+                .padding(2.dp)
+        ) {
+            Text(
+                modifier = Modifier.align(Alignment.CenterVertically),
+                style = MaterialTheme.typography.caption,
+                text = "${start.format(EventTimeFormatter)} - ${end.format(EventTimeFormatter)}:"
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                modifier = Modifier.align(Alignment.Top),
+                style = MaterialTheme.typography.body1,
+                fontWeight = FontWeight.Bold,
+                overflow = TextOverflow.Ellipsis,
+                text = title
+            )
+        }
+
+        if (description != null) {
+            Text(
+                text = description,
+                style = MaterialTheme.typography.body2,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+    }
+
+}
+
+@Composable
+fun ScheduledTaskComposable(
+    title: String,
+    isCompleted: Boolean,
+    setScheduledTaskCompletion: (Boolean) -> Unit,
+    description: String?,
+    color: Color,
+    start: LocalTime,
+    end: LocalTime,
+    modifier: Modifier = Modifier
 ) {
     val EventTimeFormatter = DateTimeFormatter.ofPattern("h:mm a")
     Row(
@@ -84,31 +132,29 @@ fun PlanComposable(
             }
         }
 
-        if (isScheduledTask) {
-            Box(
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .align(Alignment.CenterVertically),
-            ) {
-                Checkbox(
-                    checked = false,
-                    onCheckedChange = {},
-                )
-            }
+        Box(
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .align(Alignment.CenterVertically),
+        ) {
+            Checkbox(
+                checked = isCompleted,
+                onCheckedChange = { completion: Boolean -> setScheduledTaskCompletion(completion) },
+            )
         }
+
     }
 }
 
 @Preview
 @Composable
 fun PlanComposablePreview() {
-    PlanComposable(
-        isScheduledTask = true,
+    EventComposable(
         title = "Testing",
         description = "test",
         color = akiflow_lavender,
         start = LocalTime.now(),
-        end = LocalTime.now().plusMinutes(30), 
+        end = LocalTime.now().plusMinutes(30),
         modifier = Modifier.height(120.dp)
     )
 }

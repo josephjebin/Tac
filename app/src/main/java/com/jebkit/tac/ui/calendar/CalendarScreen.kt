@@ -10,9 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.dragAndDrop.Draggable
-import com.jebkit.tac.ui.tasks.TasksSheetState
 import java.time.LocalDate
-import java.time.ZonedDateTime
 
 @Composable
 fun Calendar(
@@ -20,8 +18,9 @@ fun Calendar(
     verticalScrollState: ScrollState,
     selectedDate: LocalDate,
     eventDaos: List<EventDao>,
-    scheduledTasks: List<ScheduledTask>
-) {
+    scheduledTasks: List<ScheduledTask>,
+    setScheduledTaskCompletion: (ScheduledTask) -> Unit
+    ) {
     Box{
         Row {
             HoursSidebar(
@@ -32,11 +31,12 @@ fun Calendar(
 
             Box(modifier = Modifier) {
                 SingleDaySchedule(
+                    modifier = Modifier
+                        .verticalScroll(verticalScrollState),
+                    hourHeight = hourHeight,
                     eventDaos = eventDaos.filter { eventDao -> eventDao.start.value.toLocalDate() == selectedDate || eventDao.end.value.toLocalDate() == selectedDate },
                     scheduledTasks = scheduledTasks.filter { scheduledTask -> scheduledTask.start.value.toLocalDate() == selectedDate || scheduledTask.end.value.toLocalDate() == selectedDate },
-                    hourHeight = hourHeight,
-                    modifier = Modifier
-                        .verticalScroll(verticalScrollState)
+                    setScheduledTaskCompletion = setScheduledTaskCompletion
                 )
 
                 Draggable()
