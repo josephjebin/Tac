@@ -27,7 +27,7 @@ fun SingleDaySchedule(
     hourHeight: Dp,
     eventDaos: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
-    setScheduledTaskCompletion: (ScheduledTask) -> Unit
+    toggleScheduledTaskCompletion: (ScheduledTask) -> Unit
 ) {
     //TODO: light and dark themes
 //    val dividerColor = if (MaterialTheme.colors.isLight) Color.LightGray else Color.DarkGray
@@ -65,7 +65,7 @@ fun SingleDaySchedule(
                         dataToDrop = scheduledTask,
                         modifier = planComposableModifier,
                         draggableHeight = taskHeight,
-                        setScheduledTaskCompletion = setScheduledTaskCompletion
+                        toggleScheduledTaskCompletion = toggleScheduledTaskCompletion
                     )
                 }
         },

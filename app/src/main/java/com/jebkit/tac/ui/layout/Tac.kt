@@ -86,7 +86,7 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
             onTaskDaoSelected = {
                 //TODO
             },
-            setScheduledTaskCompletion = { scheduledTask: ScheduledTask -> tasksAndCalendarViewModel.toggleScheduledTaskCompletion(scheduledTask) }
+            toggleScheduledTaskCompletion = { scheduledTask: ScheduledTask -> tasksAndCalendarViewModel.toggleScheduledTaskCompletion(scheduledTask) }
         )
 
     }
@@ -102,7 +102,7 @@ fun TasksAndCalendarScreen(
     currentSelectedTaskListDao: TaskListDao?,
     onTaskListDaoSelected: (TaskListDao) -> Unit,
     onTaskDaoSelected: (TaskDao) -> Unit,
-    setScheduledTaskCompletion: (ScheduledTask) -> Unit
+    toggleScheduledTaskCompletion: (ScheduledTask) -> Unit
 ) {
     val tasksSheetState = rememberSaveable { mutableStateOf(TasksSheetState.COLLAPSED) }
     var minuteVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
@@ -152,7 +152,7 @@ fun TasksAndCalendarScreen(
                             selectedDate = selectedDate,
                             eventDaos = eventDaos,
                             scheduledTasks = scheduledTasks,
-                            setScheduledTaskCompletion = setScheduledTaskCompletion
+                            toggleScheduledTaskCompletion = toggleScheduledTaskCompletion
                         )
                     }
                 }
@@ -229,6 +229,7 @@ fun TacPreview() {
         taskDaos = listOf(),
         currentSelectedTaskListDao = null,
         onTaskListDaoSelected = { (TaskListDao) -> },
-        onTaskDaoSelected = { (TaskDao) -> }
+        onTaskDaoSelected = { (TaskDao) -> },
+        toggleScheduledTaskCompletion = {}
     )
 }

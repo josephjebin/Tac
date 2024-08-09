@@ -218,7 +218,7 @@ fun ScheduledTaskDragTarget(
     draggableHeight: Dp,
     //todo: what is this?? close task sheet?
     onTaskDrag: (() -> Unit) = {},
-    setScheduledTaskCompletion: (ScheduledTask, Boolean) -> Unit
+    toggleScheduledTaskCompletion: (ScheduledTask) -> Unit
 ) {
     val state = LocalDragTargetInfo.current
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
@@ -274,7 +274,7 @@ fun ScheduledTaskDragTarget(
         ScheduledTaskComposable(
             title = currentData.title.value,
             isCompleted = currentData.completed.value,
-            setScheduledTaskCompletion = { boolean: Boolean -> setScheduledTaskCompletion(currentData, boolean) },
+            toggleScheduledTaskCompletion = {  toggleScheduledTaskCompletion(currentData) },
             description = currentData.description.value,
             color = currentData.color.value,
             start = currentData.start.value.toLocalTime(),
@@ -337,7 +337,7 @@ fun TaskRowDragTarget(
 @Composable
 fun Draggable(
     //draggable doesn't need this since a user won't be able to click the checkbox while dragging
-    toggleScheduledTaskCompletion: (Boolean) -> Unit = {}
+    toggleScheduledTaskCompletion: () -> Unit = {}
 ) {
     val state = LocalDragTargetInfo.current
     var bounds: Rect by remember { mutableStateOf(Rect(Offset.Zero, Offset.Zero)) }
@@ -378,7 +378,7 @@ fun Draggable(
                         ScheduledTaskComposable(
                             title = state.dataToDrop.title.value,
                             isCompleted = (state.dataToDrop as ScheduledTask).completed.value,
-                            setScheduledTaskCompletion = toggleScheduledTaskCompletion,
+                            toggleScheduledTaskCompletion = toggleScheduledTaskCompletion,
                             description = state.dataToDrop.description.value,
                             color = state.dataToDrop.color.value,
                             start = state.dataToDrop.start.value.toLocalTime()

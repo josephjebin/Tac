@@ -82,7 +82,7 @@ fun EventComposable(
 fun ScheduledTaskComposable(
     title: String,
     isCompleted: Boolean,
-    setScheduledTaskCompletion: (Boolean) -> Unit,
+    toggleScheduledTaskCompletion: () -> Unit,
     description: String?,
     color: Color,
     start: LocalTime,
@@ -139,7 +139,7 @@ fun ScheduledTaskComposable(
         ) {
             Checkbox(
                 checked = isCompleted,
-                onCheckedChange = { completion: Boolean -> setScheduledTaskCompletion(completion) },
+                onCheckedChange = { toggleScheduledTaskCompletion() },
             )
         }
 

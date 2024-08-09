@@ -19,7 +19,7 @@ fun Calendar(
     selectedDate: LocalDate,
     eventDaos: List<EventDao>,
     scheduledTasks: List<ScheduledTask>,
-    setScheduledTaskCompletion: (ScheduledTask) -> Unit
+    toggleScheduledTaskCompletion: (ScheduledTask) -> Unit
     ) {
     Box{
         Row {
@@ -36,7 +36,7 @@ fun Calendar(
                     hourHeight = hourHeight,
                     eventDaos = eventDaos.filter { eventDao -> eventDao.start.value.toLocalDate() == selectedDate || eventDao.end.value.toLocalDate() == selectedDate },
                     scheduledTasks = scheduledTasks.filter { scheduledTask -> scheduledTask.start.value.toLocalDate() == selectedDate || scheduledTask.end.value.toLocalDate() == selectedDate },
-                    setScheduledTaskCompletion = setScheduledTaskCompletion
+                    toggleScheduledTaskCompletion = toggleScheduledTaskCompletion
                 )
 
                 Draggable()
