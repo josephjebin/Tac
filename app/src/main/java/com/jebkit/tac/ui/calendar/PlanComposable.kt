@@ -2,11 +2,15 @@ package com.jebkit.tac.ui.calendar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,13 +44,13 @@ fun PlanComposable(
     val EventTimeFormatter = DateTimeFormatter.ofPattern("h:mm a")
     Row(
         modifier = modifier
+            .background(color, shape = RoundedCornerShape(8.dp))
+            .testTag("PlanComposable: $title")
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .background(color, shape = RoundedCornerShape(8.dp))
+                .weight(1f)
                 .padding(4.dp)
-                .testTag("PlanComposable: $title")
         ) {
             Row(
                 modifier = Modifier
@@ -80,13 +84,18 @@ fun PlanComposable(
             }
         }
 
-        if (isScheduledTask)
-            Checkbox(
+        if (isScheduledTask) {
+            Box(
                 modifier = Modifier
-                    .padding(end = 8.dp),
-                checked = false,
-                onCheckedChange = {},
-            )
+                    .padding(end = 8.dp)
+                    .align(Alignment.CenterVertically),
+            ) {
+                Checkbox(
+                    checked = false,
+                    onCheckedChange = {},
+                )
+            }
+        }
     }
 }
 
@@ -99,6 +108,7 @@ fun PlanComposablePreview() {
         description = "test",
         color = akiflow_lavender,
         start = LocalTime.now(),
-        end = LocalTime.now().plusMinutes(30)
+        end = LocalTime.now().plusMinutes(30), 
+        modifier = Modifier.height(120.dp)
     )
 }
