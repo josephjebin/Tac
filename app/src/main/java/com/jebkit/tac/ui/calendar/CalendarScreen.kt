@@ -10,7 +10,6 @@ import androidx.compose.ui.unit.dp
 import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.ScheduledTask
 import com.jebkit.tac.ui.dragAndDrop.Draggable
-import com.jebkit.tac.ui.tasks.TasksSheetState
 import java.time.LocalDate
 import java.time.ZonedDateTime
 
@@ -20,9 +19,12 @@ fun Calendar(
     verticalScrollState: ScrollState,
     selectedDate: LocalDate,
     eventDaos: List<EventDao>,
-    scheduledTasks: List<ScheduledTask>
+    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
+    scheduledTasks: List<ScheduledTask>,
+    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
+    toggleScheduledTaskCompletion: (ScheduledTask) -> Unit
 ) {
-    Box{
+    Box {
         Row {
             HoursSidebar(
                 hourHeight = hourHeight,
@@ -32,11 +34,14 @@ fun Calendar(
 
             Box(modifier = Modifier) {
                 SingleDaySchedule(
-                    eventDaos = eventDaos.filter { eventDao -> eventDao.start.value.toLocalDate() == selectedDate || eventDao.end.value.toLocalDate() == selectedDate },
-                    scheduledTasks = scheduledTasks.filter { scheduledTask -> scheduledTask.start.value.toLocalDate() == selectedDate || scheduledTask.end.value.toLocalDate() == selectedDate },
-                    hourHeight = hourHeight,
                     modifier = Modifier
-                        .verticalScroll(verticalScrollState)
+                        .verticalScroll(verticalScrollState),
+                    hourHeight = hourHeight,
+                    eventDaos = eventDaos.filter { eventDao -> eventDao.start.value.toLocalDate() == selectedDate || eventDao.end.value.toLocalDate() == selectedDate },
+                    updateEventDaoTime = updateEventDaoTime,
+                    scheduledTasks = scheduledTasks.filter { scheduledTask -> scheduledTask.start.value.toLocalDate() == selectedDate || scheduledTask.end.value.toLocalDate() == selectedDate },
+                    updateScheduledTaskTime = updateScheduledTaskTime,
+                    toggleScheduledTaskCompletion = toggleScheduledTaskCompletion
                 )
 
                 Draggable()

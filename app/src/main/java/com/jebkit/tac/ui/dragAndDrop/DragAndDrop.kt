@@ -1,6 +1,5 @@
 package com.jebkit.tac.ui.dragAndDrop
 
-import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -36,9 +35,11 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.jebkit.tac.constants.Constants.Companion.dpPerMinute
+import com.jebkit.tac.data.calendar.EventDao
 import com.jebkit.tac.data.calendar.Plan
 import com.jebkit.tac.data.calendar.ScheduledTask
-import com.jebkit.tac.ui.calendar.PlanComposable
+import com.jebkit.tac.ui.calendar.EventComposable
+import com.jebkit.tac.ui.calendar.ScheduledTaskComposable
 import com.jebkit.tac.ui.theme.akiflow_lavender
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -59,14 +60,12 @@ internal class DragTargetInfo {
             description = mutableStateOf("defaultDescription"),
             start = mutableStateOf(
                 ZonedDateTime.of(
-                    LocalDateTime.MIN,
-                    ZoneId.systemDefault()
+                    LocalDateTime.MIN, ZoneId.systemDefault()
                 )
             ),
             end = mutableStateOf(
                 ZonedDateTime.of(
-                    LocalDateTime.MIN,
-                    ZoneId.systemDefault()
+                    LocalDateTime.MIN, ZoneId.systemDefault()
                 )
             ),
             duration = mutableIntStateOf(30),
@@ -125,90 +124,217 @@ fun RootDragInfoProvider(
         updateIsDragging(state.isDragging)
         updateIsDraggingInsideCancelRegion(state.draggingInsideCancelBoundary)
 
-        Box(
-            modifier = Modifier.onPlaced {
-                val bottomOfScreen = it.boundsInWindow().bottom
-                val dpPerOffset = dpPerMinute.div(state.verticalOffsetPerMinute)
-                //96.dp because both app bar and tasks sheet peek height are 48.dp
-                val offsetPerCancelArea = dpPerOffset.div(96.dp).pow(-1)
-                state.dragCancelBoundaryOffset = bottomOfScreen.minus(offsetPerCancelArea)
-            }
-        )
-        {
+        Box(modifier = Modifier.onPlaced {
+            val bottomOfScreen = it.boundsInWindow().bottom
+            val dpPerOffset = dpPerMinute.div(state.verticalOffsetPerMinute)
+            //96.dp because both app bar and tasks sheet peek height are 48.dp
+            val offsetPerCancelArea = dpPerOffset.div(96.dp).pow(-1)
+            state.dragCancelBoundaryOffset = bottomOfScreen.minus(offsetPerCancelArea)
+        }) {
             content()
         }
     }
 }
 
-//TODO - combine drag targets
 @Composable
-fun CalendarDragTarget(
+fun EventDragTarget(
     modifier: Modifier,
-    dataToDrop: Plan,
+    dataToDrop: EventDao,
     draggableHeight: Dp,
-    onTaskDrag: (() -> Unit) = {},
+    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit
 ) {
     val state = LocalDragTargetInfo.current
     var currentPosition by remember { mutableStateOf(Offset.Zero) }
     var currentData by remember { mutableStateOf(dataToDrop) }
     var composableHeight by remember { mutableStateOf(draggableHeight) }
-    var planComposableModifier: Modifier by remember { mutableStateOf(modifier) }
     var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
-    //made this whole variable just to trigger alpha changes for this single plan composable
     var thisTargetIsBeingDragged by remember { mutableStateOf(false) }
 
+    //these 2 lines reassign the data, and they're essential
+    //without them, Compose uses previous values
     currentData = dataToDrop
     composableHeight = draggableHeight
-    planComposableModifier = modifier
 
-    Box(modifier = planComposableModifier
+    Box(modifier = modifier
         .onPlaced {
             layoutCoordinates = it
             currentPosition = it.positionInWindow()
         }
         .pointerInput(Unit) {
-            detectDragGesturesAfterLongPress(
-                onDragStart = {
-                    onTaskDrag()
-                    thisTargetIsBeingDragged = true
-                    state.dataToDrop = currentData
-                    state.topOfDraggableOffset = currentPosition
-                    state.windowPointerOffset = layoutCoordinates!!.localToWindow(it)
-                    state.composableHeight = composableHeight
-                    state.dragStartedFromCalendar = true
-                },
-                onDrag = { change, dragAmount ->
-                    change.consume()
-                    state.dragVerticalOffset += dragAmount.y
-                },
-                onDragEnd = {
-                    state.isDragging = false
-                    state.dragStartedFromCalendar = false
-                    thisTargetIsBeingDragged = false
-                    state.dragVerticalOffset = 0f
-                    //if pointer was not in cancel area
-                        // logic to update event time in viewmodel
-                        // logic to update event time in google
-                },
-                onDragCancel = {
-                    state.isDragging = false
-                    state.dragStartedFromCalendar = false
-                    thisTargetIsBeingDragged = false
-                    state.dragVerticalOffset = 0f
+            detectDragGesturesAfterLongPress(onDragStart = {
+                thisTargetIsBeingDragged = true
+                state.dataToDrop = currentData
+                state.topOfDraggableOffset = currentPosition
+                state.windowPointerOffset = layoutCoordinates!!.localToWindow(it)
+                state.composableHeight = composableHeight
+                state.dragStartedFromCalendar = true
+            }, onDrag = { change, dragAmount ->
+                change.consume()
+                state.dragVerticalOffset += dragAmount.y
+            }, onDragEnd = {
+                if (!state.draggingInsideCancelBoundary) {
+                    if (state.timeChangeInIncrementsOfFiveMinutes != 0) {
+                        val newStartTime = ZonedDateTime.of(
+                            currentData.start.value
+                                .toLocalDateTime()
+                                .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                            ZoneId.systemDefault()
+                        )
+                        updateEventDaoTime(
+                            currentData, newStartTime
+                        )
+                    }
                 }
-            )
-        }
-    ) {
-        PlanComposable(
-            title = dataToDrop.title.value,
-            description = dataToDrop.description.value,
-            color = dataToDrop.color.value,
-            start = dataToDrop.start.value.toLocalTime(),
-            end = dataToDrop.end.value.toLocalTime(),
-            modifier = planComposableModifier
+                state.isDragging = false
+                state.dragStartedFromCalendar = false
+                thisTargetIsBeingDragged = false
+                state.dragVerticalOffset = 0f
+            }, onDragCancel = {
+                state.isDragging = false
+                state.dragStartedFromCalendar = false
+                thisTargetIsBeingDragged = false
+                state.dragVerticalOffset = 0f
+            })
+        }) {
+        EventComposable(
+            title = currentData.title.value,
+            description = currentData.description.value,
+            color = currentData.color.value,
+            start = currentData.start.value.toLocalTime(),
+            end = currentData.end.value.toLocalTime(),
+            modifier = modifier
                 .padding(2.dp)
-                .alpha(if(thisTargetIsBeingDragged) .4f else 1f)
+                .alpha(if (thisTargetIsBeingDragged) .4f else 1f)
         )
+    }
+}
+
+@Composable
+fun ScheduledTaskDragTarget(
+    modifier: Modifier,
+    dataToDrop: ScheduledTask,
+    draggableHeight: Dp,
+    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
+    toggleScheduledTaskCompletion: (ScheduledTask) -> Unit
+) {
+    val state = LocalDragTargetInfo.current
+    var currentPosition by remember { mutableStateOf(Offset.Zero) }
+    var currentData by remember { mutableStateOf(dataToDrop) }
+    var composableHeight by remember { mutableStateOf(draggableHeight) }
+    var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
+    var thisTargetIsBeingDragged by remember { mutableStateOf(false) }
+
+    //these 2 lines reassign the data, and they're essential
+    //without them, Compose uses previous values
+    currentData = dataToDrop
+    composableHeight = draggableHeight
+
+    Box(modifier = modifier
+        .onPlaced {
+            layoutCoordinates = it
+            currentPosition = it.positionInWindow()
+        }
+        .pointerInput(Unit) {
+            detectDragGesturesAfterLongPress(onDragStart = {
+                thisTargetIsBeingDragged = true
+                state.dataToDrop = currentData
+                state.topOfDraggableOffset = currentPosition
+                state.windowPointerOffset = layoutCoordinates!!.localToWindow(it)
+                state.composableHeight = composableHeight
+                state.dragStartedFromCalendar = true
+            }, onDrag = { change, dragAmount ->
+                change.consume()
+                state.dragVerticalOffset += dragAmount.y
+            }, onDragEnd = {
+                if (!state.draggingInsideCancelBoundary) {
+                    if (state.timeChangeInIncrementsOfFiveMinutes != 0) {
+                        val newStartTime = ZonedDateTime.of(
+                            currentData.start.value
+                                .toLocalDateTime()
+                                .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                            ZoneId.systemDefault()
+                        )
+                        updateScheduledTaskTime(
+                            currentData, newStartTime
+                        )
+                    }
+                }
+                state.isDragging = false
+                state.dragStartedFromCalendar = false
+                thisTargetIsBeingDragged = false
+                state.dragVerticalOffset = 0f
+            }, onDragCancel = {
+                state.isDragging = false
+                state.dragStartedFromCalendar = false
+                thisTargetIsBeingDragged = false
+                state.dragVerticalOffset = 0f
+            })
+        }) {
+        ScheduledTaskComposable(
+            title = currentData.title.value,
+            isCompleted = currentData.completed.value,
+            toggleScheduledTaskCompletion = { toggleScheduledTaskCompletion(currentData) },
+            description = currentData.description.value,
+            color = currentData.color.value,
+            start = currentData.start.value.toLocalTime(),
+            end = currentData.end.value.toLocalTime(),
+            modifier = modifier
+                .padding(2.dp)
+                .alpha(if (thisTargetIsBeingDragged) .4f else 1f)
+        )
+    }
+}
+
+@Composable
+fun TaskRowDragTarget(
+    dataToDrop: ScheduledTask,
+    draggableHeight: Dp,
+    closeTaskSheet: (() -> Unit) = {},
+    addScheduledTask: (ScheduledTask) -> Unit,
+    content: @Composable () -> Unit
+) {
+    val state = LocalDragTargetInfo.current
+    var currentData by remember { mutableStateOf(dataToDrop) }
+    var composableHeight by remember { mutableStateOf(0.dp) }
+    var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
+
+    currentData = dataToDrop
+    composableHeight = draggableHeight
+
+    Box(modifier = Modifier
+        .onPlaced {
+            layoutCoordinates = it
+        }
+        .pointerInput(Unit) {
+            detectDragGesturesAfterLongPress(onDragStart = {
+                closeTaskSheet()
+                state.dataToDrop = currentData
+                state.windowPointerOffset = layoutCoordinates!!.localToWindow(it)
+                state.composableHeight = composableHeight
+                state.dragStartedFromTaskSheet = true
+            }, onDrag = { change, dragAmount ->
+                change.consume()
+                state.dragVerticalOffset += dragAmount.y
+            }, onDragEnd = {
+                if (!state.draggingInsideCancelBoundary) {
+                    //TODO: currently only handling today's date, but TAC needs to handle adding things to other days
+                    //TODO: this could cause bugs later because we cant data to drop. what happens if a user
+                    //TODO: ends drag and picks up a EventDao immediately and updates data to drop before we casted and added it
+                    state.dataToDrop.start.value =
+                        state.dataToDrop.start.value.plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong())
+                    state.dataToDrop.end.value = state.dataToDrop.start.value.plusMinutes(state.dataToDrop.duration.intValue.toLong())
+                    addScheduledTask(state.dataToDrop as ScheduledTask)
+                }
+                state.isDragging = false
+                state.dragStartedFromTaskSheet = false
+                state.dragVerticalOffset = 0f
+            }, onDragCancel = {
+                state.isDragging = false
+                state.dragStartedFromTaskSheet = false
+                state.dragVerticalOffset = 0f
+            })
+        }) {
+        content()
     }
 }
 
@@ -226,13 +352,12 @@ fun Draggable() {
             layoutCoordinates = it
             bounds = it.boundsInParent()
         }
-        .background(Color.Transparent)
-    ) {
+        .background(Color.Transparent)) {
         val density: Density = LocalDensity.current
 
         if (state.isDragging) {
             //communicate up to show drag cancel area
-            if(state.windowPointerOffset.y + state.dragVerticalOffset >= state.dragCancelBoundaryOffset) {
+            if (state.windowPointerOffset.y + state.dragVerticalOffset >= state.dragCancelBoundaryOffset) {
                 //communicate up to highlight drag cancel area
                 state.draggingInsideCancelBoundary = true
             } else {
@@ -240,49 +365,58 @@ fun Draggable() {
                 state.draggingInsideCancelBoundary = false
                 state.timeChangeInIncrementsOfFiveMinutes =
                     (state.dragVerticalOffset / state.verticalOffsetPerFiveMinutes).roundToInt()
-                Box(modifier = Modifier
-                    .graphicsLayer {
-                        alpha = 1f
-                        scaleX = 1.0f
-                        scaleY = 1.0f
-                        translationX = 0.0f
-                        translationY = composableStartOffset.y.plus(state.dragVerticalOffset)
+                Box(modifier = Modifier.graphicsLayer {
+                    alpha = 1f
+                    scaleX = 1.0f
+                    scaleY = 1.0f
+                    translationX = 0.0f
+                    translationY = composableStartOffset.y.plus(state.dragVerticalOffset)
+                }) {
+                    if (state.dataToDrop is ScheduledTask) {
+                        ScheduledTaskComposable(
+                            title = state.dataToDrop.title.value,
+                            isCompleted = (state.dataToDrop as ScheduledTask).completed.value,
+                            description = state.dataToDrop.description.value,
+                            color = state.dataToDrop.color.value,
+                            start = state.dataToDrop.start.value.toLocalTime()
+                                .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                            end = state.dataToDrop.end.value.toLocalTime()
+                                .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                            modifier = Modifier
+                                .height(state.composableHeight)
+                                .fillMaxWidth()
+                        )
+                    } else {
+                        EventComposable(
+                            title = state.dataToDrop.title.value,
+                            description = state.dataToDrop.description.value,
+                            color = state.dataToDrop.color.value,
+                            start = state.dataToDrop.start.value.toLocalTime()
+                                .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                            end = state.dataToDrop.end.value.toLocalTime()
+                                .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
+                            modifier = Modifier
+                                .height(state.composableHeight)
+                                .fillMaxWidth()
+                        )
                     }
-                ) {
-                    PlanComposable(
-                        title = state.dataToDrop.title.value,
-                        description = state.dataToDrop.description.value,
-                        color = state.dataToDrop.color.value,
-                        start = state.dataToDrop.start.value.toLocalTime()
-                            .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
-                        end = state.dataToDrop.end.value.toLocalTime()
-                            .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
-                        modifier = Modifier
-                            .height(state.composableHeight)
-                            .fillMaxWidth()
-                    )
                 }
             }
         } else if (state.dragStartedFromTaskSheet) {
             //LOL put all the code inside this modifier to guarantee layout coordinates aren't null
             Box(modifier = Modifier.onPlaced {
                 val halfComposableHeightOffset = Offset(
-                    x = 0f, y = state.dataToDrop.duration.intValue
-                        .div(2)
+                    x = 0f,
+                    y = state.dataToDrop.duration.intValue.div(2)
                         .times(state.verticalOffsetPerMinute)
                 )
                 composableStartOffset = layoutCoordinates!!.windowToLocal(state.windowPointerOffset)
                     .minus(halfComposableHeightOffset)
-                Log.e(
-                    "DND",
-                    "root offset: ${layoutCoordinates!!.localToRoot(composableStartOffset)}"
-                )
                 //need to calculate minutes, so that we can spawn the composable at an increment of 5 mins
                 //float because scroll might not result in a flat minute
                 var minutesUntilTopOfComposable: Float = composableStartOffset.toMinutes(
                     minuteVerticalOffset = state.verticalOffsetPerMinute,
-                    with(density) { state.calendarScrollState!!.value.toDp() }
-                )
+                    with(density) { state.calendarScrollState!!.value.toDp() })
 
                 //TODO: sometimes, coercing the time doesn't work, so this needs to be improved and tested
                 //e.g. 62.5 mins til top of composable --> we'll shift the composable down 2.5 mins
@@ -323,55 +457,6 @@ fun Draggable() {
                 state.isDragging = true
             })
         }
-    }
-}
-
-@Composable
-fun TaskRowDragTarget(
-    dataToDrop: ScheduledTask,
-    draggableHeight: Dp,
-    closeTaskSheet: (() -> Unit) = {},
-    content: @Composable () -> Unit
-) {
-    val state = LocalDragTargetInfo.current
-    var currentData by remember { mutableStateOf(dataToDrop) }
-    var composableHeight by remember { mutableStateOf(0.dp) }
-//    var planComposableModifier: Modifier by remember { mutableStateOf(Modifier) }
-    var layoutCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
-
-    currentData = dataToDrop
-    composableHeight = draggableHeight
-
-    Box(modifier = Modifier
-        .onPlaced {
-            layoutCoordinates = it
-        }
-        .pointerInput(Unit) {
-            detectDragGesturesAfterLongPress(
-                onDragStart = {
-                    closeTaskSheet()
-                    state.dataToDrop = currentData
-//                    state.draggableModifier = planComposableModifier
-                    state.windowPointerOffset = layoutCoordinates!!.localToWindow(it)
-                    state.composableHeight = composableHeight
-                    state.dragStartedFromTaskSheet = true
-                }, onDrag = { change, dragAmount ->
-                    change.consume()
-                    state.dragVerticalOffset += dragAmount.y
-                }, onDragEnd = {
-                    state.isDragging = false
-                    state.dragStartedFromTaskSheet = false
-                    //if pointer was not in cancel area
-                        //logic to add scheduled task
-                    state.dragVerticalOffset = 0f
-                }, onDragCancel = {
-                    state.isDragging = false
-                    state.dragStartedFromTaskSheet = false
-                    state.dragVerticalOffset = 0f
-                })
-        }
-    ) {
-        content()
     }
 }
 

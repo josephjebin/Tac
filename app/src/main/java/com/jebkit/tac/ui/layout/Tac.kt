@@ -1,8 +1,6 @@
 package com.jebkit.tac.ui.layout
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -27,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -67,18 +63,23 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
         TasksAndCalendarScreen(
             selectedDate = tasksAndCalendarState.minSelectedDate.value,
             eventDaos = tasksAndCalendarState.eventDaos.values.toList(),
+            updateEventDaoTime = { eventDao: EventDao, newStartTime: ZonedDateTime ->
+                tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
+            },
             scheduledTasks = tasksAndCalendarState.scheduledTasks.values.toList(),
-//            addScheduledTask = { scheduledTask: ScheduledTask ->
-//                tasksAndCalendarViewModel.addScheduledTask(
-//                    scheduledTask
-//                )
-//            },
-//            updateScheduledTaskTime = { scheduledTask: ScheduledTask, newStartTime: ZonedDateTime ->
-//                tasksAndCalendarViewModel.updateScheduledTaskStartTime(scheduledTask, newStartTime)
-//            },
-//            updateEventDaoTime = { eventDao: EventDao, newStartTime: ZonedDateTime ->
-//                tasksAndCalendarViewModel.updateEventDaoTime(eventDao, newStartTime)
-//            },
+            addScheduledTask = { scheduledTask: ScheduledTask ->
+                tasksAndCalendarViewModel.addScheduledTask(
+                    scheduledTask
+                )
+            },
+            updateScheduledTaskTime = { scheduledTask: ScheduledTask, newStartTime: ZonedDateTime ->
+                tasksAndCalendarViewModel.updateScheduledTaskStartTime(scheduledTask, newStartTime)
+            },
+            toggleScheduledTaskCompletion = { scheduledTask: ScheduledTask ->
+                tasksAndCalendarViewModel.toggleScheduledTaskCompletion(
+                    scheduledTask
+                )
+            },
             taskListDaos = tasksAndCalendarState.taskListDaos.values.toList(),
             taskDaos = tasksAndCalendarState.taskDaos.values.toList()
                 .filter { taskDao ->
@@ -100,12 +101,16 @@ fun Tac(tasksAndCalendarViewModel: TasksAndCalendarViewModel = viewModel()) {
 fun TasksAndCalendarScreen(
     selectedDate: LocalDate,
     eventDaos: List<EventDao>,
+    updateEventDaoTime: (EventDao, ZonedDateTime) -> Unit,
     scheduledTasks: List<ScheduledTask>,
+    addScheduledTask: (ScheduledTask) -> Unit,
+    updateScheduledTaskTime: (ScheduledTask, ZonedDateTime) -> Unit,
+    toggleScheduledTaskCompletion: (ScheduledTask) -> Unit,
     taskListDaos: List<TaskListDao>,
     taskDaos: List<TaskDao>,
     currentSelectedTaskListDao: TaskListDao?,
     onTaskListDaoSelected: (TaskListDao) -> Unit,
-    onTaskDaoSelected: (TaskDao) -> Unit
+    onTaskDaoSelected: (TaskDao) -> Unit,
 ) {
     val tasksSheetState = rememberSaveable { mutableStateOf(TasksSheetState.COLLAPSED) }
     var minuteVerticalOffset: Float by remember { mutableFloatStateOf(0f) }
@@ -117,7 +122,9 @@ fun TasksAndCalendarScreen(
         verticalOffsetPerMinute = minuteVerticalOffset,
         calendarScrollState = calendarScrollState,
         updateIsDragging = { boolean: Boolean -> isDragging = boolean },
-        updateIsDraggingInsideCancelRegion = { boolean: Boolean -> isDraggingInsideCancelRegion = boolean }
+        updateIsDraggingInsideCancelRegion = { boolean: Boolean ->
+            isDraggingInsideCancelRegion = boolean
+        }
     ) {
         Scaffold(
             topBar = { DayHeader(selectedDate) },
@@ -152,7 +159,10 @@ fun TasksAndCalendarScreen(
                             verticalScrollState = calendarScrollState,
                             selectedDate = selectedDate,
                             eventDaos = eventDaos,
-                            scheduledTasks = scheduledTasks
+                            updateEventDaoTime = updateEventDaoTime,
+                            scheduledTasks = scheduledTasks,
+                            updateScheduledTaskTime = updateScheduledTaskTime,
+                            toggleScheduledTaskCompletion = toggleScheduledTaskCompletion
                         )
                     }
                 }
@@ -168,6 +178,7 @@ fun TasksAndCalendarScreen(
                     onTaskCompleted = { taskDao: TaskDao ->
                     },
                     closeTaskSheet = { tasksSheetState.value = TasksSheetState.COLLAPSED },
+                    addScheduledTask = addScheduledTask
                 )
             }
 
@@ -199,7 +210,9 @@ fun TasksAndCalendarScreen(
                         .fillMaxSize()
                         .padding(16.dp)
                         .background(
-                            color = if(isDraggingInsideCancelRegion) google_highlighted_border else colorResource(id = R.color.google_text_gray)
+                            color = if (isDraggingInsideCancelRegion) google_highlighted_border else colorResource(
+                                id = R.color.google_text_gray
+                            )
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -208,7 +221,7 @@ fun TasksAndCalendarScreen(
                             .fillMaxSize()
                             .wrapContentHeight(),
                         text = "Drop here to cancel",
-                        textAlign = TextAlign.Center, 
+                        textAlign = TextAlign.Center,
                     )
                 }
             }
@@ -222,11 +235,15 @@ fun TacPreview() {
     TasksAndCalendarScreen(
         selectedDate = LocalDate.now(),
         eventDaos = listOf(),
+        updateEventDaoTime = { _, _ -> },
         scheduledTasks = listOf(),
+        addScheduledTask = {_ ->},
+        toggleScheduledTaskCompletion = {},
+        updateScheduledTaskTime = {_, _ -> },
         taskListDaos = listOf(),
         taskDaos = listOf(),
         currentSelectedTaskListDao = null,
         onTaskListDaoSelected = { (TaskListDao) -> },
-        onTaskDaoSelected = { (TaskDao) -> }
+        onTaskDaoSelected = { (TaskDao) -> },
     )
 }

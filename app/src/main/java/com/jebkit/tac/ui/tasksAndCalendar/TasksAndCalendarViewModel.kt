@@ -246,7 +246,9 @@ class TasksAndCalendarViewModel(
                     event.setStart(startTime.toEventDateTime())
                     event.setEnd(newEndTime.toEventDateTime())
                     val response = googleCalendarService.updateEvent(event)
-                    if (response != null) _uiState.value.googleEvents[eventDao.id] = response
+                    if (response != null) {
+                        _uiState.value.googleEvents[eventDao.id] = response
+                    }
                     else {
                         Log.e(
                             TAG,
@@ -368,6 +370,20 @@ class TasksAndCalendarViewModel(
                 }
             }
         }
+    }
+
+    fun toggleScheduledTaskCompletion(scheduledTask: ScheduledTask) {
+        val parentTask = _uiState.value.taskDaos[scheduledTask.parentTaskId]
+        if(parentTask != null) {
+            //if currently marked as completed
+            if (scheduledTask.completed.value) {
+                parentTask.workedDuration.intValue -= scheduledTask.duration.intValue
+            } else {
+                parentTask.workedDuration.intValue += scheduledTask.duration.intValue
+            }
+        }
+
+        scheduledTask.completed.value = !scheduledTask.completed.value
     }
 
     fun deleteScheduledTask(scheduledTaskId: String) {
