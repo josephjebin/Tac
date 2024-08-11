@@ -48,7 +48,7 @@ import com.jebkit.tac.ui.dragAndDrop.RootDragInfoProvider
 import com.jebkit.tac.ui.tasks.TaskSheet
 import com.jebkit.tac.ui.tasks.TasksSheetState
 import com.jebkit.tac.ui.theme.google_divider_gray
-import com.jebkit.tac.ui.theme.google_highlighted_border
+import com.jebkit.tac.ui.theme.google_light_blue
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -200,7 +200,7 @@ fun TasksAndCalendarScreen(
                     .background(colorResource(id = R.color.surface_dark_gray))
                     .drawBehind {
                         drawRoundRect(
-                            color = if (isDraggingInsideCancelRegion) google_highlighted_border else google_divider_gray,
+                            color = if (isDraggingInsideCancelRegion) google_light_blue else google_divider_gray,
                             style = stroke
                         )
                     }
@@ -210,7 +210,7 @@ fun TasksAndCalendarScreen(
                         .fillMaxSize()
                         .padding(16.dp)
                         .background(
-                            color = if (isDraggingInsideCancelRegion) google_highlighted_border else colorResource(
+                            color = if (isDraggingInsideCancelRegion) google_light_blue else colorResource(
                                 id = R.color.google_text_gray
                             )
                         ),

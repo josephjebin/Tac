@@ -2,6 +2,7 @@ package com.jebkit.tac.ui.dragAndDrop
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -199,7 +200,7 @@ fun EventDragTarget(
         EventComposable(
             title = currentData.title.value,
             description = currentData.description.value,
-            color = currentData.color.value,
+//            color = currentData.color.value,
             start = currentData.start.value.toLocalTime(),
             end = currentData.end.value.toLocalTime(),
             modifier = modifier
@@ -275,7 +276,7 @@ fun ScheduledTaskDragTarget(
             isCompleted = currentData.completed.value,
             toggleScheduledTaskCompletion = { toggleScheduledTaskCompletion(currentData) },
             description = currentData.description.value,
-            color = currentData.color.value,
+//            color = currentData.color.value,
             start = currentData.start.value.toLocalTime(),
             end = currentData.end.value.toLocalTime(),
             modifier = modifier
@@ -377,7 +378,7 @@ fun Draggable() {
                             title = state.dataToDrop.title.value,
                             isCompleted = (state.dataToDrop as ScheduledTask).completed.value,
                             description = state.dataToDrop.description.value,
-                            color = state.dataToDrop.color.value,
+//                            color = state.dataToDrop.color.value,
                             start = state.dataToDrop.start.value.toLocalTime()
                                 .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
                             end = state.dataToDrop.end.value.toLocalTime()
@@ -385,12 +386,13 @@ fun Draggable() {
                             modifier = Modifier
                                 .height(state.composableHeight)
                                 .fillMaxWidth()
+                                .border(2.dp, Color.Black)
                         )
                     } else {
                         EventComposable(
                             title = state.dataToDrop.title.value,
                             description = state.dataToDrop.description.value,
-                            color = state.dataToDrop.color.value,
+//                            color = state.dataToDrop.color.value,
                             start = state.dataToDrop.start.value.toLocalTime()
                                 .plusMinutes(5 * state.timeChangeInIncrementsOfFiveMinutes.toLong()),
                             end = state.dataToDrop.end.value.toLocalTime()
@@ -398,6 +400,7 @@ fun Draggable() {
                             modifier = Modifier
                                 .height(state.composableHeight)
                                 .fillMaxWidth()
+                                .border(2.dp, Color.Black)
                         )
                     }
                 }
