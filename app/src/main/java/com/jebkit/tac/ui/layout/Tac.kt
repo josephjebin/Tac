@@ -1,7 +1,7 @@
 package com.jebkit.tac.ui.layout
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Scaffold
@@ -48,7 +47,6 @@ import com.jebkit.tac.ui.tasksAndCalendar.TasksAndCalendarViewModel
 import com.jebkit.tac.ui.calendar.DayHeader
 import com.jebkit.tac.ui.dragAndDrop.RootDragInfoProvider
 import com.jebkit.tac.ui.fab.AddEventAndTaskFab
-import com.jebkit.tac.ui.fab.DialogButtonStack
 import com.jebkit.tac.ui.tasks.TaskSheet
 import com.jebkit.tac.ui.tasks.TasksSheetState
 import com.jebkit.tac.ui.theme.google_divider_gray
@@ -121,6 +119,7 @@ fun TasksAndCalendarScreen(
     val calendarScrollState = rememberScrollState()
     var isDragging by remember { mutableStateOf(false) }
     var isDraggingInsideCancelRegion by remember { mutableStateOf(false) }
+    var addEventAndTask by remember { mutableStateOf(false) }
 
     RootDragInfoProvider(
         verticalOffsetPerMinute = minuteVerticalOffset,
@@ -130,10 +129,19 @@ fun TasksAndCalendarScreen(
             isDraggingInsideCancelRegion = boolean
         }
     ) {
+        val animatedFabPadding by animateDpAsState(
+            if (tasksSheetState.value == TasksSheetState.COLLAPSED) {
+                48.dp
+            } else {
+                0.dp
+            },
+            label = "fab_padding"
+        )
+
         Scaffold(
             topBar = { DayHeader(selectedDate) },
             bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) },
-            floatingActionButton = { AddEventAndTaskFab() }
+            floatingActionButton = { AddEventAndTaskFab(Modifier.padding(bottom = animatedFabPadding, end = 8.dp)) }
         ) {
             //invisible boxes to calculate one hour's offset
             Box {
@@ -188,6 +196,12 @@ fun TasksAndCalendarScreen(
             }
 
 
+//            Box(modifier = Modifier.padding(it).fillMaxSize().border(8.dp, Color.Red)) {
+//                DialogButtonStack(
+//                    onDismissRequest = {}
+//                )
+//
+//            }
         }
 
         //Drag Cancel Region
@@ -230,13 +244,6 @@ fun TasksAndCalendarScreen(
                     )
                 }
             }
-        }
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            DialogButtonStack(
-                onDismissRequest = {}
-            )
-
         }
     }
 }
