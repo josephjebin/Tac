@@ -31,6 +31,7 @@ import com.jebkit.tac.data.tasks.TaskDao
 import com.jebkit.tac.data.tasks.TaskListDao
 import com.jebkit.tac.ui.dragAndDrop.TaskRowDragTarget
 import com.jebkit.tac.ui.layout.outputFormat
+import com.jebkit.tac.ui.theme.google_light_blue
 import java.time.ZonedDateTime
 
 @Composable
@@ -42,7 +43,7 @@ fun TaskSheet(
     onTaskListDaoSelected: (TaskListDao) -> Unit,
     onTaskSelected: (TaskDao) -> Unit,
     onTaskCompleted: (TaskDao) -> Unit,
-    closeTaskSheet: () -> Unit,
+    setTasksSheetState: (TasksSheetState) -> Unit,
     addScheduledTask: (ScheduledTask) -> Unit,
 ) {
     val taskSheetModifier = when (tasksSheetState) {
@@ -82,7 +83,8 @@ fun TaskSheet(
             .height(taskSheetPeekHeight)
             .fillMaxWidth()
             .clickable {
-
+                if (tasksSheetState == TasksSheetState.COLLAPSED) setTasksSheetState(TasksSheetState.PARTIALLY_EXPANDED)
+                else setTasksSheetState(TasksSheetState.COLLAPSED)
             }
         ) {
             Image(
@@ -110,7 +112,7 @@ fun TaskSheet(
                     backgroundColor = colorResource(id = R.color.surface_dark_gray),
                     border = BorderStroke(
                         2.dp,
-                        if (taskListDao == currentSelectedTaskListDao) colorResource(id = R.color.akiflow_app_light_purple)
+                        if (taskListDao == currentSelectedTaskListDao) google_light_blue
                         else colorResource(id = R.color.google_text_white)
                     )
                 ) {
@@ -154,7 +156,7 @@ fun TaskSheet(
                         color = taskDao.color
                     ),
                     draggableHeight = eventHeight,
-                    closeTaskSheet = closeTaskSheet,
+                    closeTaskSheet = { setTasksSheetState(TasksSheetState.COLLAPSED) },
                     addScheduledTask = addScheduledTask
                 ) {
                     TaskRow(
@@ -271,7 +273,7 @@ fun TaskSheetPreview_Dragging() {
         onTaskListDaoSelected = {},
         onTaskSelected = {},
         onTaskCompleted = {},
-        closeTaskSheet = {}
+        setTasksSheetState = {}
     ) {}
 }
 
@@ -289,6 +291,6 @@ fun TaskSheetPreview_NotDragging() {
         onTaskListDaoSelected = {},
         onTaskSelected = {},
         onTaskCompleted = {},
-        closeTaskSheet = {}
+        setTasksSheetState = {}
     ) {}
 }

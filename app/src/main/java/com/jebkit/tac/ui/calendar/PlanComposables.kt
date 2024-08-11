@@ -18,11 +18,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jebkit.tac.R
 import com.jebkit.tac.ui.theme.akiflow_lavender
+import com.jebkit.tac.ui.theme.google_light_blue
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -31,7 +35,7 @@ import java.time.format.DateTimeFormatter
 fun EventComposable(
     title: String,
     description: String?,
-    color: Color,
+    color: Color = google_light_blue,
     start: LocalTime,
     end: LocalTime,
     modifier: Modifier = Modifier
@@ -87,7 +91,7 @@ fun ScheduledTaskComposable(
     //it's fine cuz a user can't click the checkbox while dragging
     toggleScheduledTaskCompletion: () -> Unit = {},
     description: String?,
-    color: Color,
+    color: Color = google_light_blue,
     start: LocalTime,
     end: LocalTime
 ) {
@@ -110,7 +114,9 @@ fun ScheduledTaskComposable(
                 Text(
                     modifier = Modifier.align(Alignment.CenterVertically),
                     style = MaterialTheme.typography.caption,
-                    text = "${start.format(EventTimeFormatter)} - ${end.format(EventTimeFormatter)}:"
+                    text = "${start.format(EventTimeFormatter)} - ${end.format(EventTimeFormatter)}:",
+                    textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
+                    color = if (isCompleted) colorResource(id = R.color.google_text_gray) else Color.Black
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -120,11 +126,13 @@ fun ScheduledTaskComposable(
                     style = MaterialTheme.typography.body1,
                     fontWeight = FontWeight.Bold,
                     overflow = TextOverflow.Ellipsis,
-                    text = title
+                    text = title,
+                    textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
+                    color = if (isCompleted) colorResource(id = R.color.google_text_gray) else Color.Black
                 )
             }
 
-            if (description != null) {
+            if (!isCompleted && description != null) {
                 Text(
                     text = description,
                     style = MaterialTheme.typography.body2,

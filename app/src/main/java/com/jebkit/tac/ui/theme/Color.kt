@@ -12,5 +12,5 @@ val surfaceGray = Color(0xFF1F2125)
 val onSurfaceGray = Color(0XFF818286)
 val akiflow_lavender = Color(0XFF7B8CFE)
 
-val google_highlighted_border = Color(0XFF8AB4F8)
+val google_light_blue = Color(0XFF8AB4F8)
 val google_divider_gray = Color(0XFF414246)

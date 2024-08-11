@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenuItem
@@ -24,25 +23,20 @@ import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldColors
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jebkit.tac.R
+import com.jebkit.tac.ui.theme.google_light_blue
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -75,7 +69,7 @@ fun DayHeader(selectedDate: LocalDate) {
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.profile_pic_placeholder),
-                            tint = colorResource(id = R.color.akiflow_dark_purple),
+                            tint = google_light_blue,
                             modifier = Modifier.size(40.dp),
                             contentDescription = "profile"
                         )
@@ -86,14 +80,7 @@ fun DayHeader(selectedDate: LocalDate) {
                     Text(
                         modifier = Modifier.align(Alignment.CenterVertically),
                         text = "${selectedDate.dayOfWeek}, ${selectedDate.month} ${selectedDate.dayOfMonth}",
-                        style = TextStyle(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    colorResource(id = R.color.akiflow_lavendar),
-                                    colorResource(id = R.color.akiflow_app_light_purple)
-                                )
-                            )
-                        ),
+                        color = google_light_blue,
                         fontSize = 18.sp
                     )
                 }
