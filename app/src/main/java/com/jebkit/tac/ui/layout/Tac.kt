@@ -177,7 +177,7 @@ fun TasksAndCalendarScreen(
                     onTaskSelected = onTaskDaoSelected,
                     onTaskCompleted = { taskDao: TaskDao ->
                     },
-                    closeTaskSheet = { tasksSheetState.value = TasksSheetState.COLLAPSED },
+                    setTasksSheetState = { newTasksSheetState -> tasksSheetState.value = newTasksSheetState },
                     addScheduledTask = addScheduledTask
                 )
             }

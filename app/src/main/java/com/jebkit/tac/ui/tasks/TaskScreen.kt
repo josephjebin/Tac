@@ -42,7 +42,7 @@ fun TaskSheet(
     onTaskListDaoSelected: (TaskListDao) -> Unit,
     onTaskSelected: (TaskDao) -> Unit,
     onTaskCompleted: (TaskDao) -> Unit,
-    closeTaskSheet: () -> Unit,
+    setTasksSheetState: (TasksSheetState) -> Unit,
     addScheduledTask: (ScheduledTask) -> Unit,
 ) {
     val taskSheetModifier = when (tasksSheetState) {
@@ -82,7 +82,8 @@ fun TaskSheet(
             .height(taskSheetPeekHeight)
             .fillMaxWidth()
             .clickable {
-
+                if (tasksSheetState == TasksSheetState.COLLAPSED) setTasksSheetState(TasksSheetState.PARTIALLY_EXPANDED)
+                else setTasksSheetState(TasksSheetState.COLLAPSED)
             }
         ) {
             Image(
@@ -154,7 +155,7 @@ fun TaskSheet(
                         color = taskDao.color
                     ),
                     draggableHeight = eventHeight,
-                    closeTaskSheet = closeTaskSheet,
+                    closeTaskSheet = { setTasksSheetState(TasksSheetState.COLLAPSED) },
                     addScheduledTask = addScheduledTask
                 ) {
                     TaskRow(
@@ -271,7 +272,7 @@ fun TaskSheetPreview_Dragging() {
         onTaskListDaoSelected = {},
         onTaskSelected = {},
         onTaskCompleted = {},
-        closeTaskSheet = {}
+        setTasksSheetState = {}
     ) {}
 }
 
@@ -289,6 +290,6 @@ fun TaskSheetPreview_NotDragging() {
         onTaskListDaoSelected = {},
         onTaskSelected = {},
         onTaskCompleted = {},
-        closeTaskSheet = {}
+        setTasksSheetState = {}
     ) {}
 }
