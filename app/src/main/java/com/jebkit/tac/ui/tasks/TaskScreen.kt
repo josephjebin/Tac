@@ -1,15 +1,17 @@
 package com.jebkit.tac.ui.tasks
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -32,6 +34,7 @@ import com.jebkit.tac.data.tasks.TaskListDao
 import com.jebkit.tac.ui.dragAndDrop.TaskRowDragTarget
 import com.jebkit.tac.ui.layout.outputFormat
 import com.jebkit.tac.ui.theme.google_light_blue
+import kotlinx.coroutines.launch
 import java.time.ZonedDateTime
 
 @Composable
@@ -79,6 +82,16 @@ fun TaskSheet(
             )
     ) {
         //Peek Arrow
+        val animatableRotation = remember { Animatable(180f) }
+        val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(key1 = tasksSheetState) {
+            when(tasksSheetState) {
+                TasksSheetState.COLLAPSED -> coroutineScope.launch { animatableRotation.animateTo(180f) }
+                else -> coroutineScope.launch { animatableRotation.animateTo(0f) }
+            }
+        }
+
         Box(modifier = Modifier
             .height(taskSheetPeekHeight)
             .fillMaxWidth()
@@ -91,8 +104,8 @@ fun TaskSheet(
                 painterResource(id = R.drawable.caret_down),
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .rotate(if (tasksSheetState == TasksSheetState.COLLAPSED) 180f else 0f),
-                contentDescription = "Task Sheet Peek Arrow"
+                    .rotate(animatableRotation.value),
+                contentDescription = "Task Sheet Peek Arrow",
             )
         }
 
