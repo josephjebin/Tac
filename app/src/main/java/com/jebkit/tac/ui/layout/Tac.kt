@@ -1,6 +1,7 @@
 package com.jebkit.tac.ui.layout
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -33,9 +37,12 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jebkit.tac.MyBottomBar
 import com.jebkit.tac.R
@@ -122,7 +129,7 @@ fun TasksAndCalendarScreen(
     val calendarScrollState = rememberScrollState()
     var isDragging by remember { mutableStateOf(false) }
     var isDraggingInsideCancelRegion by remember { mutableStateOf(false) }
-    var addEventAndTask by remember { mutableStateOf(false) }
+    var addEventAndTask by remember { mutableStateOf(true) }
 
     RootDragInfoProvider(
         verticalOffsetPerMinute = minuteVerticalOffset,
@@ -144,7 +151,6 @@ fun TasksAndCalendarScreen(
         Scaffold(
             topBar = { DayHeader(selectedDate) },
             bottomBar = { MyBottomBar(tasksSheetState = tasksSheetState) },
-            floatingActionButton = { AddEventAndTaskFab(Modifier.padding(bottom = animatedFabPadding, end = 8.dp)) }
         ) {
             //invisible boxes to calculate one hour's offset
             Box {
@@ -193,18 +199,39 @@ fun TasksAndCalendarScreen(
                     onTaskSelected = onTaskDaoSelected,
                     onTaskCompleted = { taskDao: TaskDao ->
                     },
-                    setTasksSheetState = { newTasksSheetState -> tasksSheetState.value = newTasksSheetState },
+                    setTasksSheetState = { newTasksSheetState ->
+                        tasksSheetState.value = newTasksSheetState
+                    },
                     addScheduledTask = addScheduledTask
                 )
             }
 
+            //FAB button to add task or event
+            Box(
+                modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize()
+            ) {
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 48.dp, end = 8.dp),
+                    onClick = { /*TODO*/ },
+                ) {
+                    Image(
+                        painterResource(id = R.drawable.google_plus_sign),
+                        contentDescription = "Add task or event"
+                    )
+                }
+            }
 
-//            Box(modifier = Modifier.padding(it).fillMaxSize().border(8.dp, Color.Red)) {
-//                DialogButtonStack(
-//                    onDismissRequest = {}
-//                )
-//
-//            }
+            //Dialog spawned by FAB
+            if (addEventAndTask) {
+                DialogButtonStack(
+                    it,
+                    onDismissRequest = { addEventAndTask = false }
+                )
+            }
         }
 
         //Drag Cancel Region
