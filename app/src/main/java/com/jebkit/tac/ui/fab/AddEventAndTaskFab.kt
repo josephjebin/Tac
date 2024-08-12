@@ -2,12 +2,8 @@ package com.jebkit.tac.ui.fab
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationResult
-import androidx.compose.animation.core.AnimationVector
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
@@ -34,22 +29,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.jebkit.tac.R
-import com.jebkit.tac.ui.tasks.TasksSheetState
 import com.jebkit.tac.ui.theme.google_divider_gray
 import com.jebkit.tac.ui.theme.google_light_blue
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 @Composable
@@ -64,19 +54,6 @@ fun AddEventAndTaskFab(
                 contentDescription = "Add event or task"
             )
         }
-
-//        Image(
-//            painter = painterResource(id = R.drawable.google_plus_sign),
-//            contentDescription = "",
-//            modifier = Modifier
-//                .clip(CircleShape)
-//                .padding(0.dp)
-//                .background(
-//                    color = colorResource(id = R.color.google_divider_gray),
-//                    shape = CircleShape
-//                )
-//                .clickable { triggerDialog() }
-//        )
     }
 }
 
@@ -173,7 +150,7 @@ fun DialogButtonStack(
                             .background(colorResource(id = R.color.google_button_gray), CircleShape)
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.google_task_button_2),
+                            painter = painterResource(id = R.drawable.google_task_button),
                             contentDescription = "Add event",
                             modifier = Modifier
                         )
