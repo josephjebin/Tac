@@ -75,13 +75,13 @@ fun DayHeader(selectedDate: LocalDate) {
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
 
                     Text(
                         modifier = Modifier.align(Alignment.CenterVertically),
                         text = "${selectedDate.dayOfWeek}, ${selectedDate.month} ${selectedDate.dayOfMonth}",
                         color = google_light_blue,
-                        fontSize = 18.sp
+                        fontSize = 15.sp
                     )
                 }
 

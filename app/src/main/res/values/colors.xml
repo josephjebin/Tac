@@ -16,4 +16,5 @@
     <color name="google_text_white">#FFEBECF0</color>
     <color name="google_text_gray">#FF9BA0A4</color>
     <color name="google_divider_gray">#FF414246</color>
+    <color name="google_button_gray">#FF353639</color>
 </resources>

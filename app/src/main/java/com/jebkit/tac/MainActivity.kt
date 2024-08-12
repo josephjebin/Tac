@@ -390,6 +390,13 @@ fun MyBottomBar(
             .height(48.dp)
             .background(colorResource(R.color.surface_dark_gray))
     ) {
+        Divider(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(2.dp),
+            color = Color.Black
+        )
+
         //CALENDAR BUTTON
         Box(
             contentAlignment = Alignment.Center,
@@ -411,8 +418,7 @@ fun MyBottomBar(
             modifier = Modifier
                 .fillMaxHeight()
                 .width(2.dp),
-            color = Color.Black,
-            thickness = 2.dp
+            color = Color.Black
         )
 
         //TO-DO LIST BUTTON
@@ -435,6 +441,12 @@ fun MyBottomBar(
             )
         }
 
+        Divider(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(2.dp),
+            color = Color.Black
+        )
     }
 }
 
