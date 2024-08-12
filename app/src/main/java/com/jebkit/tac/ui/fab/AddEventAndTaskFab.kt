@@ -1,5 +1,6 @@
 package com.jebkit.tac.ui.fab
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,10 +21,16 @@ import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -77,10 +84,17 @@ fun DialogButtonStack(
             usePlatformDefaultWidth = false
         )
     ) {
+        var triggerAnimations by remember { mutableStateOf(false) }
+        LaunchedEffect(key1 = triggerAnimations) {
+
+        }
+
         Column(
+            verticalArrangement = Arrangement.Bottom,
+            horizontalAlignment = Alignment.End,
             modifier = Modifier
-                .padding(paddingValues)
                 .fillMaxSize()
+                .padding(paddingValues)
                 .padding(bottom = flexPadding, end = 16.dp)
                 .border(2.dp, Color.Yellow),
         ) {
@@ -101,21 +115,24 @@ fun DialogButtonStack(
                         .clickable { onDismissRequest() }
                 )
 
-                IconButton(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier.background(colorResource(id = R.color.surface_dark_gray), CircleShape)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.round_calendar_today_24),
-                        contentDescription = "Add event",
-                        modifier = Modifier
-                            .size(36.dp)
-                            .padding(4.dp),
-                        tint = google_light_blue
-                    )
+                AnimatedVisibility(visible = triggerAnimations) {
+                    IconButton(
+                        onClick = { /*TODO*/ },
+                        modifier = Modifier.background(colorResource(id = R.color.surface_dark_gray), CircleShape)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.round_calendar_today_24),
+                            contentDescription = "Add event",
+                            modifier = Modifier
+                                .size(36.dp)
+                                .padding(4.dp),
+                            tint = google_light_blue
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
                 }
 
-                Spacer(modifier = Modifier.width(4.dp))
             }
 
             Row(
@@ -126,34 +143,51 @@ fun DialogButtonStack(
                     .clickable { onDismissRequest() }
                 )
 
-                IconButton(
-                    onClick = { /*TODO*/ },
-                    modifier = Modifier
-//                        .wrapContentSize()
-                        .border(2.dp, Color.Cyan)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.google_task_button),
-                        contentDescription = "Add task",
+                AnimatedVisibility(visible = triggerAnimations) {
+                    IconButton(
+                        onClick = { /*TODO*/ },
                         modifier = Modifier
-                            .size(80.dp)
-                            .padding(2.dp)
-                    )
+                            .border(2.dp, Color.Cyan)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.google_task_button),
+                            contentDescription = "Add task",
+                            modifier = Modifier
+                                .size(80.dp)
+                                .padding(2.dp)
+                        )
+                    }
                 }
 
                 IconButton(
-                    onClick = { onDismissRequest() }
+                    modifier = Modifier,
+                    onClick = {  },
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.google_plus_sign),
-                        contentDescription = "exit adding prompt",
+                        painterResource(id = R.drawable.google_plus_sign),
+                        contentDescription = "Add task or event",
                         modifier = Modifier
-                            .size(56.dp)
+                            .size(48.dp)
                             .background(google_divider_gray, shape = CircleShape)
-                            .padding(2.dp)
-                            .border(2.dp, Color.Blue)
                     )
                 }
+
+//                IconButton(
+//                    onClick = { onDismissRequest() },
+//                    modifier = Modifier.onPlaced {
+//                        triggerAnimations = true
+//                    }
+//                            .border(2.dp, Color.Blue)
+//                ) {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.google_plus_sign),
+//                        contentDescription = "exit adding prompt",
+//                        modifier = Modifier
+//                            .size(48.dp)
+//                            .background(google_divider_gray, shape = CircleShape)
+//                            .padding(2.dp)
+//                    )
+//                }
             }
         }
     }

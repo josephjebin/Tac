@@ -129,7 +129,7 @@ fun TasksAndCalendarScreen(
     val calendarScrollState = rememberScrollState()
     var isDragging by remember { mutableStateOf(false) }
     var isDraggingInsideCancelRegion by remember { mutableStateOf(false) }
-    var addEventAndTask by remember { mutableStateOf(false) }
+    var addEventAndTask by remember { mutableStateOf(true) }
 
     RootDragInfoProvider(
         verticalOffsetPerMinute = minuteVerticalOffset,
@@ -211,6 +211,7 @@ fun TasksAndCalendarScreen(
                 modifier = Modifier
                     .padding(it)
                     .fillMaxSize()
+                    .border(2.dp, Color.Magenta)
             ) {
                 IconButton(
                     modifier = Modifier
@@ -230,11 +231,19 @@ fun TasksAndCalendarScreen(
 
             //Dialog spawned by FAB
             if (addEventAndTask) {
-                DialogButtonStack(
-                    it,
-                    animatedFabPadding,
-                    onDismissRequest = { addEventAndTask = false }
-                )
+                Box(
+                    modifier = Modifier
+                        .padding(it)
+                        .fillMaxSize()
+                        .border(2.dp, Color.Green),
+                    contentAlignment = Alignment.BottomEnd
+                ) {
+                    DialogButtonStack(
+                        it,
+                        animatedFabPadding,
+                        onDismissRequest = { addEventAndTask = false }
+                    )
+                }
             }
         }
 
