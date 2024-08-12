@@ -129,7 +129,7 @@ fun TasksAndCalendarScreen(
     val calendarScrollState = rememberScrollState()
     var isDragging by remember { mutableStateOf(false) }
     var isDraggingInsideCancelRegion by remember { mutableStateOf(false) }
-    var addEventAndTask by remember { mutableStateOf(true) }
+    var addEventAndTask by remember { mutableStateOf(false) }
 
     RootDragInfoProvider(
         verticalOffsetPerMinute = minuteVerticalOffset,
@@ -141,9 +141,9 @@ fun TasksAndCalendarScreen(
     ) {
         val animatedFabPadding by animateDpAsState(
             if (tasksSheetState.value == TasksSheetState.COLLAPSED) {
-                48.dp
+                56.dp
             } else {
-                0.dp
+                8.dp
             },
             label = "fab_padding"
         )
@@ -215,12 +215,15 @@ fun TasksAndCalendarScreen(
                 IconButton(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(bottom = 48.dp, end = 8.dp),
-                    onClick = { /*TODO*/ },
+                        .padding(bottom = animatedFabPadding, end = 16.dp),
+                    onClick = { addEventAndTask = true },
                 ) {
                     Image(
                         painterResource(id = R.drawable.google_plus_sign),
-                        contentDescription = "Add task or event"
+                        contentDescription = "Add task or event",
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(google_divider_gray, shape = CircleShape)
                     )
                 }
             }
@@ -229,6 +232,7 @@ fun TasksAndCalendarScreen(
             if (addEventAndTask) {
                 DialogButtonStack(
                     it,
+                    animatedFabPadding,
                     onDismissRequest = { addEventAndTask = false }
                 )
             }
