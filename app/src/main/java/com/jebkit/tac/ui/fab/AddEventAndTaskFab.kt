@@ -1,6 +1,10 @@
 package com.jebkit.tac.ui.fab
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationResult
+import androidx.compose.animation.core.AnimationVector
+import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,10 +16,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
@@ -25,10 +29,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.colorResource
@@ -36,11 +41,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.jebkit.tac.R
+import com.jebkit.tac.ui.tasks.TasksSheetState
 import com.jebkit.tac.ui.theme.google_divider_gray
 import com.jebkit.tac.ui.theme.google_light_blue
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddEventAndTaskFab(
@@ -76,27 +86,33 @@ fun DialogButtonStack(
     flexPadding: Dp,
     onDismissRequest: () -> Unit
 ) {
+    var showAddButtons by remember { mutableStateOf(false) }
+    val animatableRotation = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = showAddButtons) {
+        if (showAddButtons) {
+            coroutineScope.launch { animatableRotation.animateTo(45f) }
+        }
+    }
     Dialog(
-        onDismissRequest = { onDismissRequest() },
+        onDismissRequest = {
+            onDismissRequest()
+        },
         properties = DialogProperties(
             dismissOnClickOutside = true,
             dismissOnBackPress = true,
             usePlatformDefaultWidth = false
         )
     ) {
-        var triggerAnimations by remember { mutableStateOf(false) }
-        LaunchedEffect(key1 = triggerAnimations) {
-
-        }
-
         Column(
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.End,
             modifier = Modifier
                 .fillMaxSize()
+                .clickable { onDismissRequest() }
                 .padding(paddingValues)
                 .padding(bottom = flexPadding, end = 16.dp)
-                .border(2.dp, Color.Yellow),
         ) {
             Row(
                 Modifier.weight(1f)
@@ -115,17 +131,22 @@ fun DialogButtonStack(
                         .clickable { onDismissRequest() }
                 )
 
-                AnimatedVisibility(visible = triggerAnimations) {
+                AnimatedVisibility(visible = showAddButtons) {
                     IconButton(
                         onClick = { /*TODO*/ },
-                        modifier = Modifier.background(colorResource(id = R.color.surface_dark_gray), CircleShape)
-                    ) {
+                        modifier = Modifier
+                            .background(
+                                colorResource(id = R.color.surface_dark_gray),
+                                CircleShape
+                            )
+                            .size(48.dp),
+
+                        ) {
                         Icon(
                             painter = painterResource(id = R.drawable.round_calendar_today_24),
                             contentDescription = "Add event",
                             modifier = Modifier
-                                .size(36.dp)
-                                .padding(4.dp),
+                                .padding(8.dp),
                             tint = google_light_blue
                         )
                     }
@@ -135,6 +156,8 @@ fun DialogButtonStack(
 
             }
 
+            Spacer(Modifier.height(12.dp))
+
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -143,51 +166,39 @@ fun DialogButtonStack(
                     .clickable { onDismissRequest() }
                 )
 
-                AnimatedVisibility(visible = triggerAnimations) {
+                AnimatedVisibility(visible = showAddButtons) {
                     IconButton(
                         onClick = { /*TODO*/ },
                         modifier = Modifier
-                            .border(2.dp, Color.Cyan)
+                            .background(colorResource(id = R.color.google_button_gray), CircleShape)
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.google_task_button),
-                            contentDescription = "Add task",
+                            painter = painterResource(id = R.drawable.google_task_button_2),
+                            contentDescription = "Add event",
                             modifier = Modifier
-                                .size(80.dp)
-                                .padding(2.dp)
                         )
                     }
                 }
 
+                Spacer(Modifier.width(12.dp))
+
                 IconButton(
-                    modifier = Modifier,
-                    onClick = {  },
+                    modifier = Modifier
+                        .onPlaced {
+                            showAddButtons = true
+                        },
+                    onClick = { onDismissRequest() },
                 ) {
                     Image(
                         painterResource(id = R.drawable.google_plus_sign),
                         contentDescription = "Add task or event",
                         modifier = Modifier
-                            .size(48.dp)
                             .background(google_divider_gray, shape = CircleShape)
+                            .size(48.dp)
+                            .padding(4.dp)
+                            .rotate(animatableRotation.value)
                     )
                 }
-
-//                IconButton(
-//                    onClick = { onDismissRequest() },
-//                    modifier = Modifier.onPlaced {
-//                        triggerAnimations = true
-//                    }
-//                            .border(2.dp, Color.Blue)
-//                ) {
-//                    Image(
-//                        painter = painterResource(id = R.drawable.google_plus_sign),
-//                        contentDescription = "exit adding prompt",
-//                        modifier = Modifier
-//                            .size(48.dp)
-//                            .background(google_divider_gray, shape = CircleShape)
-//                            .padding(2.dp)
-//                    )
-//                }
             }
         }
     }

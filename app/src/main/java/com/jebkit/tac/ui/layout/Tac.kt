@@ -1,5 +1,7 @@
 package com.jebkit.tac.ui.layout
 
+import android.view.animation.RotateAnimation
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,16 +23,19 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -61,6 +66,7 @@ import com.jebkit.tac.ui.tasks.TaskSheet
 import com.jebkit.tac.ui.tasks.TasksSheetState
 import com.jebkit.tac.ui.theme.google_divider_gray
 import com.jebkit.tac.ui.theme.google_light_blue
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -129,7 +135,7 @@ fun TasksAndCalendarScreen(
     val calendarScrollState = rememberScrollState()
     var isDragging by remember { mutableStateOf(false) }
     var isDraggingInsideCancelRegion by remember { mutableStateOf(false) }
-    var addEventAndTask by remember { mutableStateOf(true) }
+    var addEventAndTask by remember { mutableStateOf(false) }
 
     RootDragInfoProvider(
         verticalOffsetPerMinute = minuteVerticalOffset,
@@ -207,11 +213,18 @@ fun TasksAndCalendarScreen(
             }
 
             //FAB button to add task or event
+            val animatableRotation = remember { Animatable(0f) }
+            val coroutineScope = rememberCoroutineScope()
+            LaunchedEffect(key1 = addEventAndTask) {
+                when(addEventAndTask) {
+                    false -> coroutineScope.launch { animatableRotation.animateTo(0f) }
+                    true -> coroutineScope.launch { animatableRotation.animateTo(45f) }
+                }
+            }
             Box(
                 modifier = Modifier
                     .padding(it)
                     .fillMaxSize()
-                    .border(2.dp, Color.Magenta)
             ) {
                 IconButton(
                     modifier = Modifier
@@ -223,8 +236,10 @@ fun TasksAndCalendarScreen(
                         painterResource(id = R.drawable.google_plus_sign),
                         contentDescription = "Add task or event",
                         modifier = Modifier
-                            .size(48.dp)
                             .background(google_divider_gray, shape = CircleShape)
+                            .size(48.dp)
+                            .padding(4.dp)
+                            .rotate(animatableRotation.value)
                     )
                 }
             }
@@ -234,8 +249,7 @@ fun TasksAndCalendarScreen(
                 Box(
                     modifier = Modifier
                         .padding(it)
-                        .fillMaxSize()
-                        .border(2.dp, Color.Green),
+                        .fillMaxSize(),
                     contentAlignment = Alignment.BottomEnd
                 ) {
                     DialogButtonStack(
