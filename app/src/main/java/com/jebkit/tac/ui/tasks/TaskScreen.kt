@@ -264,7 +264,7 @@ fun TaskRow(
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     color = colorResource(id = R.color.google_text_white),
-                    text = "${taskDao.scheduledDuration.intValue} / ${taskDao.workedDuration.intValue} / ${taskDao.neededDuration.intValue}",
+                    text = "${taskDao.workedDuration.intValue} / ${taskDao.scheduledDuration.intValue} / ${taskDao.neededDuration.intValue}",
                     textAlign = TextAlign.Center
                 )
             }

@@ -107,9 +107,9 @@ import java.time.ZonedDateTime
 
 fun dummyDataTaskListDaos(): List<TaskListDao> {
     return listOf(
-        TaskListDao(id = "careerTaskListDaoId", title = mutableStateOf("Career")),
-        TaskListDao(id = "financeTaskListDaoId", title = mutableStateOf("Finance")),
-        TaskListDao(id = "fitnessTaskListDaoId", title = mutableStateOf("Fitness"))
+        TaskListDao(id = "sewingTaskListDaoId", title = mutableStateOf("Sewing")),
+//        TaskListDao(id = "financeTaskListDaoId", title = mutableStateOf("Finance")),
+//        TaskListDao(id = "fitnessTaskListDaoId", title = mutableStateOf("Fitness"))
     )
 }
 
@@ -117,113 +117,113 @@ fun dummyDataTasksDaos(): List<TaskDao> {
     return listOf(
         TaskDao(
             id = "1",
-            title = mutableStateOf("Apply"),
-            notes = mutableStateOf("notes"),
+            title = mutableStateOf("Re-hem pants"),
+            notes = mutableStateOf(null),
             completed = mutableStateOf(false),
             due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("careerTaskListDaoId"),
-            scheduledDuration = mutableIntStateOf(120),
-            workedDuration = mutableIntStateOf(120),
-            neededDuration = mutableIntStateOf(120)
+            taskListId = mutableStateOf("sewingTaskListDaoId"),
+            scheduledDuration = mutableIntStateOf(0),
+            workedDuration = mutableIntStateOf(0),
+            neededDuration = mutableIntStateOf(45)
         ),
         TaskDao(
             id = "2",
-            title = mutableStateOf("Make Tac Prototype"),
-            notes = mutableStateOf("notes"),
+            title = mutableStateOf("Alter black pants"),
+            notes = mutableStateOf(null),
             completed = mutableStateOf(false),
             due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("careerTaskListDaoId"),
-            neededDuration = mutableIntStateOf(45)
+            taskListId = mutableStateOf("sewingTaskListDaoId"),
+            neededDuration = mutableIntStateOf(120)
         ),
         TaskDao(
             id = "3",
-            title = mutableStateOf("LeetCode"),
-            notes = mutableStateOf("notes"),
+            title = mutableStateOf("Patch Prishnee's ripped pants"),
+            notes = mutableStateOf(null),
             completed = mutableStateOf(false),
             due = mutableStateOf(
                 ZonedDateTime.now()
             ),
             deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("careerTaskListDaoId"),
+            taskListId = mutableStateOf("sewingTaskListDaoId"),
             neededDuration = mutableIntStateOf(45)
         ),
-        TaskDao(
-            id = "4",
-            title = mutableStateOf("Get a job"),
-            notes = mutableStateOf("notes"),
-            completed = mutableStateOf(false),
-            due = mutableStateOf(
-                ZonedDateTime.now()
-            ),
-            deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("financeTaskListDaoId"),
-            neededDuration = mutableIntStateOf(45)
-        ),
-        TaskDao(
-            id = "5",
-            title = mutableStateOf("Revise budget"),
-            notes = mutableStateOf("notes"),
-            completed = mutableStateOf(true),
-            due = mutableStateOf(
-                ZonedDateTime.now()
-            ),
-            deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("financeTaskListDaoId"),
-            neededDuration = mutableIntStateOf(180)
-        ),
-        TaskDao(
-            id = "6",
-            title = mutableStateOf("Categorize expenses"),
-            notes = mutableStateOf("notes"),
-            completed = mutableStateOf(false),
-            due = mutableStateOf(
-                ZonedDateTime.now()
-            ),
-            deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("financeTaskListDaoId"),
-            neededDuration = mutableIntStateOf(45)
-        ),
-        TaskDao(
-            id = "7",
-            title = mutableStateOf("Gym"),
-            notes = mutableStateOf("notes"),
-            completed = mutableStateOf(false),
-            due = mutableStateOf(
-                ZonedDateTime.now()
-            ),
-            deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("fitnessTaskListDaoId"),
-            neededDuration = mutableIntStateOf(45)
-        ),
-        TaskDao(
-            id = "8",
-            title = mutableStateOf("Stretch"),
-            notes = mutableStateOf("notes"),
-            completed = mutableStateOf(false),
-            due = mutableStateOf(
-                ZonedDateTime.now()
-            ),
-            deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("fitnessTaskListDaoId"),
-            neededDuration = mutableIntStateOf(45)
-        ),
-        TaskDao(
-            id = "9",
-            title = mutableStateOf("Walk"),
-            notes = mutableStateOf("notes"),
-            completed = mutableStateOf(false),
-            due = mutableStateOf(
-                ZonedDateTime.now()
-            ),
-            deleted = mutableStateOf(false),
-            taskListId = mutableStateOf("fitnessTaskListDaoId"),
-            neededDuration = mutableIntStateOf(45)
-        )
+//        TaskDao(
+//            id = "4",
+//            title = mutableStateOf("Get a job"),
+//            notes = mutableStateOf("notes"),
+//            completed = mutableStateOf(false),
+//            due = mutableStateOf(
+//                ZonedDateTime.now()
+//            ),
+//            deleted = mutableStateOf(false),
+//            taskListId = mutableStateOf("financeTaskListDaoId"),
+//            neededDuration = mutableIntStateOf(45)
+//        ),
+//        TaskDao(
+//            id = "5",
+//            title = mutableStateOf("Revise budget"),
+//            notes = mutableStateOf("notes"),
+//            completed = mutableStateOf(true),
+//            due = mutableStateOf(
+//                ZonedDateTime.now()
+//            ),
+//            deleted = mutableStateOf(false),
+//            taskListId = mutableStateOf("financeTaskListDaoId"),
+//            neededDuration = mutableIntStateOf(180)
+//        ),
+//        TaskDao(
+//            id = "6",
+//            title = mutableStateOf("Categorize expenses"),
+//            notes = mutableStateOf("notes"),
+//            completed = mutableStateOf(false),
+//            due = mutableStateOf(
+//                ZonedDateTime.now()
+//            ),
+//            deleted = mutableStateOf(false),
+//            taskListId = mutableStateOf("financeTaskListDaoId"),
+//            neededDuration = mutableIntStateOf(45)
+//        ),
+//        TaskDao(
+//            id = "7",
+//            title = mutableStateOf("Gym"),
+//            notes = mutableStateOf("notes"),
+//            completed = mutableStateOf(false),
+//            due = mutableStateOf(
+//                ZonedDateTime.now()
+//            ),
+//            deleted = mutableStateOf(false),
+//            taskListId = mutableStateOf("fitnessTaskListDaoId"),
+//            neededDuration = mutableIntStateOf(45)
+//        ),
+//        TaskDao(
+//            id = "8",
+//            title = mutableStateOf("Stretch"),
+//            notes = mutableStateOf("notes"),
+//            completed = mutableStateOf(false),
+//            due = mutableStateOf(
+//                ZonedDateTime.now()
+//            ),
+//            deleted = mutableStateOf(false),
+//            taskListId = mutableStateOf("fitnessTaskListDaoId"),
+//            neededDuration = mutableIntStateOf(45)
+//        ),
+//        TaskDao(
+//            id = "9",
+//            title = mutableStateOf("Walk"),
+//            notes = mutableStateOf("notes"),
+//            completed = mutableStateOf(false),
+//            due = mutableStateOf(
+//                ZonedDateTime.now()
+//            ),
+//            deleted = mutableStateOf(false),
+//            taskListId = mutableStateOf("fitnessTaskListDaoId"),
+//            neededDuration = mutableIntStateOf(45)
+//        )
     )
 }
