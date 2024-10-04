@@ -1,11 +1,5 @@
 package com.jebkit.tac.data.tasks
 
-//import net.openid.appauth.AuthState
-//import net.openid.appauth.AuthorizationService
-//import okhttp3.OkHttpClient
-//import okhttp3.Request
-//import org.json.JSONObject
-
 import android.content.Intent
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
